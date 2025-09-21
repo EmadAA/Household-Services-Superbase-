@@ -1,0 +1,67 @@
+/* src/index.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+.slick-prev,
+.slick-next {
+  width: 50px !important;
+  height: 50px !important;
+  z-index: 10;
+  background-color: white;
+  border-radius: 50%;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.slick-prev:hover,
+.slick-next:hover {
+  background-color: theme("colors.teal.600") !important;
+}
+
+.slick-prev:before,
+.slick-next:before {
+  font-size: 30px !important; /* Bigger arrow */
+  opacity: 1 !important;
+  color: black !important;
+  transition: color 0.3s ease;
+}
+
+.slick-prev:hover:before,
+.slick-next:hover:before {
+  color: white !important; /* Arrow turns white on hover */
+}
+
+/* Positioning */
+.slick-prev {
+  left: -55px !important;
+}
+
+.slick-next {
+  right: -55px !important;
+}
+
+/* Optional: Responsive adjustments */
+@media (max-width: 768px) {
+  .slick-prev,
+  .slick-next {
+    width: 30px;
+    height: 30px;
+  }
+  .slick-prev:before,
+  .slick-next:before {
+    font-size: 30px;
+  }
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-fadeIn {
+  animation: fadeIn 0.2s ease-out;
+}
