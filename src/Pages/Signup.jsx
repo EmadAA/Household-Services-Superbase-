@@ -1,3 +1,4 @@
+ 
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "../../supabaseClient";
@@ -36,45 +37,120 @@ const Signup = () => {
         return;
       }
 
-      // Sign up user - DON'T store file in metadata
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.password,
-        options: {
-          data: {
-            fullname: formData.fullname,
-            role: formData.role,
-            mobile: formData.mobile,
-            category: formData.role === 'technician' ? formData.category : null,
-            nid: formData.role === 'technician' ? formData.nid : null,
-            // DON'T store file data here - it's too big
-            hasNidFile: formData.nidFile ? true : false // Just store if file exists
-          }
-        }
-      });
-
-      if (authError) {
-        alert(authError.message);
-        setLoading(false);
-        return;
+      if (formData.role === 'user') {
+        await handleUserSignup();
+      } else if (formData.role === 'technician') {
+        await handleTechnicianSignup();
       }
 
-      if (authData.user) {
-        alert('Registration successful! Please check your email and confirm your account.');
-        navigate('/login');
-      }
     } catch (error) {
+      console.error('Registration error:', error);
       alert('Registration failed: ' + error.message);
     } finally {
       setLoading(false);
     }
   };
 
-  // Your existing JSX stays exactly the same
+  const handleUserSignup = async () => {
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email: formData.email,
+      password: formData.password,
+      options: {
+        data: {
+          fullname: formData.fullname,
+          role: formData.role,
+          mobile: formData.mobile
+        }
+      }
+    });
+
+    if (authError) {
+      alert(authError.message);
+      return;
+    }
+
+    if (authData.user) {
+      alert('Registration successful! Please check your email and confirm your account.');
+      navigate('/login');
+    }
+  };
+
+  const handleTechnicianSignup = async () => {
+    try {
+      let nidFileUrl = null;
+      let uploadedFileName = null;
+
+      // Step 1: Upload NID file first
+      if (formData.nidFile) {
+        const fileExt = formData.nidFile.name.split('.').pop();
+        uploadedFileName = `technician_${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+
+        console.log('Uploading file:', uploadedFileName);
+        
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('nid-files')
+          .upload(uploadedFileName, formData.nidFile);
+
+        if (uploadError) {
+          console.error('Upload error:', uploadError);
+          throw new Error('File upload failed: ' + uploadError.message);
+        }
+
+        console.log('Upload successful:', uploadData);
+
+        // Get public URL
+        const { data: { publicUrl } } = supabase.storage
+          .from('nid-files')
+          .getPublicUrl(uploadedFileName);
+        
+        nidFileUrl = publicUrl;
+        console.log('File URL:', nidFileUrl);
+      }
+
+      // Step 2: Insert into pending_technicians table (NOT technicians table)
+      console.log('Inserting technician data...');
+      
+      const { data: insertData, error: insertError } = await supabase
+        .from('pending_technicians') // This is the correct table
+        .insert([
+          {
+            fullname: formData.fullname,
+            mobile: formData.mobile,
+            email: formData.email,
+            password: formData.password, // Temporarily store password
+            category: formData.category,
+            nid: formData.nid,
+            nid_file_url: nidFileUrl,
+            status: 'pending_verification'
+          }
+        ]);
+
+      if (insertError) {
+        console.error('Database insert error:', insertError);
+        
+        // Clean up uploaded file if database insert fails
+        if (uploadedFileName) {
+          console.log('Cleaning up uploaded file...');
+          await supabase.storage.from('nid-files').remove([uploadedFileName]);
+        }
+        
+        throw new Error('Database storage failed: ' + insertError.message);
+      }
+
+      console.log('Database insert successful:', insertData);
+
+      alert('Technician registration successful! All your data and documents have been saved. Please wait for admin verification.');
+      navigate('/registration-complete');
+
+    } catch (error) {
+      console.error('Technician signup error:', error);
+      throw error;
+    }
+  };
+
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100">
       <div className="bg-white rounded-2xl shadow-xl w-[850px] min-h-[700px] flex flex-col overflow-hidden">
-        {/* All your existing JSX code here - no changes needed */}
         {/* Header */}
         <div className="bg-gradient-to-r from-teal-500 to-teal-600 h-[120px] flex justify-center items-center">
           <h1 className="text-white text-4xl font-bold uppercase bg-black/40 px-6 py-2 rounded-md">
@@ -85,7 +161,6 @@ const Signup = () => {
         {/* Form */}
         <div className="flex-1 p-12">
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* All your existing form fields... */}
             {/* Full Name */}
             <div className="relative">
               <input
@@ -236,13 +311,14 @@ const Signup = () => {
                 {/* NID Upload */}
                 <div>
                   <label className="block text-gray-700 mb-2">
-                    Upload NID / Birth Certificate (PDF or Image)
+                    Upload NID / Birth Certificate (PDF or Image) *
                   </label>
                   <input
                     type="file"
                     accept=".pdf,image/*"
                     name="nidFile"
                     onChange={handleChange}
+                    required
                     className="w-full p-2 border border-gray-300 rounded-lg"
                   />
                   {formData.nidFile && (
@@ -250,8 +326,8 @@ const Signup = () => {
                       Selected: {formData.nidFile.name}
                     </p>
                   )}
-                  <p className="text-sm text-orange-600 mt-1">
-                    Note: File will be uploaded after email confirmation
+                  <p className="text-sm text-green-600 mt-1">
+                    Your document will be uploaded securely to our servers
                   </p>
                 </div>
               </>
@@ -306,7 +382,7 @@ const Signup = () => {
                 disabled={loading}
                 className="bg-gradient-to-r from-teal-500 to-teal-600 text-white px-8 py-3 rounded-lg shadow hover:opacity-90 transition-opacity disabled:opacity-50"
               >
-                {loading ? 'Creating Account...' : 'Sign Up'}
+                {loading ? 'Processing...' : 'Sign Up'}
               </button>
               <Link
                 to="/login"

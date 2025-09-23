@@ -6,6 +6,7 @@ import {
   Routes
 } from "react-router-dom";
 import ProtectedRoute from './Components/ProtectedRoute';
+import RegistrationComplete from './Components/RegistrationComplete ';
 
 const Home = lazy(() => import('./Pages/Home'));
 const About = lazy(() => import('./Pages/About'));
@@ -35,6 +36,7 @@ const App = () => {
           <Route path="/about" element={<About />} />
           <Route path="/services" element={<Services />} /> // later,  i will make it also protected
           <Route path="/contact" element={<Contact />} />
+          <Route path="/registration-complete" element={<RegistrationComplete />} />
            <Route
           path="/profile"
           element={
