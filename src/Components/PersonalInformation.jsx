@@ -26,47 +26,66 @@ export default function PersonalInformation({ userData, onProfileUpdated }) {
   const handleSave = async () => {
     setSaving(true);
     try {
-      // Get current user session
-      const { data: { session } } = await supabase.auth.getSession();
+      // Check if user is admin first (admin uses localStorage, not auth.users)
+      const userRole = localStorage.getItem('userRole');
+      const adminId = localStorage.getItem('adminId');
       
-      if (!session?.user) {
-        alert("Not logged in.");
-        setSaving(false);
-        return;
-      }
+      if (userRole === 'admin' && adminId) {
+        // Handle admin update
+        const updateData = {
+          fullname: formData.name,
+          mobile: formData.phone,
+          email: formData.email,
+        };
 
-      const userId = session.user.id;
-      const userRole = session.user.user_metadata?.role;
+        const { error } = await supabase
+          .from('admin')
+          .update(updateData)
+          .eq('id', adminId);
 
-      // Prepare update data
-      const updateData = {
-        fullname: formData.name,
-        mobile: formData.phone,
-        email: formData.email,
-      };
+        if (error) throw error;
 
-      // Add NID for technicians only
-      if (userRole === 'technician') {
-        updateData.nid = formData.nid;
-      }
-
-      // Determine which table to update
-      let tableName = '';
-      if (userRole === 'user') {
-        tableName = 'users';
-      } else if (userRole === 'technician') {
-        tableName = 'technicians';
       } else {
-        tableName = 'admin';
+        // Handle regular users and technicians
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (!session?.user) {
+          alert("Not logged in.");
+          setSaving(false);
+          return;
+        }
+
+        const userId = session.user.id;
+        const sessionUserRole = session.user.user_metadata?.role;
+
+        // Prepare update data
+        const updateData = {
+          fullname: formData.name,
+          mobile: formData.phone,
+          email: formData.email,
+        };
+
+        // Add NID for technicians only
+        if (sessionUserRole === 'technician') {
+          updateData.nid = formData.nid;
+        }
+
+        // Determine which table to update
+        let tableName = '';
+        if (sessionUserRole === 'user') {
+          tableName = 'users';
+        } else if (sessionUserRole === 'technician') {
+          tableName = 'technicians';
+        }
+
+        // Update in Supabase
+        const { error } = await supabase
+          .from(tableName)
+          .update(updateData)
+          .eq('id', userId);
+
+        if (error) throw error;
       }
-
-      // Update in Supabase
-      const { error } = await supabase
-        .from(tableName)
-        .update(updateData)
-        .eq('id', userId);
-
-      if (error) throw error;
 
       alert("✅ Profile updated successfully!");
       setIsEditing(false);

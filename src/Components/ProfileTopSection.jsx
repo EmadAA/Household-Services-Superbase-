@@ -4,7 +4,21 @@ import LoggedInOutButton from "./LoggedInOutButton";
 
 export default function ProfileTopSection({ userData }) {
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    // Check if user is admin
+    const userRole = localStorage.getItem('userRole');
+    
+    if (userRole === 'admin') {
+      // Admin logout - clear localStorage
+      localStorage.removeItem('userRole');
+      localStorage.removeItem('adminId');
+      localStorage.removeItem('adminEmail');
+      localStorage.removeItem('adminName');
+      localStorage.removeItem('isLoggedIn');
+    } else {
+      // Regular user/technician logout - clear Supabase auth
+      await supabase.auth.signOut();
+    }
+    
     window.location.href = "/login";
   };
 
@@ -32,6 +46,8 @@ export default function ProfileTopSection({ userData }) {
                 ? userData.category.replace("_", " & ")
                 : userData.role === "technician"
                 ? "General Technician"
+                : userData.role === "admin"
+                ? "System Administrator"
                 : "User"}
             </p>
           </div>

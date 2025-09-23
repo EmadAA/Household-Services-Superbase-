@@ -21,22 +21,44 @@ const Login = () => {
   // Function to verify admin login
   const verifyAdminLogin = async (email, password) => {
     try {
+      console.log('🔍 Checking admin login for:', email);
+      
+      // Try to fetch admin data
       const { data, error } = await supabase
         .from('admin')
         .select('*')
-        .eq('email', email)
+        .eq('email', email.toLowerCase().trim())
         .single();
 
-      if (error || !data) {
-        return false;
+      console.log('📊 Admin query result:', { data, error });
+
+      // If RLS error or no access, just return false (don't show error to user)
+      if (error) {
+        console.log('❌ Admin query error (expected for non-admins):', error.message);
+        return { isAdmin: false, adminData: null };
       }
 
-      // Simple password comparison (you should use proper hashing in production)
-      // For now, assuming password_hash stores plain text or you handle hashing
-      return data.password_hash === password;
+      if (!data) {
+        console.log('❌ No admin found with this email');
+        return { isAdmin: false, adminData: null };
+      }
+
+      console.log('✅ Admin found:', data.fullname);
+      
+      // Compare password (exact match)
+      const isValidPassword = data.password_hash === password;
+      
+      console.log('🔐 Password comparison result:', isValidPassword);
+      
+      return { 
+        isAdmin: isValidPassword, 
+        adminData: isValidPassword ? data : null 
+      };
+      
     } catch (error) {
-      console.error('Admin verification error:', error);
-      return false;
+      console.log('💥 Admin verification error (expected for non-admins):', error);
+      // Don't treat this as a fatal error - just means user is not admin
+      return { isAdmin: false, adminData: null };
     }
   };
 
@@ -45,45 +67,72 @@ const Login = () => {
     setLoading(true);
 
     try {
-      // First check if this is an admin login
-      const isAdmin = await verifyAdminLogin(formData.email, formData.password);
+      console.log('🚀 Starting login process...');
       
-      if (isAdmin) {
-        // Admin login - create a session manually or handle differently
-        alert('Admin login successful!');
-        // Store admin info in localStorage for now
-        localStorage.setItem('adminEmail', formData.email);
+      // First check if this is an admin login (silently fail if not)
+      const { isAdmin, adminData } = await verifyAdminLogin(formData.email, formData.password);
+      
+      if (isAdmin && adminData) {
+        console.log('✅ Admin login successful for:', adminData.fullname);
+        
+        // Store admin session data
         localStorage.setItem('userRole', 'admin');
+        localStorage.setItem('adminId', adminData.id);
+        localStorage.setItem('adminEmail', adminData.email);
+        localStorage.setItem('adminName', adminData.fullname);
+        localStorage.setItem('isLoggedIn', 'true');
+        
+        alert(`🎉 Welcome back, ${adminData.fullname}! Admin login successful.`);
         navigate("/admindashboard");
         setLoading(false);
         return;
       }
 
-      // If not admin, try regular Supabase auth login
+      // If not admin, try regular Supabase auth login for users/technicians
+      console.log('👤 Attempting regular user login for:', formData.email);
+      
       const { data, error } = await supabase.auth.signInWithPassword({
         email: formData.email,
         password: formData.password,
       });
 
       if (error) {
+        console.error('❌ Supabase auth error:', error);
+        
         if (error.message.includes('Email not confirmed')) {
-          alert('Please check your email and confirm your account first!');
+          alert('📧 Please check your email and confirm your account first!');
         } else if (error.message.includes('Invalid login credentials')) {
-          alert('Invalid email or password. Please check your credentials.');
+          alert('🔐 Invalid email or password. Please check your credentials and try again.');
         } else {
-          alert('Login failed: ' + error.message);
+          alert('❌ Login failed: ' + error.message);
         }
         setLoading(false);
         return;
       }
 
       if (data.user) {
-        alert('Login successful!');
-        navigate("/home");
+        console.log('✅ Regular user login successful:', data.user.email);
+        
+        // Store user session data
+        localStorage.setItem('userRole', data.user.user_metadata?.role || 'user');
+        localStorage.setItem('userId', data.user.id);
+        localStorage.setItem('userEmail', data.user.email);
+        localStorage.setItem('isLoggedIn', 'true');
+        
+        alert('🎉 Login successful!');
+        
+        // Redirect based on user role
+        const userRole = data.user.user_metadata?.role;
+        if (userRole === 'technician') {
+          navigate("/home");
+        } else {
+          navigate("/home");
+        }
       }
+
     } catch (error) {
-      console.error('Login error:', error);
-      alert('Login error: ' + error.message);
+      console.error('💥 Login error:', error);
+      alert('❌ Login error: ' + error.message);
     } finally {
       setLoading(false);
     }
@@ -129,6 +178,7 @@ const Login = () => {
               />
             </div>
 
+           
             <div className="flex justify-between items-center text-sm text-gray-600">
               <label className="flex items-center gap-2">
                 <input type="checkbox" name="remember" />
@@ -141,13 +191,22 @@ const Login = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="bg-gradient-to-r from-teal-500 to-teal-600 text-white px-8 py-3 rounded-lg shadow hover:opacity-90 disabled:opacity-50"
+                className="bg-gradient-to-r from-teal-500 to-teal-600 text-white px-8 py-3 rounded-lg shadow hover:opacity-90 disabled:opacity-50 transition"
               >
-                {loading ? 'Logging in...' : 'Login'}
+                {loading ? (
+                  <span className="flex items-center">
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Logging in...
+                  </span>
+                ) : 'Login'}
               </button>
+              
               <Link
                 to="/signup"
-                className="bg-gradient-to-r from-teal-500 to-teal-600 text-white px-8 py-3 rounded-lg shadow hover:opacity-90 text-center"
+                className="bg-gradient-to-r from-teal-500 to-teal-600 text-white px-8 py-3 rounded-lg shadow hover:opacity-90 text-center transition"
               >
                 Sign Up
               </Link>
