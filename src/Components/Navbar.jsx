@@ -2,6 +2,8 @@
 import { useEffect, useRef, useState } from "react";
 import { FaBars, FaSearch, FaSignInAlt, FaSignOutAlt, FaTimes } from "react-icons/fa";
 import { NavLink, useNavigate } from "react-router-dom";
+import { supabase } from "../../supabaseClient";
+
 
 export default function Navbar() {
   const navigate = useNavigate();
@@ -51,8 +53,19 @@ export default function Navbar() {
     setIsMenuOpen(false);
     navigate("/login");
   }
-  const handleLogout = () => {
+  const handleLogout = async () => {
     // Clear all user data
+
+    try {
+      const { error } = await supabase.auth.signOut();
+          if (error) {
+            console.error('Logout error:', error);
+          }
+          navigate('/login');
+        } catch (error) {
+          console.error('Logout failed:', error);
+        }
+   
     localStorage.removeItem('userRole');
     localStorage.removeItem('adminId');
     localStorage.removeItem('adminEmail');
@@ -104,7 +117,7 @@ export default function Navbar() {
       className={({ isActive }) => `${
         isActive ? "text-teal-600 font-bold" : "text-gray-800"
       } font-medium hover:text-teal-400 transition block text-center ${
-        item.name === "PROFILE" ? "text-teal-600 font-semibold" : ""
+        item.name === "PROFILE" ? "text-gray-600 font-semibold" : ""
       }`}
       onClick={onClick}
     >
@@ -200,7 +213,7 @@ export default function Navbar() {
                     className="flex items-center gap-2 px-4 py-2 text-red-600 hover:text-red-500 font-medium transition border border-red-300 rounded-lg hover:bg-red-50"
                   >
                     <FaSignOutAlt />
-                    <span>Logout</span>
+                    <span>Sign Out</span>
                   </button>
                 ) : (
                   <NavLink
@@ -208,7 +221,7 @@ export default function Navbar() {
                      className="flex items-center gap-2 px-4 py-2 text-teal-600 hover:text-teal-500 font-medium transition border border-teal-300 rounded-lg hover:bg-teal-50"
                   >
                     <FaSignInAlt />
-                    Login
+                    Sign In
                   </NavLink>
                 )}
               </div>
@@ -284,7 +297,7 @@ export default function Navbar() {
                   className="flex items-center gap-2 px-4 py-2 text-teal-600 hover:text-teal-500 font-medium transition"
                 >
                   <FaSignInAlt />
-                  <span>Login</span>
+                  <span>Sign In</span>
                 </button>
               )}
             </div>
