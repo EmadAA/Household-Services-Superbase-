@@ -1,4 +1,4 @@
-/* eslint-disable no-unused-vars */
+ 
 import { useState } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
@@ -9,7 +9,7 @@ const Signup = () => {
     fullname: "",
     mobile: "",
     email: "",
-    role: "",
+    role: "user",
     nid: "",
     password: "",
     cpassword: "",
@@ -25,16 +25,24 @@ const Signup = () => {
   // Regex patterns
   const patterns = {
     email: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-    mobile: /^01[3-9]\d{8}$/, // Bangladeshi mobile format
-    nid: /^\d{10}$/, // Exactly 10 digits
-    birthCertificate: /^\d{16,17}$/, // 16 or 17 digits
+    mobile: /^01[3-9]\d{8}$/,
+    nid: /^\d{10}$/,
+    birthCertificate: /^\d{16,17}$/,
     password: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/
+  };
+
+  const handleRoleChange = (role) => {
+    setFormData(prev => ({ 
+      ...prev, 
+      role,
+      ...(role === 'user' && { category: "", nid: "", nidFile: null })
+    }));
+    setErrors(prev => ({ ...prev, category: "", nid: "" }));
   };
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
     
-    // Clear previous errors for this field
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: "" }));
     }
@@ -112,45 +120,25 @@ const Signup = () => {
     return true;
   };
 
-  const checkUniqueness = async (field, value, role) => {
+  // FIXED: Use RPC function for uniqueness check
+  const checkUniqueness = async (field, value) => {
     try {
-      // Check in users table
-      const { data: userData, error: userError } = await supabase
-        .from('users')
-        .select('id')
-        .eq(field, value)
-        .limit(1);
+      console.log(`🔍 Checking uniqueness for ${field}: ${value}`);
+      
+      const { data, error } = await supabase.rpc('check_field_uniqueness', {
+        field_name: field,
+        field_value: value
+      });
 
-      if (userError) throw userError;
-      if (userData && userData.length > 0) {
-        return false; // Found duplicate in users
+      if (error) {
+        console.error('RPC error:', error);
+        // If RPC fails, be conservative and block registration
+        return false;
       }
 
-      // Check in technicians table
-      const { data: techData, error: techError } = await supabase
-        .from('technicians')
-        .select('id')
-        .eq(field, value)
-        .limit(1);
-
-      if (techError) throw techError;
-      if (techData && techData.length > 0) {
-        return false; // Found duplicate in technicians
-      }
-
-      // Check in pending_technicians table
-      const { data: pendingData, error: pendingError } = await supabase
-        .from('pending_technicians')
-        .select('id')
-        .eq(field, value)
-        .limit(1);
-
-      if (pendingError) throw pendingError;
-      if (pendingData && pendingData.length > 0) {
-        return false; // Found duplicate in pending_technicians
-      }
-
-      return true; // Unique
+      console.log(`Uniqueness check result for ${field}:`, data);
+      return data; // true = unique, false = duplicate
+      
     } catch (error) {
       console.error('Uniqueness check error:', error);
       return false;
@@ -163,7 +151,9 @@ const Signup = () => {
     setErrors({});
 
     try {
-      // Validate all fields
+      console.log('🚀 Starting registration process...');
+      
+      // Validate all fields first
       const isEmailValid = validateEmail(formData.email);
       const isMobileValid = validateMobile(formData.mobile);
       const isPasswordValid = validatePassword(formData.password);
@@ -172,39 +162,54 @@ const Signup = () => {
       let isNIDValid = true;
       if (formData.role === 'technician') {
         isNIDValid = validateNID(formData.nid);
+        
+        if (!formData.category) {
+          setErrors(prev => ({ ...prev, category: "Please select a category" }));
+          setLoading(false);
+          return;
+        }
+        
+        if (!formData.nidFile) {
+          alert("Please upload your NID/Birth Certificate file");
+          setLoading(false);
+          return;
+        }
       }
 
       if (!isEmailValid || !isMobileValid || !isPasswordValid || !isConfirmPasswordValid || !isNIDValid) {
+        console.log('❌ Validation failed');
         setLoading(false);
         return;
       }
 
-      // Check uniqueness
-      console.log('Checking email uniqueness...');
-      const isEmailUnique = await checkUniqueness('email', formData.email, formData.role);
+      // FIXED: Use RPC function for uniqueness checks
+      console.log('📧 Checking email uniqueness...');
+      const isEmailUnique = await checkUniqueness('email', formData.email);
       if (!isEmailUnique) {
-        setErrors(prev => ({ ...prev, email: "This email is already registered" }));
+        setErrors(prev => ({ ...prev, email: "This email is already registered. Please use a different email address." }));
         setLoading(false);
         return;
       }
 
-      console.log('Checking mobile uniqueness...');
-      const isMobileUnique = await checkUniqueness('mobile', formData.mobile, formData.role);
+      console.log('📱 Checking mobile uniqueness...');
+      const isMobileUnique = await checkUniqueness('mobile', formData.mobile);
       if (!isMobileUnique) {
-        setErrors(prev => ({ ...prev, mobile: "This mobile number is already registered" }));
+        setErrors(prev => ({ ...prev, mobile: "This mobile number is already registered. Please use a different mobile number." }));
         setLoading(false);
         return;
       }
 
       if (formData.role === 'technician') {
-        console.log('Checking NID uniqueness...');
-        const isNIDUnique = await checkUniqueness('nid', formData.nid, formData.role);
+        console.log('🆔 Checking NID uniqueness...');
+        const isNIDUnique = await checkUniqueness('nid', formData.nid);
         if (!isNIDUnique) {
-          setErrors(prev => ({ ...prev, nid: "This NID/Birth Certificate number is already registered" }));
+          setErrors(prev => ({ ...prev, nid: "This NID/Birth Certificate number is already registered. Please check your number." }));
           setLoading(false);
           return;
         }
       }
+
+      console.log('✅ All uniqueness checks passed, proceeding with registration...');
 
       // Proceed with registration
       if (formData.role === 'user') {
@@ -214,7 +219,7 @@ const Signup = () => {
       }
 
     } catch (error) {
-      console.error('Registration error:', error);
+      console.error('💥 Registration error:', error);
       alert('Registration failed: ' + error.message);
     } finally {
       setLoading(false);
@@ -222,6 +227,8 @@ const Signup = () => {
   };
 
   const handleUserSignup = async () => {
+    console.log('👤 Creating user account...');
+    
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email: formData.email,
       password: formData.password,
@@ -235,11 +242,18 @@ const Signup = () => {
     });
 
     if (authError) {
-      alert(authError.message);
+      console.error('Auth error:', authError);
+      
+      if (authError.message.includes('already registered')) {
+        setErrors(prev => ({ ...prev, email: "This email is already registered" }));
+      } else {
+        alert('Registration failed: ' + authError.message);
+      }
       return;
     }
 
     if (authData.user) {
+      console.log('✅ User registered successfully');
       alert('Registration successful! Please check your email and confirm your account.');
       navigate('/login');
     }
@@ -247,6 +261,8 @@ const Signup = () => {
 
   const handleTechnicianSignup = async () => {
     try {
+      console.log('🔧 Creating technician registration...');
+      
       let nidFileUrl = null;
       let uploadedFileName = null;
 
@@ -255,7 +271,7 @@ const Signup = () => {
         const fileExt = formData.nidFile.name.split('.').pop();
         uploadedFileName = `technician_${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
 
-        console.log('Uploading file:', uploadedFileName);
+        console.log('📁 Uploading file:', uploadedFileName);
         
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('nid-files')
@@ -266,19 +282,18 @@ const Signup = () => {
           throw new Error('File upload failed: ' + uploadError.message);
         }
 
-        console.log('Upload successful:', uploadData);
+        console.log('✅ Upload successful:', uploadData);
 
-        // Get public URL
         const { data: { publicUrl } } = supabase.storage
           .from('nid-files')
           .getPublicUrl(uploadedFileName);
         
         nidFileUrl = publicUrl;
-        console.log('File URL:', nidFileUrl);
+        console.log('📎 File URL:', nidFileUrl);
       }
 
       // Step 2: Insert into pending_technicians table
-      console.log('Inserting technician data...');
+      console.log('💾 Inserting technician data...');
       
       const { data: insertData, error: insertError } = await supabase
         .from('pending_technicians')
@@ -293,24 +308,37 @@ const Signup = () => {
             nid_file_url: nidFileUrl,
             status: 'pending_verification'
           }
-        ]);
+        ])
+        .select();
 
       if (insertError) {
         console.error('Database insert error:', insertError);
         
-        // Clean up uploaded file if database insert fails
         if (uploadedFileName) {
-          console.log('Cleaning up uploaded file...');
+          console.log('🧹 Cleaning up uploaded file...');
           await supabase.storage.from('nid-files').remove([uploadedFileName]);
+        }
+        
+        if (insertError.message.includes('duplicate') || insertError.code === '23505') {
+          if (insertError.message.includes('email')) {
+            setErrors(prev => ({ ...prev, email: "This email is already registered" }));
+          } else if (insertError.message.includes('mobile')) {
+            setErrors(prev => ({ ...prev, mobile: "This mobile number is already registered" }));
+          } else if (insertError.message.includes('nid')) {
+            setErrors(prev => ({ ...prev, nid: "This NID/Birth Certificate number is already registered" }));
+          } else {
+            throw new Error('Duplicate data detected');
+          }
+          return;
         }
         
         throw new Error('Database storage failed: ' + insertError.message);
       }
 
-      console.log('Database insert successful:', insertData);
+      console.log('✅ Database insert successful:', insertData);
 
-      alert('Technician registration successful! All your data and documents have been saved. Please wait for admin verification.');
-      navigate('/registration-complete');
+      alert('🎉 Technician registration successful! All your data and documents have been saved. Please wait for admin verification. You will be notified once approved.');
+      navigate('/login');
 
     } catch (error) {
       console.error('Technician signup error:', error);
@@ -319,20 +347,48 @@ const Signup = () => {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100">
-      <div className="bg-white rounded-2xl shadow-xl w-[850px] min-h-[700px] flex flex-col overflow-hidden">
+    <div className="flex justify-center items-center min-h-screen bg-gray-100 p-4">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-4xl">
+        
         {/* Header */}
-        <div className="bg-gradient-to-r from-teal-500 to-teal-600 h-[120px] flex justify-center items-center">
-          <h1 className="text-white text-4xl font-bold uppercase bg-black/40 px-6 py-2 rounded-md">
-            Sign Up
+        <div className="bg-gradient-to-r from-teal-500 to-teal-600 rounded-t-2xl p-6 text-center">
+          <h1 className="text-white text-3xl font-bold uppercase">
+            SIGN UP
           </h1>
         </div>
 
+        {/* Role Tabs */}
+        <div className="flex">
+          <button
+            type="button"
+            onClick={() => handleRoleChange('user')}
+            className={`flex-1 py-4 px-6 font-semibold text-lg transition-colors ${
+              formData.role === 'user'
+                ? 'bg-teal-500 text-white'
+                : 'bg-gray-300 text-gray-700 hover:bg-gray-400'
+            }`}
+          >
+            User 
+          </button>
+          <button
+            type="button"
+            onClick={() => handleRoleChange('technician')}
+            className={`flex-1 py-4 px-6 font-semibold text-lg transition-colors ${
+              formData.role === 'technician'
+                ? 'bg-teal-500 text-white'
+                : 'bg-gray-300 text-gray-700 hover:bg-gray-400'
+            }`}
+          >
+            Technician
+          </button>
+        </div>
+
         {/* Form */}
-        <div className="flex-1 p-12">
+        <div className="p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
+            
             {/* Full Name */}
-            <div className="relative">
+            <div>
               <input
                 type="text"
                 id="fullname"
@@ -340,20 +396,13 @@ const Signup = () => {
                 value={formData.fullname}
                 onChange={handleChange}
                 required
-                className={`w-full p-3 border-2 rounded-lg bg-transparent outline-none focus:ring-2 border-gray-300 focus:ring-teal-500 transition
-                  ${formData.fullname ? "pt-6" : ""}`}
+                placeholder="Full Name"
+                className="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
               />
-              <label
-                htmlFor="fullname"
-                className={`absolute left-3 top-3 text-gray-500 text-base transition-all
-                  ${formData.fullname ? "-top-3 text-sm bg-white px-1" : ""}`}
-              >
-                Full Name
-              </label>
             </div>
 
             {/* Mobile */}
-            <div className="relative">
+            <div>
               <input
                 type="tel"
                 id="mobile"
@@ -361,25 +410,20 @@ const Signup = () => {
                 value={formData.mobile}
                 onChange={handleChange}
                 required
-                
-                className={`w-full p-3 border-2 rounded-lg bg-transparent outline-none focus:ring-2 transition
-                  ${errors.mobile ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-teal-500"}
-                  ${formData.mobile ? "pt-6" : ""}`}
+                placeholder="Mobile (01XXXXXXXXX)"
+                className={`w-full p-4 border rounded-lg focus:outline-none focus:ring-2 transition ${
+                  errors.mobile 
+                    ? "border-red-500 focus:ring-red-500" 
+                    : "border-gray-300 focus:ring-teal-500 focus:border-transparent"
+                }`}
               />
-              <label
-                htmlFor="mobile"
-                className={`absolute left-3 top-3 text-gray-500 text-base transition-all
-                  ${formData.mobile ? "-top-3 text-sm bg-white px-1" : ""}`}
-              >
-                Mobile (Ex: 01712345678)
-              </label>
               {errors.mobile && (
-                <p className="text-red-500 text-xs mt-1">{errors.mobile}</p>
+                <p className="text-red-500 text-sm mt-1">{errors.mobile}</p>
               )}
             </div>
 
             {/* Email */}
-            <div className="relative">
+            <div>
               <input
                 type="email"
                 id="email"
@@ -387,87 +431,54 @@ const Signup = () => {
                 value={formData.email}
                 onChange={handleChange}
                 required
-                className={`w-full p-3 border-2 rounded-lg bg-transparent outline-none focus:ring-2 transition
-                  ${errors.email ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-teal-500"}
-                  ${formData.email ? "pt-6" : ""}`}
+                placeholder="Email"
+                className={`w-full p-4 border rounded-lg focus:outline-none focus:ring-2 transition ${
+                  errors.email 
+                    ? "border-red-500 focus:ring-red-500" 
+                    : "border-gray-300 focus:ring-teal-500 focus:border-transparent"
+                }`}
               />
-              <label
-                htmlFor="email"
-                className={`absolute left-3 top-3 text-gray-500 text-base transition-all
-                  ${formData.email ? "-top-3 text-sm bg-white px-1" : ""}`}
-              >
-                Email
-              </label>
               {errors.email && (
-                <p className="text-red-500 text-xs mt-1">{errors.email}</p>
+                <p className="text-red-500 text-sm mt-1">{errors.email}</p>
               )}
             </div>
 
-            {/* Role */}
-            <div className="relative">
-              <select
-                id="role"
-                name="role"
-                value={formData.role}
-                onChange={handleChange}
-                required
-                className="w-full p-3 border-2 rounded-lg outline-none focus:ring-2 border-gray-300 focus:ring-teal-500 transition"
-              >
-                <option value="" disabled hidden>
-                  Select Role
-                </option>
-                <option value="user">User</option>
-                <option value="technician">Technician</option>
-              </select>
-              <label
-                htmlFor="role"
-                className="absolute left-3 -top-3 text-sm bg-white px-1 text-gray-500"
-              >
-                Role
-              </label>
-            </div>
-
-            {/* Technician Fields */}
-            {formData.role === "technician" && (
+            {/* Technician-specific fields */}
+            {formData.role === 'technician' && (
               <>
                 {/* Category */}
-                <div className="relative">
+                <div>
                   <select
                     id="category"
                     name="category"
                     value={formData.category}
                     onChange={handleChange}
                     required
-                    className="w-full p-3 border-2 rounded-lg outline-none focus:ring-2 border-gray-300 focus:ring-teal-500 transition"
+                    className={`w-full p-4 border rounded-lg focus:outline-none focus:ring-2 transition ${
+                      errors.category 
+                        ? "border-red-500 focus:ring-red-500" 
+                        : "border-gray-300 focus:ring-teal-500 focus:border-transparent"
+                    }`}
                   >
-                    <option value="" disabled hidden>
-                      Select Category
-                    </option>
+                    <option value="">Select Category</option>
                     <option value="electrician">Electrician</option>
                     <option value="plumber">Plumber</option>
                     <option value="carpenter">Carpenter</option>
-                    <option value="ac_refrigerator_expert">
-                      AC & Refrigerator Expert
-                    </option>
+                    <option value="ac_refrigerator_expert">AC & Refrigerator Expert</option>
                     <option value="painter">Painter</option>
                     <option value="cleaner">Cleaner</option>
                     <option value="decorator">Decorator (Home Events)</option>
                     <option value="housemaid">Housemaid</option>
                     <option value="mover">Mover</option>
-                    <option value="pest_control_expert">
-                      Pest Control Expert
-                    </option>
+                    <option value="pest_control_expert">Pest Control Expert</option>
                   </select>
-                  <label
-                    htmlFor="category"
-                    className="absolute left-3 -top-3 text-sm bg-white px-1 text-gray-500"
-                  >
-                    Category
-                  </label>
+                  {errors.category && (
+                    <p className="text-red-500 text-sm mt-1">{errors.category}</p>
+                  )}
                 </div>
 
                 {/* NID */}
-                <div className="relative">
+                <div>
                   <input
                     type="text"
                     id="nid"
@@ -475,26 +486,21 @@ const Signup = () => {
                     value={formData.nid}
                     onChange={handleChange}
                     required
-                    
-                    className={`w-full p-3 border-2 rounded-lg bg-transparent outline-none focus:ring-2 transition
-                      ${errors.nid ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-teal-500"}
-                      ${formData.nid ? "pt-6" : ""}`}
+                    placeholder="NID (10 digits) or Birth Certificate (16-17 digits)"
+                    className={`w-full p-4 border rounded-lg focus:outline-none focus:ring-2 transition ${
+                      errors.nid 
+                        ? "border-red-500 focus:ring-red-500" 
+                        : "border-gray-300 focus:ring-teal-500 focus:border-transparent"
+                    }`}
                   />
-                  <label
-                    htmlFor="nid"
-                    className={`absolute left-3 top-3 text-gray-500 text-base transition-all
-                      ${formData.nid ? "-top-3 text-sm bg-white px-1" : ""}`}
-                  >
-                    NID / Birth Certificate No.(10 digits for NID or 16-17 digits for Birth Certificate)
-                  </label>
                   {errors.nid && (
-                    <p className="text-red-500 text-xs mt-1">{errors.nid}</p>
+                    <p className="text-red-500 text-sm mt-1">{errors.nid}</p>
                   )}
                 </div>
 
-                {/* NID Upload */}
+                {/* NID File Upload */}
                 <div>
-                  <label className="block text-gray-700 mb-2">
+                  <label className="block text-gray-700 mb-2 font-medium">
                     Upload NID / Birth Certificate (PDF or Image) *
                   </label>
                   <input
@@ -503,22 +509,19 @@ const Signup = () => {
                     name="nidFile"
                     onChange={handleChange}
                     required
-                    className="w-full p-2 border border-gray-300 rounded-lg"
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
                   />
                   {formData.nidFile && (
                     <p className="text-sm text-gray-600 mt-2">
                       Selected: {formData.nidFile.name}
                     </p>
                   )}
-                  <p className="text-sm text-green-600 mt-1">
-                    Your document will be uploaded securely to our servers
-                  </p>
                 </div>
               </>
             )}
 
             {/* Password */}
-            <div className="relative item ">
+            <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
                 id="password"
@@ -526,26 +529,22 @@ const Signup = () => {
                 value={formData.password}
                 onChange={handleChange}
                 required
-                className={`w-full p-3 pr-12 border-2 rounded-lg bg-transparent outline-none focus:ring-2 transition 
-                  ${errors.password ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-teal-500"}
-                  ${formData.password ? "pt-6" : ""}`}
+                placeholder="Password"
+                className={`w-full p-4 pr-12 border rounded-lg focus:outline-none focus:ring-2 transition ${
+                  errors.password 
+                    ? "border-red-500 focus:ring-red-500" 
+                    : "border-gray-300 focus:ring-teal-500 focus:border-transparent"
+                }`}
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-3 text-gray-500 hover:text-gray-700"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
               >
                 {showPassword ? <FaEyeSlash /> : <FaEye />}
               </button>
-              <label
-                htmlFor="password"
-                className={`absolute left-3 top-3 text-gray-500 text-base transition-all
-                  ${formData.password ? "-top-3 text-sm bg-white px-1" : ""}`}
-              >
-                Password
-              </label>
               {errors.password && (
-                <p className="text-red-500 text-xs mt-1">{errors.password}</p>
+                <p className="text-red-500 text-sm mt-1">{errors.password}</p>
               )}
             </div>
 
@@ -558,26 +557,22 @@ const Signup = () => {
                 value={formData.cpassword}
                 onChange={handleChange}
                 required
-                className={`w-full p-3 pr-12 border-2 rounded-lg bg-transparent outline-none focus:ring-2 transition
-                  ${errors.cpassword ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-teal-500"}
-                  ${formData.cpassword ? "pt-6" : ""}`}
+                placeholder="Confirm Password"
+                className={`w-full p-4 pr-12 border rounded-lg focus:outline-none focus:ring-2 transition ${
+                  errors.cpassword 
+                    ? "border-red-500 focus:ring-red-500" 
+                    : "border-gray-300 focus:ring-teal-500 focus:border-transparent"
+                }`}
               />
               <button
                 type="button"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute right-3 top-3 text-gray-500 hover:text-gray-700"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
               >
                 {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
               </button>
-              <label
-                htmlFor="cpassword"
-                className={`absolute left-3 top-3 text-gray-500 text-base transition-all
-                  ${formData.cpassword ? "-top-3 text-sm bg-white px-1" : ""}`}
-              >
-                Confirm Password
-              </label>
               {errors.cpassword && (
-                <p className="text-red-500 text-xs mt-1">{errors.cpassword}</p>
+                <p className="text-red-500 text-sm mt-1">{errors.cpassword}</p>
               )}
             </div>
 
@@ -594,17 +589,25 @@ const Signup = () => {
             </div>
 
             {/* Buttons */}
-            <div className="flex justify-center gap-6 pt-4">
+            <div className="flex justify-center gap-4 pt-4">
               <button
                 type="submit"
                 disabled={loading}
-                className="bg-gradient-to-r from-teal-500 to-teal-600 text-white px-8 py-3 rounded-lg shadow hover:opacity-90 transition-opacity disabled:opacity-50"
+                className="bg-gradient-to-r from-teal-500 to-teal-600 text-white px-8 py-3 rounded-lg shadow hover:opacity-90 transition-opacity disabled:opacity-50 font-semibold"
               >
-                {loading ? 'Processing...' : 'Sign Up'}
+                {loading ? (
+                  <span className="flex items-center">
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Processing...
+                  </span>
+                ) : 'Sign Up'}
               </button>
               <Link
                 to="/login"
-                className="bg-gradient-to-r from-teal-500 to-teal-600 text-white px-8 py-3 rounded-lg shadow hover:opacity-90 transition-opacity text-center"
+                className="bg-gradient-to-r from-teal-500 to-teal-600 text-white px-8 py-3 rounded-lg shadow hover:opacity-90 transition-opacity text-center font-semibold"
               >
                 Back to Sign In
               </Link>

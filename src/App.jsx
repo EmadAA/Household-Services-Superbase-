@@ -46,9 +46,9 @@ const App = () => {
           }
         />
           <Route path="/admindashboard"  element={
-            <ProtectedRoute>
+            // <ProtectedRoute>
               <AdminDashBoard />
-            </ProtectedRoute>
+            // </ProtectedRoute>
           }/>
           <Route path="*" element={<Page404 />} />
         </Routes>
