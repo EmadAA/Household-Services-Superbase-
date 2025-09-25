@@ -3,7 +3,7 @@ import { supabase } from "../../supabaseClient";
 import AllServices from "../Components/AllServices";
 import AllTechnicians from "../Components/AllTechnicians";
 import AllUsers from "../Components/AllUsers";
-import ApproveGigs from "../Components/ApproveGigs";
+import ApproveAccounts from "../Components/ApproveAccounts";
 import Footer from "../Components/Footer";
 import Navbar from "../Components/Navbar";
 import PersonalInformation from "../Components/PersonalInformation";
@@ -89,7 +89,7 @@ export default function AdminDashBoard() {
       <ProfileTopSection userData={adminData} />
       <PersonalInformation userData={adminData} onProfileUpdated={fetchAdminData} />
       <TotalMember />
-      <ApproveGigs />
+      <ApproveAccounts />
       <AllTechnicians />
       <AllUsers />
       <AllServices />

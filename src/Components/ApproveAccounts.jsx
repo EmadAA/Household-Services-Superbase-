@@ -205,7 +205,7 @@ export default function ApproveGigs() {
       {/* Content */}
       {pendingTechnicians.length === 0 ? (
         <div className="mt-8 text-center">
-          <div className="text-6xl mb-4">✅</div>
+          {/* <div className="text-6xl mb-4">✅</div> */}
           <h3 className="text-xl font-semibold text-gray-700 mb-2">All Caught Up!</h3>
           <p className="text-gray-500">No pending technician applications to review.</p>
         </div>
@@ -235,19 +235,15 @@ export default function ApproveGigs() {
                       Applied: {formatDate(tech.created_at)}
                     </p>
                     
-                    {/* Debug info - remove this after testing */}
-                    <p className="text-xs text-purple-600">
-                      ID: {tech.id} | Status: {tech.status}
-                    </p>
                     
                     {/* NID File Link */}
                     {tech.nid_file_url && (
-                      <div className="mt-2">
+                      <div className="bg-transparent border text-center text-white font-bold py-2 px-4 rounded">
                         <a 
                           href={tech.nid_file_url} 
                           target="_blank" 
                           rel="noopener noreferrer"
-                          className="text-xs text-blue-600 hover:text-blue-800 underline"
+                          className="text-md text-teal-600 hover:text-teal-800 "
                         >
                           📄 View NID Document
                         </a>
