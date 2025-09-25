@@ -186,7 +186,7 @@ export default function Navbar() {
                 </button>
 
                 {/* User Role Indicator */}
-                {userDisplayName && (
+                {/* {userDisplayName && (
                   <div className="flex items-center gap-2">
                     <div className={`w-3 h-3 rounded-full ${
                       userRole === 'admin' ? 'bg-purple-500' : 
@@ -198,7 +198,7 @@ export default function Navbar() {
                       {userRole === 'technician' && <span className="text-blue-600 ml-1">(Tech)</span>}
                     </span>
                   </div>
-                )}
+                )} */}
 
                 <a
                   href="tel:+8801676480060"
