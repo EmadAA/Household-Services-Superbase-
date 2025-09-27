@@ -31,7 +31,7 @@ export default function GigCard() {
       <div className="px-5">
         <Slider {...settings}>
           {gigDetails.map((gig, index) => (
-            <div key={index} className="outline-none px-2">
+            <div key={index} className="outline-none px-2 text-left">
               <div className="bg-white rounded-lg shadow-lg overflow-hidden">
                 <img src={Img} alt={gig.title} className="w-full h-48 object-cover" />
                 <div className="p-4 flex items-center justify-between">

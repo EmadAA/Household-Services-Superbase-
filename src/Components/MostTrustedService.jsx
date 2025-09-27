@@ -26,11 +26,11 @@ export default function MostTrustedService() {
               <div className="flex-1">
                 <div className="mb-8">
                   <div className="flex items-center mb-2">
-                    <div className="w-16 h-1 bg-green-600"></div>
-                    <span className="text-sm font-semibold text-green-600 uppercase tracking-wider ml-2">About Household</span>
+                    <div className="w-16 h-1 bg-teal-600"></div>
+                    <span className="text-sm font-semibold text-teal-600 uppercase tracking-wider ml-2">Excellent Services</span>
                   </div>
                   <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight">
-                    Excellent <span className="text-green-600">Household</span> Services
+                    Excellent <span className="text-teal-600">Household</span> Services
                   </h1>
                 </div>
 
@@ -59,7 +59,7 @@ export default function MostTrustedService() {
               {/* Right Side - Video and Logos */}
               <div className="flex-1">
                 {/* Video Container */}
-                <div className="relative mb-8 rounded-lg overflow-hidden border-4 border-green-600">
+                <div className="relative mb-8 rounded-lg overflow-hidden border-4 border-teal-600">
                   <img 
                     src={HeroImg} 
                     alt="Cleaning service" 

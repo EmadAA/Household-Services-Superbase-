@@ -7,7 +7,7 @@ export default function ServiceSlider() {
           <div className="flex items-center justify-center mb-4">
             <div className="w-16 h-1 bg-teal-600 "></div>
             <span className="text-sm font-semibold text-teal-600 uppercase tracking-wider mx-2">{title}</span>
-            <div className="w-16 h-1 bg-green-600"></div>
+            <div className="w-16 h-1 bg-teal-600"></div>
           </div>
           <h2 className="text-3xl md:text-4xl font-bold text-gray-800 leading-tight">{subtitle}</h2>
 
