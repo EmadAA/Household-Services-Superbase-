@@ -26,7 +26,7 @@ const HeaderBanner = ({ title,  BannerImage }) => {
           <img
             src={BannerImage} // put your image path here
             alt="Banner Illustration"
-            className="max-h-72 object-contain"
+            className="max-h-75 object-contain"
           />
         </div>
       </div>

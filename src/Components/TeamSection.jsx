@@ -2,10 +2,10 @@
 import Slider from 'react-slick';
 import 'slick-carousel/slick/slick-theme.css';
 import 'slick-carousel/slick/slick.css';
+import AdilImg from '../assets/images/Adil.png';
 import JW from "../assets/images/jw.jpeg";
 import KJH from "../assets/images/kjh.png";
-
-import AdilImg from '../assets/images/Adil.png';
+import Mukter from "../assets/images/mukter.jpg";
 import FISImg from '../assets/images/shuvon.png';
 import TeamMemberCard from '../Components/TeamMemberCard';
 
@@ -34,7 +34,7 @@ const TeamSection = ({
     {
       name: 'Mukter Hussen',
       role: 'Designer',
-      image: JW,
+      image: Mukter,
       socialLinks: { facebook: 'https://www.facebook.com/mukterhussen.roki', linkedin: 'https://www.linkedin.com/', instagram: 'https://www.instagram.com/mukter_71?igsh=MXIwOXBqb3E1djVheg==', github:'https://github.com/muk63' },
     },
      {
