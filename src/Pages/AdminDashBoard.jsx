@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../../supabaseClient";
-import AllServices from "../Components/AllServices";
-import AllTechnicians from "../Components/AllTechnicians";
-import AllUsers from "../Components/AllUsers";
-import ApproveAccounts from "../Components/ApproveAccounts";
+import AllServices from "../Components/AdminComponents/AllServices";
+import AllTechnicians from "../Components/AdminComponents/AllTechnicians";
+import AllUsers from "../Components/AdminComponents/AllUsers";
+import ApproveAccounts from "../Components/AdminComponents/ApproveAccounts";
+import TotalMember from "../Components/AdminComponents/TotalMember";
 import Footer from "../Components/Footer";
 import Navbar from "../Components/Navbar";
 import PersonalInformation from "../Components/PersonalInformation";
 import ProfileTopSection from "../Components/ProfileTopSection";
-import TotalMember from "../Components/TotalMember";
 
 export default function AdminDashBoard() {
   const [adminData, setAdminData] = useState(null);

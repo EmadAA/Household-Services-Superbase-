@@ -1,26 +1,7 @@
-import { supabase } from "../../supabaseClient";
-import Img from "../assets/images/profilePic.webp";
-import LoggedInOutButton from "./LoggedInOutButton";
+import Img from "../assets/images/Profile.webp";
 
 export default function ProfileTopSection({ userData }) {
-  const handleLogout = async () => {
-    // Check if user is admin
-    const userRole = localStorage.getItem('userRole');
-    
-    if (userRole === 'admin') {
-      // Admin logout - clear localStorage
-      localStorage.removeItem('userRole');
-      localStorage.removeItem('adminId');
-      localStorage.removeItem('adminEmail');
-      localStorage.removeItem('adminName');
-      localStorage.removeItem('isLoggedIn');
-    } else {
-      // Regular user/technician logout - clear Supabase auth
-      await supabase.auth.signOut();
-    }
-    
-    window.location.href = "/login";
-  };
+
 
   return (
     <div className="mt-10 mb-10 shadow-xl gap-6 md:gap-10 ml-auto mr-auto box-border border-2 p-5 rounded-[15px] border-[#E7E7E7] h-auto md:h-[200px] w-[90%] sm:w-[85%] md:w-[90%] lg:w-[1300px] max-w-[1400px]">
@@ -32,7 +13,7 @@ export default function ProfileTopSection({ userData }) {
             className="h-[180px] w-[180px] sm:h-[140px] sm:w-[140px] md:h-[150px] md:w-[150px] rounded-full object-cover "
           />
         </div>
-        <div className="flex justify-between w-full">
+        <div className="flex justify-around w-full">
           <div className="profile-info text-center md:text-left space-y-2">
             <h3 className="text-lg">
               <span className="font-semibold">Name</span>: {userData.fullname}
@@ -68,9 +49,7 @@ export default function ProfileTopSection({ userData }) {
               <span className="font-semibold">Role</span>: {userData.role}
             </h3>
           </div>
-          <div>
-            <LoggedInOutButton onClick={handleLogout} />
-          </div>
+          
         </div>
       </div>
     </div>

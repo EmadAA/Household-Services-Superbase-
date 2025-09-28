@@ -5,7 +5,7 @@ import {
   BrowserRouter as Router,
   Routes
 } from "react-router-dom";
-import ProtectedRoute from './Components/ProtectedRoute';
+import ProtectedRoute from './Components/AdminComponents/ProtectedRoute';
 import RegistrationComplete from './Components/RegistrationComplete ';
 
 const Home = lazy(() => import('./Pages/Home'));
