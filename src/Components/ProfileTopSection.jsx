@@ -1,20 +1,32 @@
 import Img from "../assets/images/Profile.webp";
 
 export default function ProfileTopSection({ userData }) {
-
+  // Format expertise nicely
+  const getExpertise = () => {
+    if (userData.category) {
+      return userData.category.replace("_", " & ");
+    }
+    if (userData.role === "technician") return "General Technician";
+    if (userData.role === "admin") return "System Administrator";
+    return "Web Development";
+  };
 
   return (
-    <div className="mt-10 mb-10 shadow-xl gap-6 md:gap-10 ml-auto mr-auto box-border border-2 p-5 rounded-[15px] border-[#E7E7E7] h-auto md:h-[200px] w-[90%] sm:w-[85%] md:w-[90%] lg:w-[1300px] max-w-[1400px]">
+    <div className="mt-10 mb-10 shadow-xl gap-6 md:gap-10 mx-auto box-border border-2 p-6 rounded-[15px] border-[#E7E7E7] h-auto md:h-[220px] w-[90%] sm:w-[85%] md:w-[90%] lg:w-[1300px] max-w-[1400px] bg-white">
       <div className="flex flex-col md:flex-row items-center gap-6">
+        {/* Profile Image */}
         <div>
           <img
             src={Img}
             alt="Profile Picture"
-            className="h-[180px] w-[180px] sm:h-[140px] sm:w-[140px] md:h-[150px] md:w-[150px] rounded-full object-cover "
+            className="h-[150px] w-[150px] sm:h-[130px] sm:w-[130px] md:h-[150px] md:w-[150px] rounded-[50%] object-cover border-4 border-teal-500 shadow-md"
           />
         </div>
-        <div className="flex justify-around w-full">
-          <div className="profile-info text-center md:text-left space-y-2">
+
+        {/* Info Section */}
+        <div className="flex flex-col md:flex-row justify-between w-full gap-8">
+          {/* Left Info */}
+          <div className="profile-info text-center md:text-left space-y-2 flex-1">
             <h3 className="text-lg">
               <span className="font-semibold">Name</span>: {userData.fullname}
             </h3>
@@ -23,20 +35,12 @@ export default function ProfileTopSection({ userData }) {
             </p>
             <p className="text-lg">
               <span className="font-semibold">Expertise</span>:{" "}
-              {(userData.category
-                ? userData.category.replace("_", " & ")
-                : userData.role === "technician"
-                ? "General Technician"
-                : userData.role === "admin"
-                ? "System Administrator"
-                : "Web Development").charAt(0).toUpperCase() + (userData.category
-                ? userData.category.replace("_", " & ")
-                : userData.role === "technician"
-                ? "General Technician"
-                : "Web Development").slice(1)}
+              {getExpertise()}
             </p>
           </div>
-          <div className="profile-info text-center md:text-left space-y-2">
+
+          {/* Right Info */}
+          <div className="profile-info text-center md:text-left space-y-2 flex-1">
             <h3 className="text-lg">
               <span className="font-semibold">NID/Birth Certificate No</span>:{" "}
               {userData.nid || "Not available"}
@@ -53,7 +57,6 @@ export default function ProfileTopSection({ userData }) {
               <span className="font-semibold">Role</span>: {userData.role}
             </h3>
           </div>
-          
         </div>
       </div>
     </div>

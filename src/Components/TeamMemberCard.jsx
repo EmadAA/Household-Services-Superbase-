@@ -1,4 +1,3 @@
-// components/TeamMemberCard.jsx
 import { useState } from "react";
 import { FaFacebook, FaGithub, FaInstagram, FaLinkedin } from "react-icons/fa";
 
@@ -6,36 +5,37 @@ const TeamMemberCard = ({
   name,
   role,
   image,
-  socialLinks = { facebook: "", linkedin: "", instagram: "",  github:'#' },
+  socialLinks = { facebook: "", linkedin: "", instagram: "", github: "#" },
   showSocialIcons = true,
 }) => {
   const [isLoaded, setIsLoaded] = useState(false);
 
   return (
-    <div className="group relative">
-      {/* Card Container with Shadow */}
-      <div className="relative rounded-xl overflow-hidden shadow-lg transition-all duration-300 hover:shadow-xl transform hover:-translate-y-2 bg-white p-4">
-        
+    <div className="group relative h-full">
+      {/* Card Container */}
+      <div className="relative rounded-xl overflow-hidden shadow-md transition-all duration-300 hover:shadow-xl transform hover:-translate-y-2 bg-white p-3 sm:p-4 h-full flex flex-col">
         {/* Profile Image */}
-        <div className="mb-4">
+        <div className="mb-3 sm:mb-4">
           <img
             src={image}
             alt={name}
             onLoad={() => setIsLoaded(true)}
-            className={`w-full h-64 object-cover rounded-lg transition-opacity duration-300 ${
+            className={`w-full h-64 object-cover object-center rounded-lg transition-opacity duration-300 ${
               isLoaded ? "opacity-100" : "opacity-0"
             }`}
           />
         </div>
 
         {/* Member Info */}
-        <div className="text-center">
-          <h3 className="font-bold text-gray-800 text-lg">{name}</h3>
-          <p className="text-sm text-teal-600 mb-3">{role}</p>
-          
+        <div className="text-center flex-1 flex flex-col">
+          <h3 className="font-bold text-gray-800 text-base sm:text-lg">
+            {name}
+          </h3>
+          <p className="text-xs sm:text-sm text-teal-600 mb-3">{role}</p>
+
           {/* Social Icons */}
           {showSocialIcons && (
-            <div className="flex justify-center space-x-4 pt-2">
+            <div className="mt-auto flex justify-center space-x-3 sm:space-x-4 pt-2">
               {socialLinks.facebook && (
                 <a
                   href={socialLinks.facebook}
@@ -43,7 +43,7 @@ const TeamMemberCard = ({
                   rel="noopener noreferrer"
                   className="text-gray-600 hover:text-teal-600 transition-colors"
                 >
-                  <FaFacebook className="w-5 h-5" />
+                  <FaFacebook className="w-4 h-4 sm:w-5 sm:h-5" />
                 </a>
               )}
               {socialLinks.linkedin && (
@@ -53,7 +53,7 @@ const TeamMemberCard = ({
                   rel="noopener noreferrer"
                   className="text-gray-600 hover:text-teal-600 transition-colors"
                 >
-                  <FaLinkedin className="w-5 h-5" />
+                  <FaLinkedin className="w-4 h-4 sm:w-5 sm:h-5" />
                 </a>
               )}
               {socialLinks.instagram && (
@@ -63,11 +63,9 @@ const TeamMemberCard = ({
                   rel="noopener noreferrer"
                   className="text-gray-600 hover:text-teal-600 transition-colors"
                 >
-                  <FaInstagram className="w-5 h-5" />
+                  <FaInstagram className="w-4 h-4 sm:w-5 sm:h-5" />
                 </a>
               )}
-            
-              
               {socialLinks.github && (
                 <a
                   href={socialLinks.github}
@@ -75,7 +73,7 @@ const TeamMemberCard = ({
                   rel="noopener noreferrer"
                   className="text-gray-600 hover:text-teal-600 transition-colors"
                 >
-                  <FaGithub className="w-5 h-5" />
+                  <FaGithub className="w-4 h-4 sm:w-5 sm:h-5" />
                 </a>
               )}
             </div>
