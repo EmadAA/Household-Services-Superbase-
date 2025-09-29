@@ -13,7 +13,7 @@ export default function Navbar() {
   const menuRef = useRef(null);
   const searchRef = useRef(null);
 
-  // Check user role on component mount and when localStorage changes
+  // Check user role 
   useEffect(() => {
     const checkUserRole = () => {
       const role = localStorage.getItem('userRole');
@@ -36,7 +36,7 @@ export default function Navbar() {
     };
   }, []);
 
-  // Close menu/search when clicking outside
+  // Closing menu
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
@@ -54,8 +54,6 @@ export default function Navbar() {
     navigate("/login");
   }
   const handleLogout = async () => {
-    // Clear all user data
-
     try {
       const { error } = await supabase.auth.signOut();
           if (error) {
@@ -83,7 +81,7 @@ export default function Navbar() {
     navigate("/home");
   };
 
-  // Dynamic navigation links based on user role
+  //navigation links
   const getNavLinks = () => {
     const baseLinks = [
       { name: "HOME", path: "/home", end: true },
@@ -91,7 +89,7 @@ export default function Navbar() {
       { name: "SERVICE", path: "/services" },
     ];
 
-    // Add different profile links based on user role
+  // Dynamic navigation (for admin, it will navigate to the AdminDashboard Page)
     if (userRole === 'admin') {
       baseLinks.push({ name: "PROFILE", path: "/admindashboard" });
     } else if (userRole === 'technician') {
@@ -99,7 +97,6 @@ export default function Navbar() {
     } else if (userRole === 'user') {
       baseLinks.push({ name: "PROFILE", path: "/profile" });
     } else {
-      // Not logged in - show generic profile
       baseLinks.push({ name: "PROFILE", path: "/profile" });
     }
 
@@ -124,18 +121,6 @@ export default function Navbar() {
       {item.name}
     </NavLink>
   );
-
-  // Get user display name based on role
-  const getUserDisplayName = () => {
-    if (userRole === 'admin') {
-      return localStorage.getItem('adminName') || 'Admin';
-    } else if (userRole) {
-      return localStorage.getItem('userEmail') || 'User';
-    }
-    return null;
-  };
-
-  const userDisplayName = getUserDisplayName();
 
   return (
     <div className="sticky top-0 z-50">
@@ -185,20 +170,7 @@ export default function Navbar() {
                   <FaSearch />
                 </button>
 
-                {/* User Role Indicator */}
-                {/* {userDisplayName && (
-                  <div className="flex items-center gap-2">
-                    <div className={`w-3 h-3 rounded-full ${
-                      userRole === 'admin' ? 'bg-purple-500' : 
-                      userRole === 'technician' ? 'bg-blue-500' : 'bg-green-500'
-                    }`}></div>
-                    <span className="text-sm text-gray-600">
-                      {userDisplayName}
-                      {userRole === 'admin' && <span className="text-purple-600 ml-1">(Admin)</span>}
-                      {userRole === 'technician' && <span className="text-blue-600 ml-1">(Tech)</span>}
-                    </span>
-                  </div>
-                )} */}
+               
 
                 <a
                   href="tel:+8801676480060"
@@ -226,7 +198,7 @@ export default function Navbar() {
                 )}
               </div>
 
-              {/* Mobile Hamburger */}
+              {/* Mobile menu Hamburger */}
               <div className="md:hidden flex items-center gap-4">
                 <button
                   onClick={() => setShowSearch(true)}
@@ -251,26 +223,13 @@ export default function Navbar() {
           )}
         </div>
 
-        {/* Mobile Dropdown */}
+        {/* Mobile Dropdown menu*/}
         {isMenuOpen && (
           <div
             ref={menuRef}
             className="md:hidden bg-white border-t border-gray-200 px-5 py-4 space-y-4 shadow-lg animate-fadeIn"
           >
-            {/* User info for mobile */}
-            {userDisplayName && (
-              <div className="flex items-center justify-center gap-2 py-2 border-b border-gray-200">
-                <div className={`w-3 h-3 rounded-full ${
-                  userRole === 'admin' ? 'bg-purple-500' : 
-                  userRole === 'technician' ? 'bg-blue-500' : 'bg-green-500'
-                }`}></div>
-                <span className="text-sm text-gray-600">
-                  Welcome, {userDisplayName}
-                  {userRole === 'admin' && <span className="text-purple-600 ml-1">(Admin)</span>}
-                  {userRole === 'technician' && <span className="text-blue-600 ml-1">(Tech)</span>}
-                </span>
-              </div>
-            )}
+            
 
             <ul className="space-y-3">
               {navLinks.map((item) => (
@@ -280,7 +239,7 @@ export default function Navbar() {
               ))}
             </ul>
 
-            {/* Centered Login/Logout */}
+            
             <div className="flex justify-center">
               {userRole ? (
                 <button

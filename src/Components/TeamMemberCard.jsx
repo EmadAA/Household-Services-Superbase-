@@ -33,7 +33,7 @@ const TeamMemberCard = ({
           <h3 className="font-bold text-gray-800 text-lg">{name}</h3>
           <p className="text-sm text-teal-600 mb-3">{role}</p>
           
-          {/* Social Icons - Always visible below role */}
+          {/* Social Icons */}
           {showSocialIcons && (
             <div className="flex justify-center space-x-4 pt-2">
               {socialLinks.facebook && (

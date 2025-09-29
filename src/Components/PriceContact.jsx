@@ -22,8 +22,7 @@ export default function PriceContact() {
     e.preventDefault();
     console.log("Form submitted!", formData);
 
-    // TODO: Send data to backend here
-
+   
     // Reset form
     setFormData({
       name: "",

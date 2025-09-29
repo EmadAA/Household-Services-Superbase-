@@ -82,7 +82,7 @@ const TeamSection = ({
         </div>
 
         {/* Slider */}
-        <div className="px-5 mx-5"> {/* Optional padding for side spacing */}
+        <div className="px-5 mx-5">
           <Slider {...settings}>
             {teamMembers.map((member, index) => (
               <div key={index} className="outline-none px-2">

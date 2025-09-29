@@ -7,7 +7,7 @@ export default function MostTrustedService() {
   return (
     <div>
       <div className="relative bg-gray-900 text-white py-20">
-        {/* Background Pattern */}
+        {/* Bg Pattern */}
         <div className="absolute inset-0 opacity-10">
           <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
             <defs>
@@ -27,7 +27,7 @@ export default function MostTrustedService() {
         <div className="container mx-auto px-4 relative z-10">
           {/* Hero Section */}
           <div className="flex flex-col lg:flex-row items-center justify-between gap-12">
-            {/* Left Side - Content */}
+            {/* Left Side */}
             <div className="flex-1">
               <div className="mb-8">
                 <div className="flex items-center mb-2">
@@ -65,16 +65,15 @@ export default function MostTrustedService() {
                 </div>
               </div>
 
-              {/* Decorative Arrow */}
+              {/* icon */}
               <div className="flex justify-center mb-8">
-                {/* ✅ Replaced SVG with React Icon */}
                 <HiSparkles className="w-12 h-12 text-white" />
               </div>
             </div>
 
-            {/* Right Side - Video and Logos */}
+            {/* Right Side */}
             <div className="flex-1">
-              {/* Video Container */}
+              {/* image */}
               <div className="relative mb-8 rounded-lg overflow-hidden border-4 border-teal-600">
                 <img
                   src={MTS}

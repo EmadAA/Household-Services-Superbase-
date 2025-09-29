@@ -16,7 +16,7 @@ const SocialIcon = ({ icon, href, label }) => (
     {icon}
   </a>
 );
-//for  repetitive input field
+//reusable input  field
 const InputField =({type="text", placeholder,  value, required, onChange})=>(
 
   <input 

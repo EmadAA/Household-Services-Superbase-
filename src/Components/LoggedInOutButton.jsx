@@ -9,7 +9,7 @@ export default function LoggedInOutButton() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Get current user
+    // Get current user info
     const getUser = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       setUser(session?.user || null);

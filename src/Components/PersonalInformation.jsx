@@ -58,7 +58,7 @@ export default function PersonalInformation({ userData, onProfileUpdated }) {
         const userId = session.user.id;
         const sessionUserRole = session.user.user_metadata?.role;
 
-        // Prepare update data
+        // update data
         const updateData = {
           fullname: formData.name,
           mobile: formData.phone,
@@ -70,7 +70,7 @@ export default function PersonalInformation({ userData, onProfileUpdated }) {
           updateData.nid = formData.nid;
         }
 
-        // Determine which table to update
+        // Determine table based on role
         let tableName = '';
         if (sessionUserRole === 'user') {
           tableName = 'users';
@@ -87,13 +87,13 @@ export default function PersonalInformation({ userData, onProfileUpdated }) {
         if (error) throw error;
       }
 
-      alert("✅ Profile updated successfully!");
+      alert(" Profile updated successfully!");
       setIsEditing(false);
-      if (onProfileUpdated) onProfileUpdated(); // Refresh parent data
+      if (onProfileUpdated) onProfileUpdated();
 
     } catch (error) {
       console.error("Update error:", error);
-      alert(`❌ ${error.message}`);
+      alert(` ${error.message}`);
     } finally {
       setSaving(false);
     }
