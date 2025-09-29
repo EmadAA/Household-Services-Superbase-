@@ -14,9 +14,7 @@ export default function Services() {
       <HeaderBanner title="Services" BannerImage={BannerImage} />
       {/* Service Gig  Card */}
       <ServiceSlider />
-
-      {/* Book Now Section */}
-
+      {/* Testimonial Section */}
 
      <Testimonial />
 

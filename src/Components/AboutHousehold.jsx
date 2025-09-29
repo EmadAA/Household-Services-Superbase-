@@ -13,8 +13,7 @@ export default function AboutHousehold() {
     <div>
       <div className="container mx-auto px-4 py-16 relative z-10">
         <div className="flex flex-col lg:flex-row items-center justify-between gap-12">
-          {/* Left Side - Images */}
-          {/* Left Side - Images */}
+          {/* Left Side Image Grid */}
           <div className="flex-1 grid grid-cols-2 gap-4">
             {/* Top Left */}
             <div className="relative">
@@ -113,7 +112,7 @@ export default function AboutHousehold() {
               </div>
             </div>
 
-            {/* Call to Action */}
+            {/* booking button */}
             <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center mb-6">
               <Link
                 to="/services"

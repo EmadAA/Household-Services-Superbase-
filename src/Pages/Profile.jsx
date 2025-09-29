@@ -11,12 +11,12 @@ export default function Profile() {
 
   const fetchUserData = async () => {
     try {
-      // Check if user is admin first
+      // Check if the user is admin 
       const userRole = localStorage.getItem('userRole');
       const adminId = localStorage.getItem('adminId');
       
       if (userRole === 'admin' && adminId) {
-        // Fetch admin data from admin table
+        // Fetch admin data
         const { data: adminData, error: adminError } = await supabase
           .from('admin')
           .select('*')
@@ -25,18 +25,18 @@ export default function Profile() {
 
         if (adminError) throw adminError;
 
-        // Format admin data to match expected structure
+        // Format admin data to match expected structure coz Admin dont have NID and Category
         const formattedAdminData = {
           ...adminData,
           role: 'Admin',
-          nid: null, // Admins don't have NID
-          category: null // Admins don't have category
+          nid: null,
+          category: null 
         };
 
         setUserData(formattedAdminData);
         
       } else {
-        // Fetch regular user/technician data
+        // Fetch user/technician data
         const { data: { session } } = await supabase.auth.getSession();
         
         if (!session?.user) {
@@ -50,7 +50,7 @@ export default function Profile() {
 
         let profileData = null;
 
-        // Fetch from appropriate table based on role
+        // Fetch from data table based on role
         if (sessionUserRole === 'user') {
           const { data, error } = await supabase
             .from('users')

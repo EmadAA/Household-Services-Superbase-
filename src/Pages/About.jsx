@@ -47,7 +47,6 @@ export default function About() {
           </svg>
         </div>
 
-{/* About Household Services */}
         <div className="container mx-auto px-4 py-16 relative z-10">
           <AboutHousehold />
         </div>
@@ -59,7 +58,8 @@ export default function About() {
 
         {/* Main Content Area */}
         <MostTrustedService />
-        
+
+        {/* Team Slider */}
         <TeamSection />
       </div>
       <Footer />

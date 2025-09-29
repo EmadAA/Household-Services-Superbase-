@@ -17,12 +17,12 @@ const Login = () => {
     }));
   };
 
-  // Function to verify admin login
+  // verify admin login
   const verifyAdminLogin = async (email, password) => {
     try {
       console.log('🔍 Checking admin login for:', email);
       
-      // Try to fetch admin data
+      // fetch admin data
       const { data, error } = await supabase
         .from('admin')
         .select('*')
@@ -31,9 +31,9 @@ const Login = () => {
 
       console.log('📊 Admin query result:', { data, error });
 
-      // If RLS error or no access, just return false (don't show error to user)
-      if (error) {
-        console.log('❌ Admin query error (expected for non-admins):', error.message);
+      // for RLS error(in supabase)
+       if (error) {
+        console.log(' Admin query error (expected for non-admins):', error.message);
         return { isAdmin: false, adminData: null };
       }
 
@@ -44,10 +44,10 @@ const Login = () => {
 
       console.log('✅ Admin found:', data.fullname);
       
-      // Compare password (exact match)
+      // password match check
       const isValidPassword = data.password_hash === password;
       
-      console.log('🔐 Password comparison result:', isValidPassword);
+      console.log(' Password comparison result:', isValidPassword);
       
       return { 
         isAdmin: isValidPassword, 
@@ -55,8 +55,7 @@ const Login = () => {
       };
       
     } catch (error) {
-      console.log('💥 Admin verification error (expected for non-admins):', error);
-      // Don't treat this as a fatal error - just means user is not admin
+      console.log(' Admin verification error (expected for non-admins):', error);
       return { isAdmin: false, adminData: null };
     }
   };
@@ -68,7 +67,7 @@ const Login = () => {
     try {
       console.log('🚀 Starting login process...');
       
-      // First check if this is an admin login (silently fail if not)
+      // First check if this is an admin login
       const { isAdmin, adminData } = await verifyAdminLogin(formData.email, formData.password);
       
       if (isAdmin && adminData) {
@@ -81,14 +80,14 @@ const Login = () => {
         localStorage.setItem('adminName', adminData.fullname);
         localStorage.setItem('isLoggedIn', 'true');
         
-        alert(`🎉 Welcome back, ${adminData.fullname}! Admin login successful.`);
+        alert(` Welcome back, ${adminData.fullname}! Admin login successful.`);
         navigate("/admindashboard");
         setLoading(false);
         return;
       }
 
-      // If not admin, try regular Supabase auth login for users/technicians
-      console.log('👤 Attempting regular user login for:', formData.email);
+      //login for users/technicians
+      console.log(' Attempting regular user login for:', formData.email);
       
       const { data, error } = await supabase.auth.signInWithPassword({
         email: formData.email,
@@ -96,14 +95,14 @@ const Login = () => {
       });
 
       if (error) {
-        console.error('❌ Supabase auth error:', error);
+        console.error(' Supabase auth error:', error);
         
         if (error.message.includes('Email not confirmed')) {
-          alert('📧 Please check your email and confirm your account first!');
+          alert(' Please check your email and confirm your account first!');
         } else if (error.message.includes('Invalid login credentials')) {
-          alert('🔐 Invalid email or password. Please check your credentials and try again.');
+          alert(' Invalid email or password. Please check your credentials and try again.');
         } else {
-          alert('❌ Login failed: ' + error.message);
+          alert(' Login failed: ' + error.message);
         }
         setLoading(false);
         return;
@@ -118,20 +117,20 @@ const Login = () => {
         localStorage.setItem('userEmail', data.user.email);
         localStorage.setItem('isLoggedIn', 'true');
         
-        alert('🎉 Login successful!');
+        alert(' Login successful!');
         
-        // Redirect based on user role
-        const userRole = data.user.user_metadata?.role;
-        if (userRole === 'technician') {
-          navigate("/home");
-        } else {
-          navigate("/home");
-        }
+        // const userRole = data.user.user_metadata?.role;
+        // if (userRole === 'technician') {
+        //   navigate("/home");
+        // } else {
+        //   navigate("/home");
+        // }
+        navigate("/home");
       }
 
     } catch (error) {
-      console.error('💥 Login error:', error);
-      alert('❌ Login error: ' + error.message);
+      console.error(' Login error:', error);
+      alert(' Login error: ' + error.message);
     } finally {
       setLoading(false);
     }

@@ -74,7 +74,7 @@ const HomePage = () => {
       {/* Pricing Section */}
   <PriceContact />
 
-      {/* Team Section */}
+      {/* Team Section Slider */}
       <section className="py-16 bg-teal-50">
         <TeamSection />
       </section>

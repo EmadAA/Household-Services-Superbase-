@@ -16,7 +16,7 @@ export default function AdminDashBoard() {
 
   const fetchAdminData = async () => {
     try {
-      // Check if user is admin
+      // Check admin
       const userRole = localStorage.getItem('userRole');
       const adminId = localStorage.getItem('adminId');
       
@@ -26,7 +26,7 @@ export default function AdminDashBoard() {
         return;
       }
 
-      // Fetch admin data from admin table
+      // Fetch admin data
       const { data: adminData, error: adminError } = await supabase
         .from('admin')
         .select('*')
@@ -35,12 +35,12 @@ export default function AdminDashBoard() {
 
       if (adminError) throw adminError;
 
-      // Format admin data to match expected structure
+      // Format admin data to match the structure coz admin dont have the NID and Category
       const formattedAdminData = {
         ...adminData,
         role: 'Admin',
-        nid: null, // Admins don't have NID
-        category: null // Admins don't have category
+        nid: null, 
+        category: null 
       };
 
       setAdminData(formattedAdminData);

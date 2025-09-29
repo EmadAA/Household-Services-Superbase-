@@ -52,7 +52,7 @@ const Signup = () => {
       [name]: files ? files[0] : value,
     }));
 
-    // Real-time validation
+    // Real time validation
     if (name === 'email' && value) {
       validateEmail(value);
     } else if (name === 'mobile' && value) {
@@ -120,10 +120,10 @@ const Signup = () => {
     return true;
   };
 
-  // FIXED: Use RPC function for uniqueness check
+  // uniqueness check
   const checkUniqueness = async (field, value) => {
     try {
-      console.log(`🔍 Checking uniqueness for ${field}: ${value}`);
+      console.log(` Checking uniqueness for ${field}: ${value}`);
       
       const { data, error } = await supabase.rpc('check_field_uniqueness', {
         field_name: field,
@@ -132,12 +132,11 @@ const Signup = () => {
 
       if (error) {
         console.error('RPC error:', error);
-        // If RPC fails, be conservative and block registration
         return false;
       }
 
       console.log(`Uniqueness check result for ${field}:`, data);
-      return data; // true = unique, false = duplicate
+      return data; 
       
     } catch (error) {
       console.error('Uniqueness check error:', error);
@@ -153,7 +152,7 @@ const Signup = () => {
     try {
       console.log('🚀 Starting registration process...');
       
-      // Validate all fields first
+      // Validate all fields 
       const isEmailValid = validateEmail(formData.email);
       const isMobileValid = validateMobile(formData.mobile);
       const isPasswordValid = validatePassword(formData.password);
@@ -182,16 +181,14 @@ const Signup = () => {
         return;
       }
 
-      // FIXED: Use RPC function for uniqueness checks
-      console.log('📧 Checking email uniqueness...');
+      // email uniqueness checks
       const isEmailUnique = await checkUniqueness('email', formData.email);
       if (!isEmailUnique) {
         setErrors(prev => ({ ...prev, email: "This email is already registered. Please use a different email address." }));
         setLoading(false);
         return;
       }
-
-      console.log('📱 Checking mobile uniqueness...');
+      // email uniqueness checks
       const isMobileUnique = await checkUniqueness('mobile', formData.mobile);
       if (!isMobileUnique) {
         setErrors(prev => ({ ...prev, mobile: "This mobile number is already registered. Please use a different mobile number." }));
@@ -200,7 +197,7 @@ const Signup = () => {
       }
 
       if (formData.role === 'technician') {
-        console.log('🆔 Checking NID uniqueness...');
+      // NID uniqueness checks 
         const isNIDUnique = await checkUniqueness('nid', formData.nid);
         if (!isNIDUnique) {
           setErrors(prev => ({ ...prev, nid: "This NID/Birth Certificate number is already registered. Please check your number." }));
@@ -209,9 +206,9 @@ const Signup = () => {
         }
       }
 
-      console.log('✅ All uniqueness checks passed, proceeding with registration...');
+      console.log(' All uniqueness checks done, proceeding with registration...');
 
-      // Proceed with registration
+      // Proceed for registration
       if (formData.role === 'user') {
         await handleUserSignup();
       } else if (formData.role === 'technician') {
@@ -227,7 +224,7 @@ const Signup = () => {
   };
 
   const handleUserSignup = async () => {
-    console.log('👤 Creating user account...');
+    console.log(' Creating user account...');
     
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email: formData.email,
@@ -253,7 +250,7 @@ const Signup = () => {
     }
 
     if (authData.user) {
-      console.log('✅ User registered successfully');
+      console.log(' User registered successfully');
       alert('Registration successful! Please check your email and confirm your account.');
       navigate('/login');
     }
@@ -261,17 +258,17 @@ const Signup = () => {
 
   const handleTechnicianSignup = async () => {
     try {
-      console.log('🔧 Creating technician registration...');
+      console.log(' Creating technician registration...');
       
       let nidFileUrl = null;
       let uploadedFileName = null;
 
-      // Step 1: Upload NID file first
+      // Upload NID file first for checkup
       if (formData.nidFile) {
         const fileExt = formData.nidFile.name.split('.').pop();
         uploadedFileName = `technician_${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
 
-        console.log('📁 Uploading file:', uploadedFileName);
+        console.log('Uploading file:', uploadedFileName);
         
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('nid-files')
@@ -282,18 +279,18 @@ const Signup = () => {
           throw new Error('File upload failed: ' + uploadError.message);
         }
 
-        console.log('✅ Upload successful:', uploadData);
+        console.log(' Upload successful:', uploadData);
 
         const { data: { publicUrl } } = supabase.storage
           .from('nid-files')
           .getPublicUrl(uploadedFileName);
         
         nidFileUrl = publicUrl;
-        console.log('📎 File URL:', nidFileUrl);
+        console.log(' File URL:', nidFileUrl);
       }
 
-      // Step 2: Insert into pending_technicians table
-      console.log('💾 Inserting technician data...');
+      // pending_technicians table
+      console.log(' Inserting technician data...');
       
       const { data: insertData, error: insertError } = await supabase
         .from('pending_technicians')
@@ -335,9 +332,9 @@ const Signup = () => {
         throw new Error('Database storage failed: ' + insertError.message);
       }
 
-      console.log('✅ Database insert successful:', insertData);
+      console.log(' Database insert successful:', insertData);
 
-      alert('🎉 Technician registration successful! All your data and documents have been saved. Please wait for admin verification. You will be notified once approved.');
+      alert(' Technician registration successful! All your data and documents have been saved. Please wait for admin verification. You will be notified when approved.');
       navigate('/login');
 
     } catch (error) {
