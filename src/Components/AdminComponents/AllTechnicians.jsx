@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { FaSearch } from "react-icons/fa";
 import { supabase } from "../../../supabaseClient";
-import Img from "../../assets/images/Image.png";
+import Img from "../../assets/images/image.png";
 
 export default function AllTechnicians() {
   const [technicians, setTechnicians] = useState([]);
