@@ -1,4 +1,4 @@
-import bannerImg from '../assets/images/banner.png';
+import bannerImg from '../assets/images/contactUs.png';
 import ContactForm from '../Components/ContactForm';
 import Footer from '../Components/Footer';
 import Header from '../Components/HeaderBanner';

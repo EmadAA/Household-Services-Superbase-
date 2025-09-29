@@ -4,8 +4,7 @@ import {
   FaInstagram,
   FaLinkedin,
   FaPhone,
-  FaTwitter,
-  FaVk,
+  FaTwitter
 } from "react-icons/fa";
 
 const SocialIcon = ({ icon, href, label }) => (
@@ -132,11 +131,7 @@ const ContactForm = () => {
                     href="#"
                     label="Instagram"
                   />
-                  <SocialIcon
-                    icon={<FaVk className="w-5 h-5" />}
-                    href="#"
-                    label="VK"
-                  />
+                  
                 </div>
               </div>
             </div>

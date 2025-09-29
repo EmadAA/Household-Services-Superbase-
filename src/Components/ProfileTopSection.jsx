@@ -23,13 +23,17 @@ export default function ProfileTopSection({ userData }) {
             </p>
             <p className="text-lg">
               <span className="font-semibold">Expertise</span>:{" "}
-              {userData.category
+              {(userData.category
                 ? userData.category.replace("_", " & ")
                 : userData.role === "technician"
                 ? "General Technician"
                 : userData.role === "admin"
                 ? "System Administrator"
-                : "User"}
+                : "Web Development").charAt(0).toUpperCase() + (userData.category
+                ? userData.category.replace("_", " & ")
+                : userData.role === "technician"
+                ? "General Technician"
+                : "Web Development").slice(1)}
             </p>
           </div>
           <div className="profile-info text-center md:text-left space-y-2">
