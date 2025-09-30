@@ -1,77 +1,108 @@
-import Slider from 'react-slick';
-import 'slick-carousel/slick/slick-theme.css';
-import 'slick-carousel/slick/slick.css';
-import AdilImg from '../assets/images/Adil.png';
+/* eslint-disable react-hooks/exhaustive-deps */
+import { useEffect, useState } from "react";
+import {
+  FaChevronLeft,
+  FaChevronRight,
+} from "react-icons/fa";
+import AdilImg from "../assets/images/Adil.png";
 import JW from "../assets/images/jw.jpeg";
 import KJH from "../assets/images/kjh.png";
 import Mukter from "../assets/images/mukter.jpg";
-import FISImg from '../assets/images/shuvon.png';
-import TeamMemberCard from '../Components/TeamMemberCard';
+import FISImg from "../assets/images/shuvon.png";
+import TeamMemberCard from "../Components/TeamMemberCard";
 
 const TeamSection = ({
-  title = 'Meet Our Team',
-  subtitle = 'We have an expert team',
+  title = "Meet Our Team",
+  subtitle = "We have an expert team",
   teamMembers = [
     {
-      name: 'Kaji Jahid Hasan',
-      role: 'Supervisor',
+      name: "Kaji Jahid Hasan",
+      role: "Supervisor",
       image: KJH,
-      socialLinks: { facebook: '#', linkedin: '#', instagram: '#', github: '#' },
+      socialLinks: { facebook: "#", linkedin: "#", instagram: "#", github: "#" },
     },
     {
-      name: 'Emad Uddin Adil',
-      role: 'Frontend Developer',
+      name: "Emad Uddin Adil",
+      role: "Frontend Developer",
       image: AdilImg,
-      socialLinks: { facebook: 'https://www.facebook.com/emad.adil.509', linkedin: 'https://www.linkedin.com/in/emad-uddin-adil-430851214/', instagram: 'https://www.instagram.com/adilemaduddin/', github: 'https://github.com/EmadAA' },
+      socialLinks: {
+        facebook: "https://www.facebook.com/emad.adil.509",
+        linkedin:
+          "https://www.linkedin.com/in/emad-uddin-adil-430851214/",
+        instagram: "https://www.instagram.com/adilemaduddin/",
+        github: "https://github.com/EmadAA",
+      },
     },
     {
-      name: 'Farhan Israk Shuvon',
-      role: 'Backend Developer',
+      name: "Farhan Israk Shuvon",
+      role: "Backend Developer",
       image: FISImg,
-      socialLinks: { facebook: 'https://www.facebook.com/farhanisrak.shuvon', linkedin: 'https://www.linkedin.com/in/farhan-israk-shuvon-630540287/', instagram: 'https://www.instagram.com/farhanshuvon?igsh=MWRnaHlqcmNyOXc2aQ==', github: 'https://github.com/FarhanShuvon' },
+      socialLinks: {
+        facebook: "https://www.facebook.com/farhanisrak.shuvon",
+        linkedin:
+          "https://www.linkedin.com/in/farhan-israk-shuvon-630540287/",
+        instagram:
+          "https://www.instagram.com/farhanshuvon?igsh=MWRnaHlqcmNyOXc2aQ==",
+        github: "https://github.com/FarhanShuvon",
+      },
     },
     {
-      name: 'Mukter Hussen',
-      role: 'Designer',
+      name: "Mukter Hussen",
+      role: "Designer",
       image: Mukter,
-      socialLinks: { facebook: 'https://www.facebook.com/mukterhussen.roki', linkedin: 'https://www.linkedin.com/', instagram: 'https://www.instagram.com/mukter_71?igsh=MXIwOXBqb3E1djVheg==', github: 'https://github.com/muk63' },
+      socialLinks: {
+        facebook: "https://www.facebook.com/mukterhussen.roki",
+        linkedin: "https://www.linkedin.com/",
+        instagram:
+          "https://www.instagram.com/mukter_71?igsh=MXIwOXBqb3E1djVheg==",
+        github: "https://github.com/muk63",
+      },
     },
     {
-      name: 'Testing',
-      role: 'Test',
+      name: "Testing",
+      role: "Test",
       image: JW,
-      socialLinks: { facebook: 'https://www.facebook.com/', linkedin: 'https://www.linkedin.com/', instagram: 'https://www.instagram.com/', github: 'https://www.github.com/' },
+      socialLinks: {
+        facebook: "https://www.facebook.com/",
+        linkedin: "https://www.linkedin.com/",
+        instagram: "https://www.instagram.com/",
+        github: "https://www.github.com/",
+      },
     },
   ],
-  sectionId = 'team',
+  sectionId = "team",
 }) => {
-  const settings = {
-    dots: true,
-    infinite: true,
-    speed: 800,
-    slidesToShow: 4, // default (desktop)
-    slidesToScroll: 1,
-    responsive: [
-      {
-        breakpoint: 1280, // below 1280px → show 3 slides
-        settings: {
-          slidesToShow: 3,
-        },
-      },
-      {
-        breakpoint: 1024, // below 1024px → show 2 slides
-        settings: {
-          slidesToShow: 2,
-        },
-      },
-      {
-        breakpoint: 640, // below 640px → show 1 slide
-        settings: {
-          slidesToShow: 1,
-        },
-      },
-    ],
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+
+  // Responsive slidesToShow
+  const slidesToShow =
+    window.innerWidth >= 1280
+      ? 4
+      : window.innerWidth >= 1024
+      ? 3
+      : window.innerWidth >= 640
+      ? 2
+      : 1;
+
+  const maxIndex = teamMembers.length - slidesToShow;
+
+  const nextSlide = () => {
+    setCurrentIndex((prev) => (prev >= maxIndex ? 0 : prev + 1));
   };
+
+  const prevSlide = () => {
+    setCurrentIndex((prev) => (prev <= 0 ? maxIndex : prev - 1));
+  };
+
+  // Autoplay every 3 sec
+  useEffect(() => {
+    if (isPaused) return;
+    const interval = setInterval(() => {
+      nextSlide();
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [isPaused, currentIndex]);
 
   return (
     <section
@@ -94,14 +125,60 @@ const TeamSection = ({
         </div>
 
         {/* Slider */}
-        <div className="px-2 sm:px-5">
-          <Slider {...settings}>
-            {teamMembers.map((member, index) => (
-              <div key={index} className="outline-none px-2 sm:px-3">
-                <TeamMemberCard {...member} />
-              </div>
+        <div
+          className="relative"
+          onMouseEnter={() => setIsPaused(true)}
+          onMouseLeave={() => setIsPaused(false)}
+        >
+          {/* Track */}
+          <div className="overflow-hidden">
+            <div
+              className="flex transition-transform duration-700 ease-in-out"
+              style={{
+                transform: `translateX(-${
+                  (100 / slidesToShow) * currentIndex
+                }%)`,
+                width: `${(teamMembers.length * 100) / slidesToShow}%`,
+              }}
+            >
+              {teamMembers.map((member, index) => (
+                <div
+                  key={index}
+                  className="px-2 sm:px-3"
+                  style={{ width: `${100 / teamMembers.length}%` }}
+                >
+                  <TeamMemberCard {...member} />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Arrows */}
+          <button
+            onClick={prevSlide}
+            className="absolute top-1/2 -left-4 sm:-left-6 transform -translate-y-1/2 bg-white p-2 rounded-full shadow hover:bg-teal-600 hover:text-white transition"
+          >
+            <FaChevronLeft />
+          </button>
+          <button
+            onClick={nextSlide}
+            className="absolute top-1/2 -right-4 sm:-right-6 transform -translate-y-1/2 bg-white p-2 rounded-full shadow hover:bg-teal-600 hover:text-white transition"
+          >
+            <FaChevronRight />
+          </button>
+
+          {/* Dots */}
+          <div className="flex justify-center mt-6 space-x-2">
+            {Array.from({ length: maxIndex + 1 }).map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setCurrentIndex(i)}
+                className={`w-3 h-3 rounded-full ${
+                  i === currentIndex ? "bg-teal-600" : "bg-gray-300"
+                }`}
+              ></button>
             ))}
-          </Slider>
+          </div>
         </div>
       </div>
     </section>
