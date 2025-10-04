@@ -1,39 +1,36 @@
 import { useState } from "react";
 import { FaFacebook, FaGithub, FaInstagram, FaLinkedin } from "react-icons/fa";
 
-const TeamMemberCard = ({
+// TeamMemberCard Component
+export default function TeamMemberCard({
   name,
   role,
   image,
   socialLinks = { facebook: "", linkedin: "", instagram: "", github: "#" },
   showSocialIcons = true,
-}) => {
+}) {
   const [isLoaded, setIsLoaded] = useState(false);
 
   return (
     <div className="group relative h-full">
-      {/* Card Container */}
       <div className="relative rounded-xl overflow-hidden shadow-md transition-all duration-300 hover:shadow-xl transform hover:-translate-y-2 bg-white p-3 sm:p-4 h-full flex flex-col">
-        {/* Profile Image */}
-        <div className="mb-3 sm:mb-4">
+        <div className="mb-3 sm:mb-4 aspect-[3/4] overflow-hidden rounded-lg">
           <img
             src={image}
             alt={name}
             onLoad={() => setIsLoaded(true)}
-            className={`w-full h-64 object-cover object-center rounded-lg transition-opacity duration-300 ${
+            className={`w-full h-full object-cover object-center transition-opacity duration-300 ${
               isLoaded ? "opacity-100" : "opacity-0"
             }`}
           />
         </div>
 
-        {/* Member Info */}
         <div className="text-center flex-1 flex flex-col">
           <h3 className="font-bold text-gray-800 text-base sm:text-lg">
             {name}
           </h3>
           <p className="text-xs sm:text-sm text-teal-600 mb-3">{role}</p>
 
-          {/* Social Icons */}
           {showSocialIcons && (
             <div className="mt-auto flex justify-center space-x-3 sm:space-x-4 pt-2">
               {socialLinks.facebook && (
@@ -84,4 +81,3 @@ const TeamMemberCard = ({
   );
 };
 
-export default TeamMemberCard;

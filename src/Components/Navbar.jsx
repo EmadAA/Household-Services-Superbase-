@@ -1,9 +1,14 @@
 // Navbar.jsx
 import { useEffect, useRef, useState } from "react";
-import { FaBars, FaSearch, FaSignInAlt, FaSignOutAlt, FaTimes } from "react-icons/fa";
+import {
+  FaBars,
+  FaSearch,
+  FaSignInAlt,
+  FaSignOutAlt,
+  FaTimes,
+} from "react-icons/fa";
 import { NavLink, useNavigate } from "react-router-dom";
 import { supabase } from "../../supabaseClient";
-
 
 export default function Navbar() {
   const navigate = useNavigate();
@@ -13,13 +18,13 @@ export default function Navbar() {
   const menuRef = useRef(null);
   const searchRef = useRef(null);
 
-  // Check user role 
+  // ✅ Check user role
   useEffect(() => {
     const checkUserRole = () => {
-      const role = localStorage.getItem('userRole');
-      const isLoggedIn = localStorage.getItem('isLoggedIn');
-      
-      if (isLoggedIn === 'true') {
+      const role = localStorage.getItem("userRole");
+      const isLoggedIn = localStorage.getItem("isLoggedIn");
+
+      if (isLoggedIn === "true") {
         setUserRole(role);
       } else {
         setUserRole(null);
@@ -27,16 +32,14 @@ export default function Navbar() {
     };
 
     checkUserRole();
+    window.addEventListener("storage", checkUserRole);
 
-    // Listen for storage changes (when user logs in/out in another tab)
-    window.addEventListener('storage', checkUserRole);
-    
     return () => {
-      window.removeEventListener('storage', checkUserRole);
+      window.removeEventListener("storage", checkUserRole);
     };
   }, []);
 
-  // Closing menu
+  // ✅ Close menu & search when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
@@ -49,29 +52,32 @@ export default function Navbar() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-  const handleLogin= () =>{
+
+  const handleLogin = () => {
     setIsMenuOpen(false);
     navigate("/login");
-  }
+  };
+
   const handleLogout = async () => {
     try {
       const { error } = await supabase.auth.signOut();
-          if (error) {
-            console.error('Logout error:', error);
-          }
-          navigate('/login');
-        } catch (error) {
-          console.error('Logout failed:', error);
-        }
-   
-    localStorage.removeItem('userRole');
-    localStorage.removeItem('adminId');
-    localStorage.removeItem('adminEmail');
-    localStorage.removeItem('adminName');
-    localStorage.removeItem('userId');
-    localStorage.removeItem('userEmail');
-    localStorage.removeItem('isLoggedIn');
-    
+      if (error) {
+        console.error("Logout error:", error);
+      }
+      navigate("/login");
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+
+    // Clear localStorage
+    localStorage.removeItem("userRole");
+    localStorage.removeItem("adminId");
+    localStorage.removeItem("adminEmail");
+    localStorage.removeItem("adminName");
+    localStorage.removeItem("userId");
+    localStorage.removeItem("userEmail");
+    localStorage.removeItem("isLoggedIn");
+
     setIsMenuOpen(false);
     setUserRole(null);
     navigate("/login");
@@ -81,7 +87,7 @@ export default function Navbar() {
     navigate("/home");
   };
 
-  //navigation links
+  // ✅ Navigation Links
   const getNavLinks = () => {
     const baseLinks = [
       { name: "HOME", path: "/home", end: true },
@@ -89,19 +95,14 @@ export default function Navbar() {
       { name: "SERVICE", path: "/services" },
     ];
 
-  // Dynamic navigation (for admin, it will navigate to the AdminDashboard Page)
-    if (userRole === 'admin') {
+    if (userRole === "admin") {
       baseLinks.push({ name: "PROFILE", path: "/admindashboard" });
-    } else if (userRole === 'technician') {
-      baseLinks.push({ name: "PROFILE", path: "/profile" });
-    } else if (userRole === 'user') {
-      baseLinks.push({ name: "PROFILE", path: "/profile" });
     } else {
       baseLinks.push({ name: "PROFILE", path: "/profile" });
     }
 
     baseLinks.push({ name: "CONTACT", path: "/contact" });
-    
+
     return baseLinks;
   };
 
@@ -111,11 +112,13 @@ export default function Navbar() {
     <NavLink
       to={item.path}
       end={item.end}
-      className={({ isActive }) => `${
-        isActive ? "text-teal-600 font-bold" : "text-gray-800"
-      } font-medium hover:text-teal-400 transition block text-center ${
-        item.name === "PROFILE" ? "text-gray-600 font-semibold" : ""
-      }`}
+      className={({ isActive }) =>
+        `${
+          isActive ? "text-teal-600 font-bold" : "text-gray-800"
+        } font-medium hover:text-teal-400 transition block text-center ${
+          item.name === "PROFILE" ? "text-gray-600 font-semibold" : ""
+        }`
+      }
       onClick={onClick}
     >
       {item.name}
@@ -125,34 +128,35 @@ export default function Navbar() {
   return (
     <div className="sticky top-0 z-50">
       <nav className="bg-white/95 backdrop-blur-md py-4 shadow-md">
-        <div className="max-w-[1400px] mx-auto flex justify-between items-center px-5">
-          {/* Logo */}
+        <div className="max-w-[1400px] mx-auto flex justify-between items-center px-4 sm:px-5">
+          {/* ✅ Logo */}
           <div
-            className="flex items-center gap-2 text-2xl font-bold text-gray-800 cursor-pointer"
+            className="flex items-center gap-2 text-lg sm:text-xl lg:text-2xl font-bold text-gray-800 cursor-pointer flex-shrink-0"
             onClick={handleLogoClick}
             aria-label="Go to home"
           >
-            <div className="w-10 h-10 bg-gradient-to-r from-teal-500 to-teal-600 rounded-full flex items-center justify-center text-white text-lg">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-teal-500 to-teal-600 rounded-full flex items-center justify-center text-white text-sm sm:text-lg flex-shrink-0">
               ✓
             </div>
-            Household Service
+            <span className="hidden sm:inline">Household Service</span>
+            <span className="sm:hidden">H.Service</span>
           </div>
 
-          {/* Search Bar */}
+          {/* ✅ Search Bar */}
           {showSearch ? (
-            <div ref={searchRef} className="flex-1 px-5">
+            <div ref={searchRef} className="flex-1 px-2 sm:px-5 max-w-md">
               <input
                 type="text"
                 placeholder="Search..."
-                className="w-full border border-gray-300 rounded-full px-4 py-2 outline-none focus:ring-2 focus:ring-teal-500"
+                className="w-full border border-gray-300 rounded-full px-4 py-2 text-sm sm:text-base outline-none focus:ring-2 focus:ring-teal-500"
                 autoFocus
                 onBlur={() => setShowSearch(false)}
               />
             </div>
           ) : (
             <>
-              {/* Desktop Menu */}
-              <ul className="hidden md:flex gap-8 list-none">
+              {/* ✅ Desktop Menu */}
+              <ul className="hidden md:flex gap-4 lg:gap-8 list-none">
                 {navLinks.map((item) => (
                   <li key={item.path}>
                     <NavItem item={item} />
@@ -160,8 +164,8 @@ export default function Navbar() {
                 ))}
               </ul>
 
-              {/* Desktop Right Side */}
-              <div className="hidden md:flex items-center gap-5">
+              {/* ✅ Desktop Right Side */}
+              <div className="hidden md:flex items-center gap-3 lg:gap-5">
                 <button
                   className="text-gray-600 text-lg"
                   onClick={() => setShowSearch(true)}
@@ -170,39 +174,41 @@ export default function Navbar() {
                   <FaSearch />
                 </button>
 
-               
-
+                {/* ✅ Helpline link FIXED */}
                 <a
                   href="tel:+8801676480060"
-                  className="bg-gradient-to-r from-teal-500 to-teal-600 text-white px-5 py-3 rounded-full flex items-center gap-2 text-sm font-medium hover:bg-teal-700 transition"
+                  className="bg-gradient-to-r from-teal-500 to-teal-600 text-white px-3 lg:px-5 py-2 lg:py-3 rounded-full flex items-center gap-2 text-xs lg:text-sm font-medium hover:bg-teal-700 transition whitespace-nowrap"
                 >
-                  Helpline +880 1676 480060
+                  <span className="hidden lg:inline">
+                    Helpline +880 1676 480060
+                  </span>
+                  <span className="lg:hidden">+880 1676 480060</span>
                 </a>
 
                 {userRole ? (
                   <button
                     onClick={handleLogout}
-                    className="flex items-center gap-2 px-4 py-2 text-red-600 hover:text-red-500 font-medium transition border border-red-300 rounded-lg hover:bg-red-50"
+                    className="flex items-center gap-2 px-3 lg:px-4 py-2 text-red-600 hover:text-red-500 font-medium transition border border-red-300 rounded-lg hover:bg-red-50 text-sm"
                   >
                     <FaSignOutAlt />
-                    <span>Sign Out</span>
+                    <span className="hidden lg:inline">Sign Out</span>
                   </button>
                 ) : (
                   <NavLink
                     to="/login"
-                     className="flex items-center gap-2 px-4 py-2 text-teal-600 hover:text-teal-500 font-medium transition border border-teal-300 rounded-lg hover:bg-teal-50"
+                    className="flex items-center gap-2 px-3 lg:px-4 py-2 text-teal-600 hover:text-teal-500 font-medium transition border border-teal-300 rounded-lg hover:bg-teal-50 text-sm"
                   >
                     <FaSignInAlt />
-                    Sign In
+                    <span className="hidden lg:inline">Sign In</span>
                   </NavLink>
                 )}
               </div>
 
-              {/* Mobile menu Hamburger */}
-              <div className="md:hidden flex items-center gap-4">
+              {/* ✅ Mobile menu Hamburger */}
+              <div className="md:hidden flex items-center gap-3 sm:gap-4">
                 <button
                   onClick={() => setShowSearch(true)}
-                  className="text-gray-600 text-xl"
+                  className="text-gray-600 text-lg sm:text-xl"
                   aria-label="Search"
                 >
                   <FaSearch />
@@ -213,9 +219,9 @@ export default function Navbar() {
                   aria-label={isMenuOpen ? "Close menu" : "Open menu"}
                 >
                   {isMenuOpen ? (
-                    <FaTimes className="h-6 w-6" />
+                    <FaTimes className="h-5 w-5 sm:h-6 sm:w-6" />
                   ) : (
-                    <FaBars className="h-6 w-6" />
+                    <FaBars className="h-5 w-5 sm:h-6 sm:w-6" />
                   )}
                 </button>
               </div>
@@ -223,14 +229,12 @@ export default function Navbar() {
           )}
         </div>
 
-        {/* Mobile Dropdown menu*/}
+        {/* ✅ Mobile Dropdown menu */}
         {isMenuOpen && (
           <div
             ref={menuRef}
             className="md:hidden bg-white border-t border-gray-200 px-5 py-4 space-y-4 shadow-lg animate-fadeIn"
           >
-            
-
             <ul className="space-y-3">
               {navLinks.map((item) => (
                 <li key={item.path}>
@@ -239,7 +243,6 @@ export default function Navbar() {
               ))}
             </ul>
 
-            
             <div className="flex justify-center">
               {userRole ? (
                 <button
@@ -250,7 +253,6 @@ export default function Navbar() {
                   <span>Logout</span>
                 </button>
               ) : (
-                
                 <button
                   onClick={handleLogin}
                   className="flex items-center gap-2 px-4 py-2 text-teal-600 hover:text-teal-500 font-medium transition"
