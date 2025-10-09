@@ -1,4 +1,3 @@
- 
 import { useEffect, useState } from "react";
 import { FaSearch } from "react-icons/fa";
 import { supabase } from "../../../supabaseClient";
@@ -88,114 +87,132 @@ export default function AllUsers() {
     setSearchTerm(e.target.value);
   };
 
- const deleteUser = async (userId, userName) => {
-  const confirmDelete = window.confirm(
-    `Are you sure you want to delete ${userName}'s account?\n\n` +
-    `This will:\n` +
-    `• Remove the user from the database\n` +
-    `• Delete their authentication account\n` +
-    `• This action cannot be undone\n\n` +
-    `Type "DELETE" to confirm:`
-  );
-  
-  if (!confirmDelete) return;
-  
-  // Additional confirmation
-  const typeConfirm = window.prompt(`To permanently delete ${userName}'s account, type "DELETE" (all caps):`);
-  if (typeConfirm !== "DELETE") {
-    alert("Deletion cancelled - confirmation text didn't match.");
-    return;
-  }
+  const deleteUser = async (userId, userName) => {
+    const confirmDelete = window.confirm(
+      `Are you sure you want to delete ${userName}'s account?\n\n` +
+        `This will:\n` +
+        `• Remove the user from the database\n` +
+        `• Delete their authentication account\n` +
+        `• This action cannot be undone\n\n` +
+        `Type "DELETE" to confirm:`
+    );
 
-  setDeleting(userId);
+    if (!confirmDelete) return;
 
-  try {
-    console.log('🗑️ Starting user deletion process for ID:', userId);
-    
-    // Step 1: Get user data first to verify it exists
-    const { data: userData, error: fetchError } = await supabase
-      .from('users')
-      .select('*')
-      .eq('id', userId)
-      .single();
-
-    console.log('👤 User data fetched:', userData);
-    console.log('❌ Fetch error:', fetchError);
-
-    if (fetchError) {
-      if (fetchError.code === 'PGRST116') {
-        throw new Error('User not found or access denied due to database policies');
-      }
-      throw new Error('Failed to fetch user data: ' + fetchError.message);
+    // Additional confirmation
+    const typeConfirm = window.prompt(
+      `To permanently delete ${userName}'s account, type "DELETE" (all caps):`
+    );
+    if (typeConfirm !== "DELETE") {
+      alert("Deletion cancelled - confirmation text didn't match.");
+      return;
     }
 
-    if (!userData) {
-      throw new Error('User not found in database');
-    }
+    setDeleting(userId);
 
-    console.log('✅ User found, proceeding with deletion...');
-
-    // Step 2: Try to delete from users table first
-    console.log('🗑️ Attempting to delete from users table...');
-    
-    const { error: deleteError, count } = await supabase
-      .from('users')
-      .delete({ count: 'exact' })
-      .eq('id', userId);
-
-    console.log('Delete result:', { deleteError, count });
-
-    if (deleteError) {
-      console.error('❌ Delete error:', deleteError);
-      
-      if (deleteError.message.includes('row-level security')) {
-        throw new Error('Access denied: Unable to delete user due to database security policies. Please contact system administrator.');
-      } else if (deleteError.code === 'PGRST116') {
-        throw new Error('User deletion blocked by database policies');
-      } else {
-        throw new Error('Failed to delete user: ' + deleteError.message);
-      }
-    }
-
-    if (count === 0) {
-      console.warn('⚠️ No rows were deleted - user may not exist or may already be deleted');
-      throw new Error('No user was deleted - user may not exist or may already be removed');
-    }
-
-    console.log(`✅ Successfully deleted ${count} user record(s)`);
-
-    // Step 3: Also try to delete from auth.users (this might fail silently due to permissions)
     try {
-      console.log('🔐 Attempting to delete auth user...');
-      const { error: authDeleteError } = await supabase.auth.admin.deleteUser(userId);
-      
-      if (authDeleteError) {
-        console.log('⚠️ Auth delete error (may be expected):', authDeleteError);
-        // Don't fail the whole operation if auth delete fails
-      } else {
-        console.log('✅ Auth user deleted successfully');
+      console.log("🗑️ Starting user deletion process for ID:", userId);
+
+      // Step 1: Get user data first to verify it exists
+      const { data: userData, error: fetchError } = await supabase
+        .from("users")
+        .select("*")
+        .eq("id", userId)
+        .single();
+
+      console.log("👤 User data fetched:", userData);
+      console.log("❌ Fetch error:", fetchError);
+
+      if (fetchError) {
+        if (fetchError.code === "PGRST116") {
+          throw new Error(
+            "User not found or access denied due to database policies"
+          );
+        }
+        throw new Error("Failed to fetch user data: " + fetchError.message);
       }
-    } catch (authError) {
-      console.log('⚠️ Auth deletion failed (may be expected due to permissions):', authError);
-      // Continue - the main database deletion succeeded
+
+      if (!userData) {
+        throw new Error("User not found in database");
+      }
+
+      console.log("✅ User found, proceeding with deletion...");
+
+      // Step 2: Try to delete from users table first
+      console.log("🗑️ Attempting to delete from users table...");
+
+      const { error: deleteError, count } = await supabase
+        .from("users")
+        .delete({ count: "exact" })
+        .eq("id", userId);
+
+      console.log("Delete result:", { deleteError, count });
+
+      if (deleteError) {
+        console.error("❌ Delete error:", deleteError);
+
+        if (deleteError.message.includes("row-level security")) {
+          throw new Error(
+            "Access denied: Unable to delete user due to database security policies. Please contact system administrator."
+          );
+        } else if (deleteError.code === "PGRST116") {
+          throw new Error("User deletion blocked by database policies");
+        } else {
+          throw new Error("Failed to delete user: " + deleteError.message);
+        }
+      }
+
+      if (count === 0) {
+        console.warn(
+          "⚠️ No rows were deleted - user may not exist or may already be deleted"
+        );
+        throw new Error(
+          "No user was deleted - user may not exist or may already be removed"
+        );
+      }
+
+      console.log(`✅ Successfully deleted ${count} user record(s)`);
+
+      // Step 3: Also try to delete from auth.users (this might fail silently due to permissions)
+      try {
+        console.log("🔐 Attempting to delete auth user...");
+        const { error: authDeleteError } = await supabase.auth.admin.deleteUser(
+          userId
+        );
+
+        if (authDeleteError) {
+          console.log(
+            "⚠️ Auth delete error (may be expected):",
+            authDeleteError
+          );
+          // Don't fail the whole operation if auth delete fails
+        } else {
+          console.log("✅ Auth user deleted successfully");
+        }
+      } catch (authError) {
+        console.log(
+          "⚠️ Auth deletion failed (may be expected due to permissions):",
+          authError
+        );
+        // Continue - the main database deletion succeeded
+      }
+
+      alert(
+        `✅ ${userName}'s account has been successfully deleted from the database.`
+      );
+
+      // Step 4: Refresh the list
+      console.log("🔄 Refreshing user list...");
+      await fetchUsers();
+    } catch (error) {
+      console.error("💥 Delete operation failed:", error);
+      alert(`❌ Failed to delete user: ${error.message}`);
+    } finally {
+      setDeleting(null);
     }
+  };
 
-    alert(`✅ ${userName}'s account has been successfully deleted from the database.`);
-    
-    // Step 4: Refresh the list
-    console.log('🔄 Refreshing user list...');
-    await fetchUsers();
-
-  } catch (error) {
-    console.error('💥 Delete operation failed:', error);
-    alert(`❌ Failed to delete user: ${error.message}`);
-  } finally {
-    setDeleting(null);
-  }
-};
-
-
-//for additional info
+  //for additional info
   // const formatDate = (dateString) => {
   //   return new Date(dateString).toLocaleDateString("en-US", {
   //     year: "numeric",
@@ -260,12 +277,12 @@ export default function AllUsers() {
               id="search"
               value={searchTerm}
               onChange={handleSearchChange}
-              className="w-full rounded-lg border border-gray-300 bg-gray-50 py-3 pl-10 pr-2 text-sm text-gray-900 focus:border-teal-500 focus:ring-teal-500"
-              placeholder="Search by name, email, or mobile..."
+              className="w-full rounded-lg border border-gray-300 bg-gray-50 py-3 pl-10 pr-24 sm:pr-28 text-sm text-gray-900 focus:border-teal-500 focus:ring-teal-500 placeholder:text-xs sm:placeholder:text-sm"
+              placeholder="Search by name, email, mobile..."
             />
             <button
               type="submit"
-              className="absolute right-2.5 bottom-2.5 rounded-lg bg-teal-700 px-4 py-1.5 text-sm font-medium text-white hover:bg-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-300"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-lg bg-teal-700 px-4 py-1.5 text-sm font-medium text-white hover:bg-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-300"
             >
               Search
             </button>

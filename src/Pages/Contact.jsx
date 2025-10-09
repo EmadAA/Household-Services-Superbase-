@@ -8,7 +8,7 @@ export default function Contact() {
   return (
     <div>
       <Navbar />
-      <Header title="Contact Us" BannerImage={bannerImg} />
+      <Header title="CONTACT US" BannerImage={bannerImg} />
       <ContactForm />
       <Footer />
     </div>

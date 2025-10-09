@@ -68,7 +68,7 @@ const ContactForm = () => {
             <div className="mb-8">
               <div className="flex items-center mb-2">
                 <div className="w-16 h-0.5 bg-teal-600 mr-2"></div>
-                <span className="text-sm font-semibold text-teal-600 uppercase">
+                <span className="text-lg font-semibold text-teal-600 uppercase">
                   CONTACT US
                 </span>
               </div>
@@ -98,13 +98,13 @@ const ContactForm = () => {
               </div>
             </div>
 
-            {/* Careers */}
+            {/* email */}
             <div className="flex items-start mb-4">
               <div className="w-12 h-12 bg-teal-600 rounded-full flex items-center justify-center text-white mr-4">
                 <FaEnvelope className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="font-semibold text-gray-800">CAREERS:</h3>
+                <h3 className="font-semibold text-gray-800">Email Support:</h3>
                 <p className="text-gray-600">household@info.com</p>
               </div>
             </div>

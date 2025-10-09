@@ -39,7 +39,7 @@ export default function Navbar() {
     };
   }, []);
 
-  // ✅ Close menu & search when clicking outside
+  //  Close menu & search when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
@@ -87,7 +87,7 @@ export default function Navbar() {
     navigate("/home");
   };
 
-  // ✅ Navigation Links
+  // Navigation Links
   const getNavLinks = () => {
     const baseLinks = [
       { name: "HOME", path: "/home", end: true },
@@ -138,8 +138,8 @@ export default function Navbar() {
             <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-teal-500 to-teal-600 rounded-full flex items-center justify-center text-white text-sm sm:text-lg flex-shrink-0">
               ✓
             </div>
-            <span className="hidden sm:inline">Household Service</span>
-            <span className="sm:hidden">H.Service</span>
+            <span className="hidden sm:inline">Household Services</span>
+            <span className="sm:hidden">H.Services</span>
           </div>
 
           {/* ✅ Search Bar */}

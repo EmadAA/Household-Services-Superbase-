@@ -11,10 +11,10 @@ import TeamSection from "../Components/TeamSection";
 const HomePage = () => {
   return (
     <div className="min-h-screen font-sans">
-      {/* ✅ Sticky Navbar */}
+      {/*Sticky Navbar */}
       <Navbar />
 
-      {/* ✅ Hero Section */}
+      {/* Hero Section */}
       <section className=" relative min-h-[70vh] sm:min-h-[80vh] flex items-center bg-gradient-to-br from-gray-800 to-gray-600 overflow-hidden">
         {/* Floating Icons */}
         <FloatingIcons />
@@ -41,11 +41,15 @@ const HomePage = () => {
                 <span>Get Pricing</span>
                 <HiArrowNarrowRight className="w-5 h-5 ml-2" />
               </Link>
+              
               <button
                 aria-label="Play video"
                 className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-r from-teal-500 to-teal-600 text-white text-lg sm:text-xl hover:scale-110 transition flex items-center justify-center"
               >
-                ▶
+                {/* just a link, nothing else */}
+                <a href="https://www.youtube.com/" target="_blank" rel="noopener noreferrer">
+                  ▶
+                </a>
               </button>
             </div>
           </div>

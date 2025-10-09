@@ -11,7 +11,7 @@ export default function Services() {
   return (
     <div>
          <Navbar />
-      <HeaderBanner title="Services" BannerImage={BannerImage} />
+      <HeaderBanner title="SERVICES" BannerImage={BannerImage} />
       {/* Service Gig  Card */}
       <ServiceSlider />
       {/* Testimonial Section */}
