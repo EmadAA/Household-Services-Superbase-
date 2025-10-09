@@ -70,7 +70,7 @@ const HomePage = () => {
         <div className="absolute bottom-0 left-0 w-full h-14 sm:h-16 md:h-20 bg-white rounded-t-full"></div>
       </section>
 
-      {/* ✅ Services Cards */}
+      {/* Services Cards */}
       <section className="py-12 sm:py-16 bg-teal-50">
         <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-8 sm:mb-10">
@@ -82,19 +82,19 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* ✅ Pricing Section */}
+      {/*Pricing Section */}
       <section>
         <PriceContact />
       </section>
 
-      {/* ✅ Team Section Slider */}
+      {/*Team Section Slider */}
       <section className="py-12 sm:py-16 bg-teal-50 px-4 sm:px-6 lg:px-8">
         <div className="max-w-screen-xl mx-auto">
           <TeamSection />
         </div>
       </section>
 
-      {/* ✅ Footer */}
+      {/* Footer */}
       <Footer />
     </div>
   );
