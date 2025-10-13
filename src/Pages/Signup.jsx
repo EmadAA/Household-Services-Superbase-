@@ -335,7 +335,7 @@ const Signup = () => {
       console.log(' Database insert successful:', insertData);
 
       alert(' Technician registration successful! All your data and documents have been saved. Please wait for admin verification. You will be notified when approved.');
-      navigate('/login');
+      navigate('/registration-complete');
 
     } catch (error) {
       console.error('Technician signup error:', error);
