@@ -46,7 +46,7 @@ export default function AdminDashBoard() {
       setAdminData(formattedAdminData);
 
     } catch (error) {
-      console.error("Error fetching admin profile:", error);
+      // console.error("Error fetching admin profile:", error);
       alert("Failed to load admin profile: " + error.message);
     } finally {
       setLoading(false);

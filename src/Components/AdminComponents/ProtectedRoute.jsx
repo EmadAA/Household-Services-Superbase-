@@ -13,7 +13,7 @@ export default function ProtectedRoute({ children }) {
         const { data: { session } } = await supabase.auth.getSession();
         
         if (!session?.user) {
-          // No user → redirect to login
+          // No user , then redirect to login
           navigate('/login', { replace: true });
           return;
         }

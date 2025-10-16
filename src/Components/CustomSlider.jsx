@@ -2,7 +2,6 @@
 import { useEffect, useState } from "react";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 
-// Custom Slider Component
 export default function CustomSlider({ children, autoplay = true, autoplaySpeed = 3000 }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [slidesToShow, setSlidesToShow] = useState(4);
@@ -11,9 +10,9 @@ export default function CustomSlider({ children, autoplay = true, autoplaySpeed 
   const [touchEnd, setTouchEnd] = useState(0);
 
   const totalSlides = children.length;
-  const minSwipeDistance = 50; // Minimum distance for a swipe
+  const minSwipeDistance = 50; // Minimum distance for swapping a slide
 
-  // Handle responsive slides
+  // Handle responsive slides for different screen 
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth < 640) {
@@ -48,7 +47,7 @@ export default function CustomSlider({ children, autoplay = true, autoplaySpeed 
     setIsTransitioning(true);
     setCurrentIndex((prev) => {
       const next = prev + 1;
-      // Loop back to start if we've gone past the end
+      // Loop back to start when we reach the end
       return next >= totalSlides ? 0 : next;
     });
     setTimeout(() => setIsTransitioning(false), 600);
@@ -59,7 +58,7 @@ export default function CustomSlider({ children, autoplay = true, autoplaySpeed 
     setIsTransitioning(true);
     setCurrentIndex((prev) => {
       const previous = prev - 1;
-      // Loop to end if we go before the start
+      // Loop back to end when we reach the start
       return previous < 0 ? totalSlides - 1 : previous;
     });
     setTimeout(() => setIsTransitioning(false), 600);
@@ -72,7 +71,7 @@ export default function CustomSlider({ children, autoplay = true, autoplaySpeed 
     setTimeout(() => setIsTransitioning(false), 600);
   };
 
-  // Create extended array with duplicates for infinite loop effect
+  // Create extended array with duplicates for infinite loop 
   const extendedChildren = [
     ...children.slice(-slidesToShow), // Add last slides at the beginning
     ...children,

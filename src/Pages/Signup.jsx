@@ -124,7 +124,7 @@ const Signup = () => {
   const checkUniqueness = async (field, value) => {
     try {
       console.log(` Checking uniqueness for ${field}: ${value}`);
-      
+      //rpc= Remote Procedure Call, ready made function in supabase
       const { data, error } = await supabase.rpc('check_field_uniqueness', {
         field_name: field,
         field_value: value
@@ -135,7 +135,7 @@ const Signup = () => {
         return false;
       }
 
-      console.log(`Uniqueness check result for ${field}:`, data);
+      // console.log(`Uniqueness check result for ${field}:`, data);
       return data; 
       
     } catch (error) {
@@ -150,7 +150,7 @@ const Signup = () => {
     setErrors({});
 
     try {
-      console.log('🚀 Starting registration process...');
+      // console.log(' Starting registration process...');
       
       // Validate all fields 
       const isEmailValid = validateEmail(formData.email);
@@ -176,7 +176,7 @@ const Signup = () => {
       }
 
       if (!isEmailValid || !isMobileValid || !isPasswordValid || !isConfirmPasswordValid || !isNIDValid) {
-        console.log('❌ Validation failed');
+        // console.log(' Validation failed');
         setLoading(false);
         return;
       }
@@ -188,7 +188,7 @@ const Signup = () => {
         setLoading(false);
         return;
       }
-      // email uniqueness checks
+      // mobile num uniqueness checks
       const isMobileUnique = await checkUniqueness('mobile', formData.mobile);
       if (!isMobileUnique) {
         setErrors(prev => ({ ...prev, mobile: "This mobile number is already registered. Please use a different mobile number." }));
@@ -206,7 +206,7 @@ const Signup = () => {
         }
       }
 
-      console.log(' All uniqueness checks done, proceeding with registration...');
+      // console.log(' All uniqueness checks done, proceeding with registration...');
 
       // Proceed for registration
       if (formData.role === 'user') {
@@ -216,7 +216,7 @@ const Signup = () => {
       }
 
     } catch (error) {
-      console.error('💥 Registration error:', error);
+      console.error('Registration error:', error);
       alert('Registration failed: ' + error.message);
     } finally {
       setLoading(false);
@@ -224,7 +224,7 @@ const Signup = () => {
   };
 
   const handleUserSignup = async () => {
-    console.log(' Creating user account...');
+    console.log(' Creating user account');
     
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email: formData.email,
@@ -250,7 +250,7 @@ const Signup = () => {
     }
 
     if (authData.user) {
-      console.log(' User registered successfully');
+      // console.log(' User registered successfully');
       alert('Registration successful! Please check your email and confirm your account.');
       navigate('/login');
     }
@@ -258,7 +258,7 @@ const Signup = () => {
 
   const handleTechnicianSignup = async () => {
     try {
-      console.log(' Creating technician registration...');
+      console.log(' Creating technician registration');
       
       let nidFileUrl = null;
       let uploadedFileName = null;
@@ -268,7 +268,7 @@ const Signup = () => {
         const fileExt = formData.nidFile.name.split('.').pop();
         uploadedFileName = `technician_${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
 
-        console.log('Uploading file:', uploadedFileName);
+        // console.log('Uploading file:', uploadedFileName);
         
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('nid-files')
@@ -286,7 +286,7 @@ const Signup = () => {
           .getPublicUrl(uploadedFileName);
         
         nidFileUrl = publicUrl;
-        console.log(' File URL:', nidFileUrl);
+        // console.log(' File URL:', nidFileUrl);
       }
 
       // pending_technicians table
@@ -312,7 +312,7 @@ const Signup = () => {
         console.error('Database insert error:', insertError);
         
         if (uploadedFileName) {
-          console.log('🧹 Cleaning up uploaded file...');
+          // console.log(' Cleaning up uploaded file');
           await supabase.storage.from('nid-files').remove([uploadedFileName]);
         }
         
@@ -342,7 +342,7 @@ const Signup = () => {
       throw error;
     }
   };
-
+ 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100 p-4">
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-4xl">

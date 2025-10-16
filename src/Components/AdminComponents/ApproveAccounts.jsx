@@ -21,9 +21,9 @@ export default function ApproveGigs() {
 
       if (error) throw error;
       setPendingTechnicians(data || []);
-      console.log('📊 Fetched pending technicians:', data?.length || 0);
+      // console.log(' Fetched pending technicians:', data?.length || 0);
     } catch (error) {
-      console.error('Error fetching pending technicians:', error);
+      // console.error('Error fetching pending technicians:', error);
       alert('Error loading data: ' + error.message);
     } finally {
       setLoading(false);
@@ -34,10 +34,9 @@ export default function ApproveGigs() {
     setProcessingId(pendingTech.id);
     
     try {
-      console.log('🚀 Starting approval for:', pendingTech.fullname, 'ID:', pendingTech.id);
+      // console.log('Starting approval for:', pendingTech.fullname, 'ID:', pendingTech.id);
       
-      // Step 1: Create auth user account
-      console.log('📝 Creating Supabase auth user...');
+      // console.log(' Creating Supabase auth user...');
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: pendingTech.email,
         password: pendingTech.password,
@@ -55,66 +54,64 @@ export default function ApproveGigs() {
       });
 
       if (authError) {
-        console.error('❌ Auth signup error:', authError);
+        // console.error(' Auth signup error:', authError);
         throw new Error(`Failed to create user account: ${authError.message}`);
       }
 
-      console.log('✅ Auth user created successfully:', authData.user?.id);
+      console.log(' Auth user created successfully:', authData.user?.id);
       
-      // Step 2: Wait for database trigger to complete
-      console.log('⏳ Waiting for database trigger to add to technicians table...');
+      console.log(' Waiting for database trigger to add to technicians table...');
       await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds
 
-      // Step 3: NOW DELETE from pending_technicians table
-      console.log('🗑️ Attempting to delete from pending_technicians table...');
-      console.log('🔍 Deleting record with ID:', pendingTech.id);
+      console.log(' Attempting to delete from pending_technicians table...');
+      console.log(' Deleting record with ID:', pendingTech.id);
       
       const { error: deleteError, count } = await supabase
         .from('pending_technicians')
         .delete({ count: 'exact' })
         .eq('id', pendingTech.id);
 
-      console.log('🔍 Delete operation result:', { deleteError, count });
+      console.log(' Delete operation result:', { deleteError, count });
 
       if (deleteError) {
-        console.error('❌ Delete error details:', deleteError);
+        console.error(' Delete error details:', deleteError);
         
         // Try to update status instead of delete as a fallback
-        console.log('⚠️ Delete failed, trying to update status...');
+        console.log(' Delete failed, trying to update status...');
         const { error: updateError } = await supabase
           .from('pending_technicians')
           .update({ status: 'approved', approved_at: new Date().toISOString() })
           .eq('id', pendingTech.id);
           
         if (updateError) {
-          console.error('❌ Update also failed:', updateError);
+          console.error(' Update also failed:', updateError);
           throw new Error(`Could not delete or update record: ${deleteError.message}`);
         }
         
-        console.log('✅ Updated status to approved as fallback');
+        console.log('Updated status to approved as fallback');
       } else {
-        console.log('✅ Successfully deleted record, count:', count);
+        console.log(' Successfully deleted record, count:', count);
       }
 
       // Step 4: Update local state to remove from UI immediately
-      console.log('🔄 Updating local state...');
+      console.log(' Updating local state...');
       setPendingTechnicians(prev => {
         const updated = prev.filter(tech => tech.id !== pendingTech.id);
-        console.log('📊 Updated list length:', updated.length);
+        console.log(' Updated list length:', updated.length);
         return updated;
       });
 
-      alert(`✅ ${pendingTech.fullname} has been approved successfully! They can now login with their credentials.`);
+      alert(`${pendingTech.fullname} has been approved successfully! They can now login with their credentials.`);
       
       // Step 5: Refresh data to ensure UI is in sync
-      console.log('🔄 Refreshing data from database...');
+      console.log(' Refreshing data from database...');
       setTimeout(() => {
         fetchPendingTechnicians();
       }, 1000);
 
     } catch (error) {
-      console.error('💥 Approval process failed:', error);
-      alert(`❌ Approval failed: ${error.message}`);
+      console.error(' Approval process failed:', error);
+      alert(` Approval failed: ${error.message}`);
       
       // Refresh data on error to ensure UI shows correct state
       fetchPendingTechnicians();
@@ -131,7 +128,7 @@ export default function ApproveGigs() {
     setProcessingId(pendingTech.id);
 
     try {
-      console.log('🚫 Rejecting technician:', pendingTech.fullname, 'ID:', pendingTech.id);
+      console.log(' Rejecting technician:', pendingTech.fullname, 'ID:', pendingTech.id);
       
       // Delete from pending_technicians table
       const { error: deleteError, count } = await supabase
@@ -150,23 +147,23 @@ export default function ApproveGigs() {
         try {
           const fileName = pendingTech.nid_file_url.split('/').pop();
           await supabase.storage.from('nid-files').remove([fileName]);
-          console.log('📁 NID file deleted from storage');
+          // console.log(' NID file deleted from storage');
         } catch (storageError) {
-          console.log('⚠️ Could not delete NID file:', storageError);
+          console.log(' Could not delete NID file:', storageError);
         }
       }
 
       // Update local state
       setPendingTechnicians(prev => prev.filter(tech => tech.id !== pendingTech.id));
 
-      alert(`❌ ${pendingTech.fullname}'s application has been rejected and removed.`);
+      alert(` ${pendingTech.fullname}'s application has been rejected and removed.`);
       
       // Refresh data
       fetchPendingTechnicians();
 
     } catch (error) {
-      console.error('Rejection error:', error);
-      alert('❌ Error rejecting application: ' + error.message);
+      // console.error('Rejection error:', error);
+      alert(' Error rejecting application: ' + error.message);
       fetchPendingTechnicians();
     } finally {
       setProcessingId(null);
@@ -205,7 +202,6 @@ export default function ApproveGigs() {
       {/* Content */}
       {pendingTechnicians.length === 0 ? (
         <div className="mt-8 text-center">
-          {/* <div className="text-6xl mb-4">✅</div> */}
           <h3 className="text-xl font-semibold text-gray-700 mb-2">All Caught Up!</h3>
           <p className="text-gray-500">No pending technician applications to review.</p>
         </div>

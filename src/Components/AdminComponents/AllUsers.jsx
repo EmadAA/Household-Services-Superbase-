@@ -45,7 +45,7 @@ export default function AllUsers() {
       console.log("📊 Supabase response:", { data, error, count });
 
       if (error) {
-        console.error("❌ Supabase error:", error);
+        console.error(" Supabase error:", error);
         setError(`Database Error: ${error.message}`);
 
         // If RLS is blocking, show specific message
@@ -53,8 +53,8 @@ export default function AllUsers() {
           error.message.includes("row-level security") ||
           error.code === "PGRST116"
         ) {
-          console.log("🔒 RLS policy is blocking access. Checking policies...");
-          alert("⚠️ Access denied to users table. Please check RLS policies.");
+          console.log(" RLS policy is blocking access. Checking policies...");
+          alert(" Access denied to users table. Please check RLS policies.");
         }
 
         setUsers([]);
@@ -62,14 +62,14 @@ export default function AllUsers() {
         return;
       }
 
-      console.log("✅ Fetched users successfully:", data?.length || 0);
-      console.log("📋 User data:", data);
+      console.log(" Fetched users successfully:", data?.length || 0);
+      console.log(" User data:", data);
 
       const userData = data || [];
       setUsers(userData);
       setFilteredUsers(userData);
     } catch (error) {
-      console.error("💥 Fetch error:", error);
+      // console.error(" Fetch error:", error);
       setError(`Fetch Error: ${error.message}`);
       setUsers([]);
       setFilteredUsers([]);
@@ -91,9 +91,9 @@ export default function AllUsers() {
     const confirmDelete = window.confirm(
       `Are you sure you want to delete ${userName}'s account?\n\n` +
         `This will:\n` +
-        `• Remove the user from the database\n` +
-        `• Delete their authentication account\n` +
-        `• This action cannot be undone\n\n` +
+        `-> Remove the user from the database\n` +
+        `-> Delete their authentication account\n` +
+        `-> This action cannot be undone\n\n` +
         `Type "DELETE" to confirm:`
     );
 
@@ -111,17 +111,16 @@ export default function AllUsers() {
     setDeleting(userId);
 
     try {
-      console.log("🗑️ Starting user deletion process for ID:", userId);
+      // console.log("🗑️ Starting user deletion process for ID:", userId);
 
-      // Step 1: Get user data first to verify it exists
       const { data: userData, error: fetchError } = await supabase
         .from("users")
         .select("*")
         .eq("id", userId)
         .single();
 
-      console.log("👤 User data fetched:", userData);
-      console.log("❌ Fetch error:", fetchError);
+      // console.log(" User data fetched:", userData);
+      // console.log(" Fetch error:", fetchError);
 
       if (fetchError) {
         if (fetchError.code === "PGRST116") {
@@ -136,10 +135,9 @@ export default function AllUsers() {
         throw new Error("User not found in database");
       }
 
-      console.log("✅ User found, proceeding with deletion...");
+      // console.log(" User found, proceeding with deletion...");
 
-      // Step 2: Try to delete from users table first
-      console.log("🗑️ Attempting to delete from users table...");
+      // console.log(" Attempting to delete from users table...");
 
       const { error: deleteError, count } = await supabase
         .from("users")
@@ -149,7 +147,7 @@ export default function AllUsers() {
       console.log("Delete result:", { deleteError, count });
 
       if (deleteError) {
-        console.error("❌ Delete error:", deleteError);
+        console.error(" Delete error:", deleteError);
 
         if (deleteError.message.includes("row-level security")) {
           throw new Error(
@@ -164,87 +162,51 @@ export default function AllUsers() {
 
       if (count === 0) {
         console.warn(
-          "⚠️ No rows were deleted - user may not exist or may already be deleted"
+          " No rows were deleted - user may not exist or may already be deleted"
         );
         throw new Error(
           "No user was deleted - user may not exist or may already be removed"
         );
       }
 
-      console.log(`✅ Successfully deleted ${count} user record(s)`);
+      console.log(`Successfully deleted ${count} user record(s)`);
 
-      // Step 3: Also try to delete from auth.users (this might fail silently due to permissions)
       try {
-        console.log("🔐 Attempting to delete auth user...");
+        console.log(" Attempting to delete auth user...");
         const { error: authDeleteError } = await supabase.auth.admin.deleteUser(
           userId
         );
 
         if (authDeleteError) {
           console.log(
-            "⚠️ Auth delete error (may be expected):",
+            " Auth delete error (may be expected):",
             authDeleteError
           );
           // Don't fail the whole operation if auth delete fails
         } else {
-          console.log("✅ Auth user deleted successfully");
+          console.log(" Auth user deleted successfully");
         }
       } catch (authError) {
         console.log(
-          "⚠️ Auth deletion failed (may be expected due to permissions):",
+          " Auth deletion failed (may be expected due to permissions):",
           authError
         );
-        // Continue - the main database deletion succeeded
       }
 
       alert(
-        `✅ ${userName}'s account has been successfully deleted from the database.`
+        ` ${userName}'s account has been successfully deleted from the database.`
       );
 
-      // Step 4: Refresh the list
-      console.log("🔄 Refreshing user list...");
+      // console.log(" Refreshing user list...");
       await fetchUsers();
     } catch (error) {
-      console.error("💥 Delete operation failed:", error);
-      alert(`❌ Failed to delete user: ${error.message}`);
+      console.error(" Delete operation failed:", error);
+      alert(` Failed to delete user: ${error.message}`);
     } finally {
       setDeleting(null);
     }
   };
 
-  //for additional info
-  // const formatDate = (dateString) => {
-  //   return new Date(dateString).toLocaleDateString("en-US", {
-  //     year: "numeric",
-  //     month: "short",
-  //     day: "numeric",
-  //   });
-  // };
-
-  // Debug function to check table access
-  const debugTableAccess = async () => {
-    try {
-      console.log("🔍 Testing users table access...");
-
-      // Test basic connection
-      const { data: testData, error: testError } = await supabase
-        .from("users")
-        .select("count")
-        .limit(1);
-
-      console.log("Test result:", { testData, testError });
-
-      // Check if we can see the table structure
-      const { data: structureData, error: structureError } = await supabase
-        .from("users")
-        .select("id")
-        .limit(1);
-
-      console.log("Structure test:", { structureData, structureError });
-    } catch (error) {
-      console.error("Debug error:", error);
-    }
-  };
 
   if (loading) {
     return (
@@ -290,36 +252,10 @@ export default function AllUsers() {
         </form>
       </div>
 
-      {/* Error Display */}
-      {error && (
-        <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-          <div className="flex">
-            <div className="text-red-800">
-              <p className="font-medium">Error loading users:</p>
-              <p className="text-sm">{error}</p>
-              <div className="mt-2 space-x-2">
-                <button
-                  onClick={fetchUsers}
-                  className="text-sm bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
-                >
-                  Retry
-                </button>
-                <button
-                  onClick={debugTableAccess}
-                  className="text-sm bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
-                >
-                  Debug Access
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Content */}
       {!error && filteredUsers.length === 0 ? (
         <div className="mt-8 text-center">
-          {/* <div className="text-6xl mb-4">👥</div> */}
           <h3 className="text-xl font-semibold text-gray-700 mb-2">
             {searchTerm ? "No Matching Users" : "No Users Found"}
           </h3>
@@ -337,16 +273,7 @@ export default function AllUsers() {
             </button>
           )}
 
-          {/* Debug info */}
-          <div className="mt-4 text-sm text-gray-400">
-            <p>Debug: Check browser console for detailed logs</p>
-            <button
-              onClick={debugTableAccess}
-              className="mt-2 text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded hover:bg-gray-300"
-            >
-              Test Database Access
-            </button>
-          </div>
+          
         </div>
       ) : (
         !error && (

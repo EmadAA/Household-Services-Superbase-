@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { FaFacebook, FaGithub, FaInstagram, FaLinkedin } from "react-icons/fa";
 
-// TeamMemberCard Component
 export default function TeamMemberCard({
   name,
   role,

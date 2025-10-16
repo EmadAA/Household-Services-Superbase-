@@ -18,7 +18,7 @@ export default function Navbar() {
   const menuRef = useRef(null);
   const searchRef = useRef(null);
 
-  // ✅ Check user role
+  // Check user role
   useEffect(() => {
     const checkUserRole = () => {
       const role = localStorage.getItem("userRole");
@@ -129,7 +129,7 @@ export default function Navbar() {
     <div className="sticky top-0 z-50">
       <nav className="bg-white/95 backdrop-blur-md py-4 shadow-md">
         <div className="max-w-[1400px] mx-auto flex justify-between items-center px-4 sm:px-5">
-          {/* ✅ Logo */}
+          {/* Logo */}
           <div
             className="flex items-center gap-2 text-lg sm:text-xl lg:text-2xl font-bold text-gray-800 cursor-pointer flex-shrink-0"
             onClick={handleLogoClick}
@@ -142,7 +142,7 @@ export default function Navbar() {
             <span className="sm:hidden">H.Services</span>
           </div>
 
-          {/* ✅ Search Bar */}
+          {/* Search Bar */}
           {showSearch ? (
             <div ref={searchRef} className="flex-1 px-2 sm:px-5 max-w-md">
               <input
@@ -164,7 +164,7 @@ export default function Navbar() {
                 ))}
               </ul>
 
-              {/* ✅ Desktop Right Side */}
+              {/*Desktop Right Side */}
               <div className="hidden md:flex items-center gap-3 lg:gap-5">
                 <button
                   className="text-gray-600 text-lg"
@@ -174,7 +174,7 @@ export default function Navbar() {
                   <FaSearch />
                 </button>
 
-                {/* ✅ Helpline link FIXED */}
+                {/* Helpline link FIXED */}
                 <a
                   href="tel:+8801676480060"
                   className="bg-gradient-to-r from-teal-500 to-teal-600 text-white px-3 lg:px-5 py-2 lg:py-3 rounded-full flex items-center gap-2 text-xs lg:text-sm font-medium hover:bg-teal-700 transition whitespace-nowrap"
@@ -204,7 +204,7 @@ export default function Navbar() {
                 )}
               </div>
 
-              {/* ✅ Mobile menu Hamburger */}
+              {/* Mobile menu Hamburger */}
               <div className="md:hidden flex items-center gap-3 sm:gap-4">
                 <button
                   onClick={() => setShowSearch(true)}
@@ -229,7 +229,7 @@ export default function Navbar() {
           )}
         </div>
 
-        {/* ✅ Mobile Dropdown menu */}
+        {/* Mobile Dropdown menu */}
         {isMenuOpen && (
           <div
             ref={menuRef}

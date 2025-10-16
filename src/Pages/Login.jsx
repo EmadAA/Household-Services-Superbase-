@@ -17,10 +17,10 @@ const Login = () => {
     }));
   };
 
-  // verify admin login
+  // verify the admin login
   const verifyAdminLogin = async (email, password) => {
     try {
-      console.log('🔍 Checking admin login for:', email);
+      // console.log(' Checking admin login for:', email);
       
       // fetch admin data
       const { data, error } = await supabase
@@ -29,7 +29,7 @@ const Login = () => {
         .eq('email', email.toLowerCase().trim())
         .single();
 
-      console.log('📊 Admin query result:', { data, error });
+      // console.log('Admin query result:', { data, error });
 
       // for RLS error(in supabase)
        if (error) {
@@ -42,12 +42,12 @@ const Login = () => {
         return { isAdmin: false, adminData: null };
       }
 
-      console.log('✅ Admin found:', data.fullname);
+      // console.log(' Admin found:', data.fullname);
       
       // password match check
       const isValidPassword = data.password_hash === password;
       
-      console.log(' Password comparison result:', isValidPassword);
+      // console.log(' Password comparison result:', isValidPassword);
       
       return { 
         isAdmin: isValidPassword, 
@@ -55,7 +55,7 @@ const Login = () => {
       };
       
     } catch (error) {
-      console.log(' Admin verification error (expected for non-admins):', error);
+      console.log(' Admin verification error', error);
       return { isAdmin: false, adminData: null };
     }
   };
@@ -65,13 +65,13 @@ const Login = () => {
     setLoading(true);
 
     try {
-      console.log('🚀 Starting login process...');
+      // console.log(' Starting login process...');
       
       // First check if this is an admin login
       const { isAdmin, adminData } = await verifyAdminLogin(formData.email, formData.password);
       
       if (isAdmin && adminData) {
-        console.log('✅ Admin login successful for:', adminData.fullname);
+        // console.log(' Admin login successful for:', adminData.fullname);
         
         // Store admin session data
         localStorage.setItem('userRole', 'admin');
@@ -87,7 +87,7 @@ const Login = () => {
       }
 
       //login for users/technicians
-      console.log(' Attempting regular user login for:', formData.email);
+      // console.log('regular user login :', formData.email);
       
       const { data, error } = await supabase.auth.signInWithPassword({
         email: formData.email,
@@ -95,7 +95,7 @@ const Login = () => {
       });
 
       if (error) {
-        console.error(' Supabase auth error:', error);
+        console.error(' Supabase authenticate error:', error);
         
         if (error.message.includes('Email not confirmed')) {
           alert(' Please check your email and confirm your account first!');
@@ -109,7 +109,7 @@ const Login = () => {
       }
 
       if (data.user) {
-        console.log('✅ Regular user login successful:', data.user.email);
+        console.log('user login successfully:', data.user.email);
         
         // Store user session data
         localStorage.setItem('userRole', data.user.user_metadata?.role || 'user');
@@ -119,12 +119,6 @@ const Login = () => {
         
         alert(' Login successful!');
         
-        // const userRole = data.user.user_metadata?.role;
-        // if (userRole === 'technician') {
-        //   navigate("/home");
-        // } else {
-        //   navigate("/home");
-        // }
         navigate("/home");
       }
 

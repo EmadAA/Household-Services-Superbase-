@@ -6,7 +6,7 @@ import MTS from "../assets/images/mosttrustedservice.png";
 export default function MostTrustedService() {
   return (
     <section className="relative bg-gray-900 text-white py-16 sm:py-20 overflow-hidden">
-      {/* ✨ Background Pattern */}
+      {/* Background Pattern */}
       <div className="absolute inset-0 opacity-10 pointer-events-none">
         <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
           <defs>
@@ -23,10 +23,10 @@ export default function MostTrustedService() {
         </svg>
       </div>
 
-      {/* 🧭 Container */}
+      {/*Container */}
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="flex flex-col lg:flex-row items-center justify-between gap-10 lg:gap-16">
-          {/* ✅ Left Side */}
+          {/*Left Side */}
           <div className="flex-1 w-full text-center lg:text-left">
             {/* Heading */}
             <div className="mb-8">
@@ -42,7 +42,7 @@ export default function MostTrustedService() {
               </h1>
             </div>
 
-            {/* 👥 Members Count */}
+            {/* Members Count */}
             <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3 mb-6">
               <div className="flex -space-x-2">
                 <img
@@ -71,7 +71,7 @@ export default function MostTrustedService() {
             </div>
           </div>
 
-          {/* ✅ Right Side */}
+          {/* Right Side */}
           <div className="flex-1 w-full">
             <div className="relative rounded-lg overflow-hidden border-4 border-teal-600 shadow-lg">
               <img

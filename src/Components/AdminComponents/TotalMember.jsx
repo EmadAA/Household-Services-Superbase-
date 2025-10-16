@@ -17,7 +17,7 @@ export default function TotalMember() {
 
   const fetchStatistics = async () => {
     try {
-      console.log('📊 Fetching database statistics...');
+      // console.log(' Fetching database statistics...');
       setError(null);
 
       // Fetch all counts in parallel for better performance
@@ -43,11 +43,7 @@ export default function TotalMember() {
           .eq('status', 'pending_verification')
       ]);
 
-      console.log('📈 Raw results:', {
-        technicians: technicianResult,
-        users: userResult,
-        pending: pendingResult
-      });
+
 
       // Handle errors
       if (technicianResult.error) {
@@ -66,12 +62,6 @@ export default function TotalMember() {
       const pendingCount = pendingResult.count || 0;
       const totalMembers = technicianCount + userCount;
 
-      console.log('📊 Final counts:', {
-        technicians: technicianCount,
-        users: userCount,
-        pending: pendingCount,
-        total: totalMembers
-      });
 
       setStats({
         totalTechnicians: technicianCount,
@@ -81,19 +71,18 @@ export default function TotalMember() {
       });
 
     } catch (error) {
-      console.error('💥 Statistics fetch error:', error);
+      // console.error(' Statistics fetch error:', error);
       setError('Failed to load statistics: ' + error.message);
     } finally {
       setLoading(false);
     }
   };
 
-  // Auto-refresh every 30 seconds
+  // Auto-refresh in every 30 seconds
   useEffect(() => {
     const interval = setInterval(() => {
       fetchStatistics();
-    }, 30000); // Refresh every 30 seconds
-
+    }, 30000); 
     return () => clearInterval(interval);
   }, []);
 
@@ -134,22 +123,7 @@ export default function TotalMember() {
         </button>
       </div>
 
-      {/* Error Display */}
-      {error && (
-        <div className="m-3 p-3 bg-red-50 border border-red-200 rounded-lg">
-          <p className="text-red-800 text-sm">{error}</p>
-          <button
-            onClick={fetchStatistics}
-            className="mt-2 text-sm bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
-          >
-            Try Again
-          </button>
-        </div>
-      )}
-
-      {/* Statistics */}
-
-      {/* Quick Stats Summary */}
+     
       {!error && (
         <div className="m-3 mt-6 p-3 bg-gray-50 rounded-lg">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">

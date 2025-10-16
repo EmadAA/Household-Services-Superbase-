@@ -79,7 +79,7 @@ export default function Profile() {
       }
 
     } catch (error) {
-      console.error("Error fetching profile:", error);
+      // console.error("Error fetching profile:", error);
       alert("Failed to load profile: " + error.message);
     } finally {
       setLoading(false);

@@ -44,10 +44,10 @@ export default function AllTechnicians() {
         .select("*", { count: "exact" })
         .order("created_at", { ascending: false });
 
-      console.log("📊 Supabase response:", { data, error, count });
+      console.log(" Supabase response:", { data, error, count });
 
       if (error) {
-        console.error("❌ Supabase error:", error);
+        // console.error("Supabase error:", error);
         setError(`Database Error: ${error.message}`);
 
         // If RLS is blocking, try a different approach
@@ -55,9 +55,9 @@ export default function AllTechnicians() {
           error.message.includes("row-level security") ||
           error.code === "PGRST116"
         ) {
-          console.log("🔒 RLS policy is blocking access. Checking policies...");
+          console.log(" RLS policy is blocking access. Checking policies...");
           alert(
-            "⚠️ Access denied to technicians table. Please check RLS policies."
+            " Access denied to technicians table. Please check RLS policies."
           );
         }
 
@@ -66,14 +66,14 @@ export default function AllTechnicians() {
         return;
       }
 
-      console.log("✅ Fetched technicians successfully:", data?.length || 0);
-      console.log("📋 Technician data:", data);
+      // console.log(" Fetched technicians successfully:", data?.length || 0);
+      // console.log(" Technician data:", data);
 
       const technicianData = data || [];
       setTechnicians(technicianData);
       setFilteredTechnicians(technicianData);
     } catch (error) {
-      console.error("💥 Fetch error:", error);
+      // console.error(" Fetch error:", error);
       setError(`Fetch Error: ${error.message}`);
       setTechnicians([]);
       setFilteredTechnicians([]);
@@ -82,30 +82,6 @@ export default function AllTechnicians() {
     }
   };
 
-  // Debug function to check table access
-  const debugTableAccess = async () => {
-    try {
-      console.log("🔍 Testing table access...");
-
-      // Test basic connection
-      const { data: testData, error: testError } = await supabase
-        .from("technicians")
-        .select("count")
-        .limit(1);
-
-      console.log("Test result:", { testData, testError });
-
-      // Check if we can see the table structure
-      const { data: structureData, error: structureError } = await supabase
-        .from("technicians")
-        .select("id")
-        .limit(1);
-
-      console.log("Structure test:", { structureData, structureError });
-    } catch (error) {
-      console.error("Debug error:", error);
-    }
-  };
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -126,7 +102,7 @@ export default function AllTechnicians() {
     setDeleting(technicianId);
 
     try {
-      console.log("🗑️ Deleting technician:", technicianId);
+      console.log("Deleting technician:", technicianId);
 
       // Get technician data first
       const { data: techData, error: fetchError } = await supabase
@@ -178,15 +154,7 @@ export default function AllTechnicians() {
     return category.replace("_", " ").replace(/\b\w/g, (l) => l.toUpperCase());
   };
 
-  //for additional info
 
-  // const formatDate = (dateString) => {
-  //   return new Date(dateString).toLocaleDateString('en-US', {
-  //     year: 'numeric',
-  //     month: 'short',
-  //     day: 'numeric'
-  //   });
-  // };
 
   if (loading) {
     return (
@@ -232,36 +200,11 @@ export default function AllTechnicians() {
         </form>
       </div>
 
-      {/* Error Display */}
-      {error && (
-        <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-          <div className="flex">
-            <div className="text-red-800">
-              <p className="font-medium">Error loading technicians:</p>
-              <p className="text-sm">{error}</p>
-              <div className="mt-2 space-x-2">
-                <button
-                  onClick={fetchTechnicians}
-                  className="text-sm bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
-                >
-                  Retry
-                </button>
-                <button
-                  onClick={debugTableAccess}
-                  className="text-sm bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
-                >
-                  Debug Access
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      
 
       {/* Content */}
       {!error && filteredTechnicians.length === 0 ? (
         <div className="mt-8 text-center">
-          {/* <div className="text-6xl mb-4">👷‍♂️</div> */}
           <h3 className="text-xl font-semibold text-gray-700 mb-2">
             {searchTerm ? "No Matching Technicians" : "No Technicians Found"}
           </h3>
@@ -278,17 +221,7 @@ export default function AllTechnicians() {
               Clear search
             </button>
           )}
-
-          {/* Debug info */}
-          <div className="mt-4 text-sm text-gray-400">
-            <p>Debug: Check browser console for detailed logs</p>
-            <button
-              onClick={debugTableAccess}
-              className="mt-2 text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded hover:bg-gray-300"
-            >
-              Test Database Access
-            </button>
-          </div>
+          
         </div>
       ) : (
         !error && (
@@ -337,29 +270,6 @@ export default function AllTechnicians() {
                         </a>
                       </div>
                     )}
-
-                    {/* Additional Info */}
-                    {/* <div className="text-xs text-gray-500 space-y-1">
-                    <p>
-                      <span className="font-medium">Status:</span> 
-                      <span className={`ml-1 px-2 py-1 rounded-full text-xs ${
-                        technician.is_verified 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-yellow-100 text-yellow-800'
-                      }`}>
-                        {technician.is_verified ? 'Verified' : 'Unverified'}
-                      </span>
-                    </p>
-                    <p>
-                      <span className="font-medium">Joined:</span> {formatDate(technician.created_at)}
-                    </p>
-                    <p>
-                      <span className="font-medium">Active:</span> 
-                      <span className={`ml-1 ${technician.is_active ? 'text-green-600' : 'text-red-600'}`}>
-                        {technician.is_active ? 'Yes' : 'No'}
-                      </span>
-                    </p>
-                  </div> */}
                   </div>
 
                   <div className="mt-4 flex flex-wrap gap-2">
