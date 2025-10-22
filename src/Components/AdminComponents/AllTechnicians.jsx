@@ -92,63 +92,93 @@ export default function AllTechnicians() {
     setSearchTerm(e.target.value);
   };
 
-  const deleteTechnician = async (technicianId, technicianName) => {
-    const confirmDelete = window.confirm(
-      `Are you sure you want to delete ${technicianName}'s account? This action cannot be undone and will also delete their authentication account.`
-    );
+const deleteTechnician = async (technicianId, technicianName) => {
+  const confirmDelete = window.confirm(
+    `Are you sure you want to delete ${technicianName}'s account?\n\n` +
+      `This will permanently remove the technician from the database.\n\n` +
+      `Type "DELETE" to confirm:`
+  );
 
-    if (!confirmDelete) return;
+  if (!confirmDelete) return;
 
-    setDeleting(technicianId);
+  const typeConfirm = window.prompt(
+    `To permanently delete ${technicianName}, type "DELETE" (all caps):`
+  );
+  if (typeConfirm !== "DELETE") {
+    alert("Deletion cancelled — confirmation text didn't match.");
+    return;
+  }
 
-    try {
-      console.log("Deleting technician:", technicianId);
+  setDeleting(technicianId);
 
-      // Get technician data first
-      const { data: techData, error: fetchError } = await supabase
-        .from("technicians")
-        .select("*")
-        .eq("id", technicianId)
-        .single();
+  try {
+    console.log("Deleting technician:", technicianId);
+    // Fetch the technician (to delete NID file if exists)
+    const { data: techData, error: fetchError } = await supabase
+      .from("technicians")
+      .select("*")
+      .eq("id", technicianId)
+      .single();
 
-      if (fetchError) {
+    if (fetchError) {
+      if (fetchError.code === "PGRST116") {
         throw new Error(
-          "Failed to fetch technician data: " + fetchError.message
+          "Technician not found or access denied due to database policies"
         );
       }
-
-      // Delete from technicians table (this will also delete from auth.users due to CASCADE)
-      const { error: deleteError } = await supabase
-        .from("technicians")
-        .delete()
-        .eq("id", technicianId);
-
-      if (deleteError) {
-        throw new Error("Failed to delete technician: " + deleteError.message);
-      }
-
-      // Optional: Delete NID file from storage if it exists
-      if (techData.nid_file_url) {
-        try {
-          const fileName = techData.nid_file_url.split("/").pop();
-          await supabase.storage.from("nid-files").remove([fileName]);
-          console.log("📁 NID file deleted from storage");
-        } catch (storageError) {
-          console.log("⚠️ Could not delete NID file:", storageError);
-        }
-      }
-
-      alert(`✅ ${technicianName}'s account has been successfully deleted.`);
-
-      // Refresh the list
-      fetchTechnicians();
-    } catch (error) {
-      console.error("Delete error:", error);
-      alert("❌ Failed to delete technician: " + error.message);
-    } finally {
-      setDeleting(null);
+      throw new Error("Failed to fetch technician: " + fetchError.message);
     }
-  };
+
+    if (!techData) {
+      throw new Error("Technician not found in database");
+    }
+
+    // Delete from technicians table
+    const { error: deleteError, count } = await supabase
+      .from("technicians")
+      .delete({ count: "exact" })
+      .eq("id", technicianId);
+
+    if (deleteError) {
+      if (deleteError.message.includes("row-level security")) {
+        alert(
+          " Access denied — check RLS policy for delete permission on 'technicians' table."
+        );
+      } else {
+        alert(" Failed to delete technician: " + deleteError.message);
+      }
+      throw deleteError;
+    }
+
+    if (count === 0) {
+      alert(" No record was deleted — technician may not exist.");
+      return;
+    }
+
+    // Delete associated NID file (if exists)
+    if (techData.nid_file_url) {
+      const fileName = techData.nid_file_url.split("/").pop();
+      const { error: storageError } = await supabase.storage
+        .from("nid-files")
+        .remove([fileName]);
+      if (storageError) {
+        console.warn(" NID file delete failed:", storageError);
+      } else {
+        console.log(" NID file deleted");
+      }
+    }
+
+    alert(` ${technicianName}'s record deleted successfully.`);
+    await fetchTechnicians(); // Refresh list
+  } catch (error) {
+    console.error("Delete error:", error);
+    alert(" Failed to delete technician: " + error.message);
+  } finally {
+    setDeleting(null);
+  }
+};
+
+
 
   const formatCategory = (category) => {
     return category.replace("_", " ").replace(/\b\w/g, (l) => l.toUpperCase());
