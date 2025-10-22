@@ -91,7 +91,7 @@ const Signup = () => {
     if (!isNID && !isBirthCert) {
       setErrors(prev => ({ 
         ...prev, 
-        nid: "NID must be exactly 10 digits OR Birth Certificate must be 16-17 digits" 
+        nid: "NID must be exactly 10 digits OR Birth Certificate must be 16 or 17 digits" 
       }));
       return false;
     }

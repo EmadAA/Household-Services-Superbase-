@@ -40,8 +40,8 @@ const FAQSection = () => {
     },
     {
       id: 2,
-      question: "NYC Home Cleaning Company",
-      answer: "We are a trusted cleaning company serving NYC and surrounding areas with professional house cleaning services tailored to meet your needs."
+      question: "Sylhet Home Cleaning Company",
+      answer: "We are a trusted cleaning company serving in Sylhet city and surrounding areas with professional house cleaning services tailored to meet your needs."
     },
     {
       id: 3,

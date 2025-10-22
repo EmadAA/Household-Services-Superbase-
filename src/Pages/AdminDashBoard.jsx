@@ -92,7 +92,7 @@ export default function AdminDashBoard() {
       <ApproveAccounts />
       <AllTechnicians />
       <AllUsers />
-      <AllServices />
+      {/* <AllServices /> */}
       <Footer />
     </div>
   );

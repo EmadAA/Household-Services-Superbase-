@@ -5,7 +5,7 @@ import FloatingIcons from "../Components/FloatingIcons";
 import Footer from "../Components/Footer";
 import Navbar from "../Components/Navbar";
 import PriceContact from "../Components/PriceContact";
-import ClassCleaningService from "../Components/ServiceCard";
+import ClassCleaningService from "../Components/ClassCleaningService";
 import TeamSection from "../Components/TeamSection";
 
 const HomePage = () => {
@@ -74,7 +74,7 @@ const HomePage = () => {
       <section className="py-12 sm:py-16 bg-teal-50">
         <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-8 sm:mb-10">
-            Best In Class Cleaning Services
+            Best In Household Services
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 sm:gap-8">
             <ClassCleaningService />
