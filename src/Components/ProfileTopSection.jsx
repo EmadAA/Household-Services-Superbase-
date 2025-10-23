@@ -8,7 +8,7 @@ export default function ProfileTopSection({ userData }) {
     }
     if (userData.role === "technician") return "General Technician";
     if (userData.role === "admin") return "System Administrator";
-    return "Web Development";
+    return "NA";
   };
 
   return (
