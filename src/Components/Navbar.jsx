@@ -1,4 +1,3 @@
-// Navbar.jsx
 import { useEffect, useRef, useState } from "react";
 import {
   FaBars,
@@ -39,7 +38,7 @@ export default function Navbar() {
     };
   }, []);
 
-  //  Close menu & search when clicking outside
+  //  Close menu & search box when clicking outside!
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
@@ -155,7 +154,7 @@ export default function Navbar() {
             </div>
           ) : (
             <>
-              {/* ✅ Desktop Menu */}
+              {/* Desktop Menu */}
               <ul className="hidden md:flex gap-4 lg:gap-8 list-none">
                 {navLinks.map((item) => (
                   <li key={item.path}>

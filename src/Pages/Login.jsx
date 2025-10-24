@@ -6,7 +6,7 @@ import { supabase } from "../../supabaseClient";
 const Login = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false); // 👈 toggle state
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -38,7 +38,7 @@ const Login = () => {
       }
 
       if (!data) {
-        console.log('❌ No admin found with this email');
+        console.log(' No admin found with this email');
         return { isAdmin: false, adminData: null };
       }
 

@@ -77,7 +77,7 @@ const ServiceSelector = () => {
         Choose Your Service
       </h2>
 
-      {/* Responsive Grid with dynamic padding */}
+      {/* Responsive Grid */}
       <div 
         className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6"
         style={{ paddingBottom: openService ? '320px' : '0' }}
@@ -101,8 +101,8 @@ const ServiceSelector = () => {
               {service}
               <span>{openService === service ? "▲" : "▼"}</span>
             </button>
-
-            {/* Dropdown - Absolutely positioned */}
+ 
+            {/* Dropdown -*/}
             {openService === service && (
               <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-2xl shadow-xl p-4 space-y-2 animate-fadeIn z-10">
                 {services[service].map((sub, index) => (
@@ -120,7 +120,7 @@ const ServiceSelector = () => {
                   </div>
                 ))}
 
-                {/* Action Buttons */}
+                {/* Buttons */}
                 <div className="flex justify-between mt-4">
                   <button
                     className="px-4 py-2 bg-cyan-500 text-white text-sm rounded-lg hover:bg-cyan-600 transition"

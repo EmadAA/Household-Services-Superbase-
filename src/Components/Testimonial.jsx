@@ -25,14 +25,14 @@ const Testimonial = () => {
     },
     {
       id: 3,
-      name: "James Rivera",
+      name: "James Test 1",
       image: test,
       rating: 4,
       text: "The cleaners arrived on time and worked efficiently. My house looks brand new. I'll definitely book again!",
     },
     {
       id: 4,
-      name: "James Test",
+      name: "James Test 2",
       image: test,
       rating: 4,
       text: "The cleaners arrived on time and worked efficiently. My house looks brand new. I'll definitely book again!",
