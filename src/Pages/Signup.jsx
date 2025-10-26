@@ -1,4 +1,3 @@
- 
 import { useState } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
@@ -24,27 +23,29 @@ const Signup = () => {
 
   // Regex patterns
   const patterns = {
+    name: /^[A-Za-z][A-Za-z\s]{2,29}$/,
     email: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
     mobile: /^01[3-9]\d{8}$/,
     nid: /^\d{10}$/,
     birthCertificate: /^\d{16,17}$/,
-    password: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/
+    password:
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/,
   };
 
   const handleRoleChange = (role) => {
-    setFormData(prev => ({ 
-      ...prev, 
+    setFormData((prev) => ({
+      ...prev,
       role,
-      ...(role === 'user' && { category: "", nid: "", nidFile: null })
+      ...(role === "user" && { category: "", nid: "", nidFile: null }),
     }));
-    setErrors(prev => ({ ...prev, category: "", nid: "" }));
+    setErrors((prev) => ({ ...prev, category: "", nid: "" }));
   };
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
-    
+
     if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: "" }));
+      setErrors((prev) => ({ ...prev, [name]: "" }));
     }
 
     setFormData((prev) => ({
@@ -53,70 +54,93 @@ const Signup = () => {
     }));
 
     // Real time validation
-    if (name === 'email' && value) {
+    if (name === "fullname" && value) {
+      validateName(value);
+    }
+    if (name === "email" && value) {
       validateEmail(value);
-    } else if (name === 'mobile' && value) {
+    } else if (name === "mobile" && value) {
       validateMobile(value);
-    } else if (name === 'nid' && value) {
+    } else if (name === "nid" && value) {
       validateNID(value);
-    } else if (name === 'password' && value) {
+    } else if (name === "password" && value) {
       validatePassword(value);
-    } else if (name === 'cpassword' && value) {
+    } else if (name === "cpassword" && value) {
       validateConfirmPassword(value, formData.password);
     }
   };
 
-  const validateEmail = (email) => {
-    if (!patterns.email.test(email)) {
-      setErrors(prev => ({ ...prev, email: "Please enter a valid email address" }));
+  const validateName = (name) => {
+    if (!patterns.name.test(name.trim())) {
+      setErrors((prev) => ({
+        ...prev,
+        fullname:
+          "Full name must start with a letter, contain only letters and spaces, and be 3–30 characters long",
+      }));
       return false;
     }
-    setErrors(prev => ({ ...prev, email: "" }));
+    setErrors((prev) => ({ ...prev, fullname: "" }));
+    return true;
+  };
+
+  const validateEmail = (email) => {
+    if (!patterns.email.test(email)) {
+      setErrors((prev) => ({
+        ...prev,
+        email: "Please enter a valid email address",
+      }));
+      return false;
+    }
+    setErrors((prev) => ({ ...prev, email: "" }));
     return true;
   };
 
   const validateMobile = (mobile) => {
     if (!patterns.mobile.test(mobile)) {
-      setErrors(prev => ({ ...prev, mobile: "Mobile must be 11 digits starting with 01 (e.g., 01712345678)" }));
+      setErrors((prev) => ({
+        ...prev,
+        mobile: "Mobile must be 11 digits starting with 01 (e.g., 01712345678)",
+      }));
       return false;
     }
-    setErrors(prev => ({ ...prev, mobile: "" }));
+    setErrors((prev) => ({ ...prev, mobile: "" }));
     return true;
   };
 
   const validateNID = (nid) => {
     const isNID = patterns.nid.test(nid);
     const isBirthCert = patterns.birthCertificate.test(nid);
-    
+
     if (!isNID && !isBirthCert) {
-      setErrors(prev => ({ 
-        ...prev, 
-        nid: "NID must be exactly 10 digits OR Birth Certificate must be 16 or 17 digits" 
+      setErrors((prev) => ({
+        ...prev,
+        nid: "NID must be exactly 10 digits OR Birth Certificate must be 16 or 17 digits",
       }));
       return false;
     }
-    setErrors(prev => ({ ...prev, nid: "" }));
+    setErrors((prev) => ({ ...prev, nid: "" }));
     return true;
   };
 
   const validatePassword = (password) => {
     if (!patterns.password.test(password)) {
-      setErrors(prev => ({ 
-        ...prev, 
-        password: "Password must be at least 6 characters with 1 uppercase, 1 lowercase, 1 number, and 1 special character" 
+      setErrors((prev) => ({
+        ...prev,
+        password:
+          "Password must be at least 6 characters with 1 uppercase, 1 lowercase, 1 number, and 1 special character",
       }));
       return false;
     }
-    setErrors(prev => ({ ...prev, password: "" }));
+    setErrors((prev) => ({ ...prev, password: "" }));
     return true;
   };
 
   const validateConfirmPassword = (confirmPassword, password) => {
     if (confirmPassword !== password) {
-      setErrors(prev => ({ ...prev, cpassword: "Passwords don't match" }));
+      setErrors((prev) => ({ ...prev, cpassword: "Passwords don't match" }));
       return false;
     }
-    setErrors(prev => ({ ...prev, cpassword: "" }));
+    setErrors((prev) => ({ ...prev, cpassword: "" }));
     return true;
   };
 
@@ -125,21 +149,20 @@ const Signup = () => {
     try {
       console.log(` Checking uniqueness for ${field}: ${value}`);
       //rpc= Remote Procedure Call, ready made function in supabase
-      const { data, error } = await supabase.rpc('check_field_uniqueness', {
+      const { data, error } = await supabase.rpc("check_field_uniqueness", {
         field_name: field,
-        field_value: value
+        field_value: value,
       });
 
       if (error) {
-        console.error('RPC error:', error);
+        console.error("RPC error:", error);
         return false;
       }
 
       // console.log(`Uniqueness check result for ${field}:`, data);
-      return data; 
-      
+      return data;
     } catch (error) {
-      console.error('Uniqueness check error:', error);
+      console.error("Uniqueness check error:", error);
       return false;
     }
   };
@@ -151,23 +174,35 @@ const Signup = () => {
 
     try {
       // console.log(' Starting registration process...');
-      
-      // Validate all fields 
+
+      // Validate all fields
       const isEmailValid = validateEmail(formData.email);
       const isMobileValid = validateMobile(formData.mobile);
       const isPasswordValid = validatePassword(formData.password);
-      const isConfirmPasswordValid = validateConfirmPassword(formData.cpassword, formData.password);
-      
+      const isConfirmPasswordValid = validateConfirmPassword(
+        formData.cpassword,
+        formData.password
+      );
+
+      const isNameValid = validateName(formData.fullname);
+      if (!isNameValid) {
+        setLoading(false);
+        return;
+      }
+
       let isNIDValid = true;
-      if (formData.role === 'technician') {
+      if (formData.role === "technician") {
         isNIDValid = validateNID(formData.nid);
-        
+
         if (!formData.category) {
-          setErrors(prev => ({ ...prev, category: "Please select a category" }));
+          setErrors((prev) => ({
+            ...prev,
+            category: "Please select a category",
+          }));
           setLoading(false);
           return;
         }
-        
+
         if (!formData.nidFile) {
           alert("Please upload your NID/Birth Certificate file");
           setLoading(false);
@@ -175,32 +210,49 @@ const Signup = () => {
         }
       }
 
-      if (!isEmailValid || !isMobileValid || !isPasswordValid || !isConfirmPasswordValid || !isNIDValid) {
+      if (
+        !isEmailValid ||
+        !isMobileValid ||
+        !isPasswordValid ||
+        !isConfirmPasswordValid ||
+        !isNIDValid
+      ) {
         // console.log(' Validation failed');
         setLoading(false);
         return;
       }
 
       // email uniqueness checks
-      const isEmailUnique = await checkUniqueness('email', formData.email);
+      const isEmailUnique = await checkUniqueness("email", formData.email);
       if (!isEmailUnique) {
-        setErrors(prev => ({ ...prev, email: "This email is already registered. Please use a different email address." }));
+        setErrors((prev) => ({
+          ...prev,
+          email:
+            "This email is already registered. Please use a different email address.",
+        }));
         setLoading(false);
         return;
       }
       // mobile num uniqueness checks
-      const isMobileUnique = await checkUniqueness('mobile', formData.mobile);
+      const isMobileUnique = await checkUniqueness("mobile", formData.mobile);
       if (!isMobileUnique) {
-        setErrors(prev => ({ ...prev, mobile: "This mobile number is already registered. Please use a different mobile number." }));
+        setErrors((prev) => ({
+          ...prev,
+          mobile:
+            "This mobile number is already registered. Please use a different mobile number.",
+        }));
         setLoading(false);
         return;
       }
 
-      if (formData.role === 'technician') {
-      // NID uniqueness checks 
-        const isNIDUnique = await checkUniqueness('nid', formData.nid);
+      if (formData.role === "technician") {
+        // NID uniqueness checks
+        const isNIDUnique = await checkUniqueness("nid", formData.nid);
         if (!isNIDUnique) {
-          setErrors(prev => ({ ...prev, nid: "This NID/Birth Certificate number is already registered. Please check your number." }));
+          setErrors((prev) => ({
+            ...prev,
+            nid: "This NID/Birth Certificate number is already registered. Please check your number.",
+          }));
           setLoading(false);
           return;
         }
@@ -209,23 +261,22 @@ const Signup = () => {
       // console.log(' All uniqueness checks done, proceeding with registration...');
 
       // Proceed for registration
-      if (formData.role === 'user') {
+      if (formData.role === "user") {
         await handleUserSignup();
-      } else if (formData.role === 'technician') {
+      } else if (formData.role === "technician") {
         await handleTechnicianSignup();
       }
-
     } catch (error) {
-      console.error('Registration error:', error);
-      alert('Registration failed: ' + error.message);
+      console.error("Registration error:", error);
+      alert("Registration failed: " + error.message);
     } finally {
       setLoading(false);
     }
   };
 
   const handleUserSignup = async () => {
-    console.log(' Creating user account');
-    
+    console.log(" Creating user account");
+
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email: formData.email,
       password: formData.password,
@@ -233,67 +284,74 @@ const Signup = () => {
         data: {
           fullname: formData.fullname,
           role: formData.role,
-          mobile: formData.mobile
-        }
-      }
+          mobile: formData.mobile,
+        },
+      },
     });
 
     if (authError) {
-      console.error('Auth error:', authError);
-      
-      if (authError.message.includes('already registered')) {
-        setErrors(prev => ({ ...prev, email: "This email is already registered" }));
+      console.error("Auth error:", authError);
+
+      if (authError.message.includes("already registered")) {
+        setErrors((prev) => ({
+          ...prev,
+          email: "This email is already registered",
+        }));
       } else {
-        alert('Registration failed: ' + authError.message);
+        alert("Registration failed: " + authError.message);
       }
       return;
     }
 
     if (authData.user) {
       // console.log(' User registered successfully');
-      alert('Registration successful! Please check your email and confirm your account.');
-      navigate('/login');
+      alert(
+        "Registration successful! Please check your email and confirm your account."
+      );
+      navigate("/login");
     }
   };
 
   const handleTechnicianSignup = async () => {
     try {
-      console.log(' Creating technician registration');
-      
+      console.log(" Creating technician registration");
+
       let nidFileUrl = null;
       let uploadedFileName = null;
 
       // Upload NID file first for checkup
       if (formData.nidFile) {
-        const fileExt = formData.nidFile.name.split('.').pop();
-        uploadedFileName = `technician_${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+        const fileExt = formData.nidFile.name.split(".").pop();
+        uploadedFileName = `technician_${Date.now()}_${Math.random()
+          .toString(36)
+          .substring(7)}.${fileExt}`;
 
         // console.log('Uploading file:', uploadedFileName);
-        
+
         const { data: uploadData, error: uploadError } = await supabase.storage
-          .from('nid-files')
+          .from("nid-files")
           .upload(uploadedFileName, formData.nidFile);
 
         if (uploadError) {
-          console.error('Upload error:', uploadError);
-          throw new Error('File upload failed: ' + uploadError.message);
+          console.error("Upload error:", uploadError);
+          throw new Error("File upload failed: " + uploadError.message);
         }
 
-        console.log(' Upload successful:', uploadData);
+        console.log(" Upload successful:", uploadData);
 
-        const { data: { publicUrl } } = supabase.storage
-          .from('nid-files')
-          .getPublicUrl(uploadedFileName);
-        
+        const {
+          data: { publicUrl },
+        } = supabase.storage.from("nid-files").getPublicUrl(uploadedFileName);
+
         nidFileUrl = publicUrl;
         // console.log(' File URL:', nidFileUrl);
       }
 
       // pending_technicians table
-      console.log(' Inserting technician data...');
-      
+      console.log(" Inserting technician data...");
+
       const { data: insertData, error: insertError } = await supabase
-        .from('pending_technicians')
+        .from("pending_technicians")
         .insert([
           {
             fullname: formData.fullname,
@@ -303,77 +361,87 @@ const Signup = () => {
             category: formData.category,
             nid: formData.nid,
             nid_file_url: nidFileUrl,
-            status: 'pending_verification'
-          }
+            status: "pending_verification",
+          },
         ])
         .select();
 
       if (insertError) {
-        console.error('Database insert error:', insertError);
-        
+        console.error("Database insert error:", insertError);
+
         if (uploadedFileName) {
           // console.log(' Cleaning up uploaded file');
-          await supabase.storage.from('nid-files').remove([uploadedFileName]);
+          await supabase.storage.from("nid-files").remove([uploadedFileName]);
         }
-        
-        if (insertError.message.includes('duplicate') || insertError.code === '23505') {
-          if (insertError.message.includes('email')) {
-            setErrors(prev => ({ ...prev, email: "This email is already registered" }));
-          } else if (insertError.message.includes('mobile')) {
-            setErrors(prev => ({ ...prev, mobile: "This mobile number is already registered" }));
-          } else if (insertError.message.includes('nid')) {
-            setErrors(prev => ({ ...prev, nid: "This NID/Birth Certificate number is already registered" }));
+
+        if (
+          insertError.message.includes("duplicate") ||
+          insertError.code === "23505"
+        ) {
+          if (insertError.message.includes("email")) {
+            setErrors((prev) => ({
+              ...prev,
+              email: "This email is already registered",
+            }));
+          } else if (insertError.message.includes("mobile")) {
+            setErrors((prev) => ({
+              ...prev,
+              mobile: "This mobile number is already registered",
+            }));
+          } else if (insertError.message.includes("nid")) {
+            setErrors((prev) => ({
+              ...prev,
+              nid: "This NID/Birth Certificate number is already registered",
+            }));
           } else {
-            throw new Error('Duplicate data detected');
+            throw new Error("Duplicate data detected");
           }
           return;
         }
-        
-        throw new Error('Database storage failed: ' + insertError.message);
+
+        throw new Error("Database storage failed: " + insertError.message);
       }
 
-      console.log(' Database insert successful:', insertData);
+      console.log(" Database insert successful:", insertData);
 
-      alert(' Technician registration successful! All your data and documents have been saved. Please wait for admin verification. You will be notified when approved.');
-      navigate('/registration-complete');
-
+      alert(
+        " Technician registration successful! All your data and documents have been saved. Please wait for admin verification. You will be notified when approved."
+      );
+      navigate("/registration-complete");
     } catch (error) {
-      console.error('Technician signup error:', error);
+      console.error("Technician signup error:", error);
       throw error;
     }
   };
- 
+
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100 p-4">
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-4xl">
-        
         {/* Header */}
         <div className="bg-gradient-to-r from-teal-500 to-teal-600 rounded-t-2xl p-6 text-center">
-          <h1 className="text-white text-3xl font-bold uppercase">
-            SIGN UP
-          </h1>
+          <h1 className="text-white text-3xl font-bold uppercase">SIGN UP</h1>
         </div>
 
         {/* Role Tabs */}
         <div className="flex">
           <button
             type="button"
-            onClick={() => handleRoleChange('user')}
+            onClick={() => handleRoleChange("user")}
             className={`flex-1 py-4 px-6 font-semibold text-lg transition-colors ${
-              formData.role === 'user'
-                ? 'bg-teal-500 text-white'
-                : 'bg-gray-300 text-gray-700 hover:bg-gray-400'
+              formData.role === "user"
+                ? "bg-teal-500 text-white"
+                : "bg-gray-300 text-gray-700 hover:bg-gray-400"
             }`}
           >
-            User 
+            User
           </button>
           <button
             type="button"
-            onClick={() => handleRoleChange('technician')}
+            onClick={() => handleRoleChange("technician")}
             className={`flex-1 py-4 px-6 font-semibold text-lg transition-colors ${
-              formData.role === 'technician'
-                ? 'bg-teal-500 text-white'
-                : 'bg-gray-300 text-gray-700 hover:bg-gray-400'
+              formData.role === "technician"
+                ? "bg-teal-500 text-white"
+                : "bg-gray-300 text-gray-700 hover:bg-gray-400"
             }`}
           >
             Technician
@@ -383,7 +451,6 @@ const Signup = () => {
         {/* Form */}
         <div className="p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
-            
             {/* Full Name */}
             <div>
               <input
@@ -394,8 +461,15 @@ const Signup = () => {
                 onChange={handleChange}
                 required
                 placeholder="Full Name"
-                className="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                className={`w-full p-4 border rounded-lg focus:outline-none focus:ring-2 transition ${
+                  errors.fullname
+                    ? "border-red-500 focus:ring-red-500"
+                    : "border-gray-300 focus:ring-teal-500 focus:border-transparent"
+                }`}
               />
+              {errors.fullname && (
+                <p className="text-red-500 text-sm mt-1">{errors.fullname}</p>
+              )}
             </div>
 
             {/* Mobile */}
@@ -409,8 +483,8 @@ const Signup = () => {
                 required
                 placeholder="Mobile (01XXXXXXXXX)"
                 className={`w-full p-4 border rounded-lg focus:outline-none focus:ring-2 transition ${
-                  errors.mobile 
-                    ? "border-red-500 focus:ring-red-500" 
+                  errors.mobile
+                    ? "border-red-500 focus:ring-red-500"
                     : "border-gray-300 focus:ring-teal-500 focus:border-transparent"
                 }`}
               />
@@ -430,8 +504,8 @@ const Signup = () => {
                 required
                 placeholder="Email"
                 className={`w-full p-4 border rounded-lg focus:outline-none focus:ring-2 transition ${
-                  errors.email 
-                    ? "border-red-500 focus:ring-red-500" 
+                  errors.email
+                    ? "border-red-500 focus:ring-red-500"
                     : "border-gray-300 focus:ring-teal-500 focus:border-transparent"
                 }`}
               />
@@ -441,7 +515,7 @@ const Signup = () => {
             </div>
 
             {/* Technician-specific fields */}
-            {formData.role === 'technician' && (
+            {formData.role === "technician" && (
               <>
                 {/* Category */}
                 <div>
@@ -452,8 +526,8 @@ const Signup = () => {
                     onChange={handleChange}
                     required
                     className={`w-full p-4 border rounded-lg focus:outline-none focus:ring-2 transition ${
-                      errors.category 
-                        ? "border-red-500 focus:ring-red-500" 
+                      errors.category
+                        ? "border-red-500 focus:ring-red-500"
                         : "border-gray-300 focus:ring-teal-500 focus:border-transparent"
                     }`}
                   >
@@ -461,16 +535,22 @@ const Signup = () => {
                     <option value="electrician">Electrician</option>
                     <option value="plumber">Plumber</option>
                     <option value="carpenter">Carpenter</option>
-                    <option value="ac_refrigerator_expert">AC & Refrigerator Expert</option>
+                    <option value="ac_refrigerator_expert">
+                      AC & Refrigerator Expert
+                    </option>
                     <option value="painter">Painter</option>
                     <option value="cleaner">Cleaner</option>
                     <option value="decorator">Decorator (Home Events)</option>
                     <option value="housemaid">Housemaid</option>
                     <option value="mover">Mover</option>
-                    <option value="pest_control_expert">Pest Control Expert</option>
+                    <option value="pest_control_expert">
+                      Pest Control Expert
+                    </option>
                   </select>
                   {errors.category && (
-                    <p className="text-red-500 text-sm mt-1">{errors.category}</p>
+                    <p className="text-red-500 text-sm mt-1">
+                      {errors.category}
+                    </p>
                   )}
                 </div>
 
@@ -485,8 +565,8 @@ const Signup = () => {
                     required
                     placeholder="NID (10 digits) or Birth Certificate (16-17 digits)"
                     className={`w-full p-4 border rounded-lg focus:outline-none focus:ring-2 transition ${
-                      errors.nid 
-                        ? "border-red-500 focus:ring-red-500" 
+                      errors.nid
+                        ? "border-red-500 focus:ring-red-500"
                         : "border-gray-300 focus:ring-teal-500 focus:border-transparent"
                     }`}
                   />
@@ -528,8 +608,8 @@ const Signup = () => {
                 required
                 placeholder="Password"
                 className={`w-full p-4 pr-12 border rounded-lg focus:outline-none focus:ring-2 transition ${
-                  errors.password 
-                    ? "border-red-500 focus:ring-red-500" 
+                  errors.password
+                    ? "border-red-500 focus:ring-red-500"
                     : "border-gray-300 focus:ring-teal-500 focus:border-transparent"
                 }`}
               />
@@ -556,8 +636,8 @@ const Signup = () => {
                 required
                 placeholder="Confirm Password"
                 className={`w-full p-4 pr-12 border rounded-lg focus:outline-none focus:ring-2 transition ${
-                  errors.cpassword 
-                    ? "border-red-500 focus:ring-red-500" 
+                  errors.cpassword
+                    ? "border-red-500 focus:ring-red-500"
                     : "border-gray-300 focus:ring-teal-500 focus:border-transparent"
                 }`}
               />
@@ -594,13 +674,30 @@ const Signup = () => {
               >
                 {loading ? (
                   <span className="flex items-center">
-                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    <svg
+                      className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
                     </svg>
                     Processing...
                   </span>
-                ) : 'Sign Up'}
+                ) : (
+                  "Sign Up"
+                )}
               </button>
               <Link
                 to="/login"
