@@ -2,9 +2,8 @@ import BannerImage from "../assets/images/banner.png";
 import AboutHousehold from "../Components/AboutHousehold";
 import Footer from "../Components/Footer";
 import HeaderBanner from "../Components/HeaderBanner";
-import MostTrustedService from '../Components/MostTrustedService';
 import Navbar from "../Components/Navbar";
-import TeamSection from "../Components/TeamSection";
+import Testimonial from "../Components/Testimonial";
 
 export default function About() {
   return (
@@ -56,11 +55,8 @@ export default function About() {
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-teal-600 to-transparent opacity-70"></div>
         </div>
 
-        {/* Main Content Area */}
-        <MostTrustedService />
-
         {/* Team Slider */}
-        <TeamSection />
+        <Testimonial />
       </div>
       <Footer />
     </div>

@@ -1,11 +1,9 @@
 import BannerImage from "../assets/images/banner.png";
-import FAQ from "../Components/FAQ";
 import Footer from "../Components/Footer";
 import HeaderBanner from "../Components/HeaderBanner";
 import Navbar from "../Components/Navbar";
 import ServiceSelector from "../Components/ServiceSelector";
 import ServiceSlider from "../Components/ServiceSlider";
-import Testimonial from "../Components/Testimonial";
 
 export default function Services() {
  
@@ -18,9 +16,7 @@ export default function Services() {
       {/* Testimonial Section */}
       <ServiceSelector />
 
-     <Testimonial />
 
-     <FAQ />
 
       <Footer />
     </div>

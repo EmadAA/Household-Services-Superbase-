@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../../supabaseClient";
-import AllServices from "../Components/AdminComponents/AllServices";
+// import AllServices from "../Components/AdminComponents/AllServices";
 import AllTechnicians from "../Components/AdminComponents/AllTechnicians";
 import AllUsers from "../Components/AdminComponents/AllUsers";
 import ApproveAccounts from "../Components/AdminComponents/ApproveAccounts";

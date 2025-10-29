@@ -96,8 +96,10 @@ export default function Navbar() {
 
     if (userRole === "admin") {
       baseLinks.push({ name: "PROFILE", path: "/admindashboard" });
+    } else if (userRole === "user") {
+      baseLinks.push({ name: "PROFILE", path: "/userprofile" });
     } else {
-      baseLinks.push({ name: "PROFILE", path: "/profile" });
+      baseLinks.push({ name: "PROFILE", path: "/technicianprofile" });
     }
 
     baseLinks.push({ name: "CONTACT", path: "/contact" });

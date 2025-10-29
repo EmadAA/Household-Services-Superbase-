@@ -15,7 +15,8 @@ const Login = lazy(() => import('./Pages/Login'));
 const Signup = lazy(() => import('./Pages/Signup'));
 const Services = lazy(() => import('./Pages/Services'));
 const Page404 = lazy(() => import('./Pages/Page404'));
-const Profile = lazy(() => import('./Pages/Profile'));
+const UserProfile = lazy(() => import('./Pages/UserProfile'));
+const TechnicianProfile = lazy(() => import('./Pages/TechnicianProfile'));
 const AdminDashBoard = lazy(() => import('./Pages/AdminDashBoard'));
 
 // Preloader
@@ -38,13 +39,21 @@ const App = () => {
           <Route path="/contact" element={<Contact />} />
           <Route path="/registration-complete" element={<RegistrationComplete />} />
            <Route
-          path="/profile"
+          path="/userprofile"
           element={
             <ProtectedRoute>
-              <Profile />
+              <UserProfile />
             </ProtectedRoute>
           }
         />
+ 
+          <Route
+          path="/technicianprofile"
+          element={
+            <ProtectedRoute>
+              <TechnicianProfile />
+            </ProtectedRoute>}
+          /> 
           <Route path="/admindashboard"  element={
             // <ProtectedRoute>
               <AdminDashBoard />

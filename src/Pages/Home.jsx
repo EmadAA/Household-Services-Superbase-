@@ -1,11 +1,13 @@
 import { HiArrowNarrowRight } from "react-icons/hi";
 import { Link } from "react-router-dom";
 import HeroImage from "../assets/images/image.png";
+import ClassCleaningService from "../Components/ClassCleaningService";
+import FAQ from "../Components/FAQ";
 import FloatingIcons from "../Components/FloatingIcons";
 import Footer from "../Components/Footer";
+import MostTrustedService from "../Components/MostTrustedService";
 import Navbar from "../Components/Navbar";
 import PriceContact from "../Components/PriceContact";
-import ClassCleaningService from "../Components/ClassCleaningService";
 import TeamSection from "../Components/TeamSection";
 
 const HomePage = () => {
@@ -41,13 +43,17 @@ const HomePage = () => {
                 <span>Get Pricing</span>
                 <HiArrowNarrowRight className="w-5 h-5 ml-2" />
               </Link>
-              
+
               <button
                 aria-label="Play video"
                 className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-r from-teal-500 to-teal-600 text-white text-lg sm:text-xl hover:scale-110 transition flex items-center justify-center"
               >
                 {/* just a link, nothing else */}
-                <a href="https://www.youtube.com/" target="_blank" rel="noopener noreferrer">
+                <a
+                  href="https://www.youtube.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   ▶
                 </a>
               </button>
@@ -82,18 +88,21 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/*Pricing Section */}
       <section>
-        <PriceContact />
+        <MostTrustedService />
       </section>
-
       {/*Team Section Slider */}
       <section className="py-12 sm:py-16 bg-teal-50 px-4 sm:px-6 lg:px-8">
         <div className="max-w-screen-xl mx-auto">
           <TeamSection />
         </div>
       </section>
+      <FAQ />
 
+      {/*Pricing Section */}
+      <section>
+        <PriceContact />
+      </section>
       {/* Footer */}
       <Footer />
     </div>
