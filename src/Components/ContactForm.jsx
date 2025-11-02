@@ -4,9 +4,10 @@ import {
   FaInstagram,
   FaLinkedin,
   FaPhone,
-  FaTwitter
+  FaTwitter,
 } from "react-icons/fa";
 
+// 🔹 Reusable Social Icon Component
 const SocialIcon = ({ icon, href, label }) => (
   <a
     href={href}
@@ -16,21 +17,43 @@ const SocialIcon = ({ icon, href, label }) => (
     {icon}
   </a>
 );
-//reusable input  field
-const InputField =({type="text", placeholder,  value, required, onChange})=>(
 
-  <input 
-  type={type}
-  placeholder={placeholder}
-  value={value}
-  onChange={onChange}
-  required={required}
-  className="w-full px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-teal-600"
-  />
-
-)
+// 🔹 Reusable Input Field Component
+const InputField = ({
+  type = "text",
+  placeholder,
+  name,
+  value,
+  required,
+  onChange,
+  error,
+}) => (
+  <div>
+    <input
+      type={type}
+      name={name}
+      placeholder={placeholder}
+      value={value}
+      onChange={onChange}
+      required={required}
+      className={`w-full px-4 py-3 border rounded-full focus:outline-none focus:ring-2 focus:ring-teal-600 ${
+        error ? "border-red-500" : "border-gray-300"
+      }`}
+    />
+    {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+  </div>
+);
 
 const ContactForm = () => {
+  // 🔹 Regex patterns
+  const patterns = {
+    firstName: /^[A-Za-z][A-Za-z\s]{2,29}$/,
+    lastName: /^[A-Za-z][A-Za-z\s]{2,29}$/,
+    phone: /^01[3-9]\d{8}$/,
+    email: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+  };
+
+  // 🔹 Form data
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -39,16 +62,63 @@ const ContactForm = () => {
     message: "",
   });
 
+  // 🔹 Error messages
+  const [errors, setErrors] = useState({});
+
+  // 🔹 Handle input change and validate live
   const handleChange = (e) => {
+    const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [e.target.name]: e.target.value,
+      [name]: value,
     }));
+
+    // Validate fields using regex patterns
+    if (patterns[name]) {
+      if (!patterns[name].test(value)) {
+        let message = "";
+        switch (name) {
+          case "firstName":
+          case "lastName":
+            message =
+              "Name must contain only letters and spaces (3–30 characters).";
+            break;
+          case "phone":
+            message = "Enter a valid Bangladeshi mobile number (e.g. 017XXXXXXXX).";
+            break;
+          case "email":
+            message = "Enter a valid email address.";
+            break;
+          default:
+            message = "Invalid input.";
+        }
+        setErrors((prev) => ({ ...prev, [name]: message }));
+      } else {
+        setErrors((prev) => ({ ...prev, [name]: "" }));
+      }
+    }
   };
 
+  // 🔹 Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Form submitted:", formData);
+
+    // Final validation before submission
+    const newErrors = {};
+    Object.keys(patterns).forEach((key) => {
+      if (!patterns[key].test(formData[key])) {
+        newErrors[key] = `Invalid ${key} format.`;
+      }
+    });
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    console.log("✅ Form submitted successfully:", formData);
+
+    // Reset form
     setFormData({
       firstName: "",
       lastName: "",
@@ -56,6 +126,7 @@ const ContactForm = () => {
       email: "",
       message: "",
     });
+    setErrors({});
   };
 
   return (
@@ -63,7 +134,7 @@ const ContactForm = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col lg:flex-row gap-12">
           {/* Left Column - Contact Info */}
-          <div className="flex-1 ">
+          <div className="flex-1">
             {/* Header */}
             <div className="mb-8">
               <div className="flex items-center mb-2">
@@ -80,7 +151,7 @@ const ContactForm = () => {
             {/* Address */}
             <p className="text-gray-600 mb-6">
               <span className="font-semibold text-teal-600">ADDRESS:</span>{" "}
-              Sylhet-3100 , Bangladesh
+              Sylhet-3100, Bangladesh
             </p>
 
             {/* Customer Service */}
@@ -89,16 +160,14 @@ const ContactForm = () => {
                 <FaPhone className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="font-semibold text-gray-800">
-                  CUSTOMER SERVICE:
-                </h3>
+                <h3 className="font-semibold text-gray-800">CUSTOMER SERVICE:</h3>
                 <p className="text-gray-600">
                   +880 1676 480060 , +880 1719 712616
                 </p>
               </div>
             </div>
 
-            {/* email */}
+            {/* Email */}
             <div className="flex items-start mb-4">
               <div className="w-12 h-12 bg-teal-600 rounded-full flex items-center justify-center text-white mr-4">
                 <FaEnvelope className="w-6 h-6" />
@@ -131,7 +200,6 @@ const ContactForm = () => {
                     href="#"
                     label="Instagram"
                   />
-                  
                 </div>
               </div>
             </div>
@@ -139,50 +207,48 @@ const ContactForm = () => {
 
           {/* Right Column - Form */}
           <div className="flex-1">
-            <form onSubmit={handleSubmit} autoFocus className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-6">
               {/* First & Last Name */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            
-                <InputField 
-                
-                type="text"
-                onChange={handleChange}
-                placeholder="First Name *"
-                value={formData.firstName}
-                required 
-                />
-
-
-
-
                 <InputField
+                  name="firstName"
                   type="text"
+                  placeholder="First Name *"
+                  value={formData.firstName}
+                  onChange={handleChange}
+                  required
+                  error={errors.firstName}
+                />
+                <InputField
                   name="lastName"
+                  type="text"
                   placeholder="Last Name *"
                   value={formData.lastName}
                   onChange={handleChange}
                   required
+                  error={errors.lastName}
                 />
               </div>
 
-             
+              {/* Phone & Email */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <InputField
-                  type="tel"
                   name="phone"
+                  type="tel"
                   placeholder="Your Phone *"
                   value={formData.phone}
                   onChange={handleChange}
                   required
+                  error={errors.phone}
                 />
-
                 <InputField
-                  type="email"
                   name="email"
+                  type="email"
                   placeholder="Your Email *"
                   value={formData.email}
                   onChange={handleChange}
                   required
+                  error={errors.email}
                 />
               </div>
 
