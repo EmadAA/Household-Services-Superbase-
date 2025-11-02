@@ -82,7 +82,7 @@ export default function PriceContact() {
         {/* Left Side - Form */}
         <div>
           <h2 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6">
-            Get Instant Price for Household Service?
+            Get Instant Quote for Household Service?
           </h2>
           <p className="mb-5 sm:mb-6 text-gray-600 text-sm sm:text-base">
             Need to speak to someone?{" "}
@@ -163,7 +163,7 @@ export default function PriceContact() {
               type="submit"
               className="bg-teal-500 text-white px-5 sm:px-6 py-2.5 sm:py-3 rounded-lg hover:bg-teal-600 transition w-full sm:w-auto font-medium text-sm sm:text-base"
             >
-              SEE MY INSTANT QUOTE
+              SEND MESSAGE
             </button>
           </form>
         </div>

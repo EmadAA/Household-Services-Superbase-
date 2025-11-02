@@ -43,7 +43,7 @@ export default function ClassCleaningService() {
             className="mx-auto mb-4 w-16 h-16"
           />
           <h3 className="font-semibold text-lg mb-2">{service.title}</h3>
-          <p className="text-gray-600 ">{service.desc}</p>
+          <p className="text-gray-600 text-justify">{service.desc}</p>
         </div>
       ))
     
