@@ -6,8 +6,8 @@ import {
   FaPhone,
   FaTwitter,
 } from "react-icons/fa";
+import { sendEmail } from "../utils/emailService";
 
-// 🔹 Reusable Social Icon Component
 const SocialIcon = ({ icon, href, label }) => (
   <a
     href={href}
@@ -18,7 +18,6 @@ const SocialIcon = ({ icon, href, label }) => (
   </a>
 );
 
-// 🔹 Reusable Input Field Component
 const InputField = ({
   type = "text",
   placeholder,
@@ -27,6 +26,7 @@ const InputField = ({
   required,
   onChange,
   error,
+  disabled,
 }) => (
   <div>
     <input
@@ -36,16 +36,16 @@ const InputField = ({
       value={value}
       onChange={onChange}
       required={required}
+      disabled={disabled}
       className={`w-full px-4 py-3 border rounded-full focus:outline-none focus:ring-2 focus:ring-teal-600 ${
         error ? "border-red-500" : "border-gray-300"
-      }`}
+      } ${disabled ? "bg-gray-100 cursor-not-allowed" : ""}`}
     />
     {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
   </div>
 );
 
 const ContactForm = () => {
-  // 🔹 Regex patterns
   const patterns = {
     firstName: /^[A-Za-z][A-Za-z\s]{2,29}$/,
     lastName: /^[A-Za-z][A-Za-z\s]{2,29}$/,
@@ -53,7 +53,6 @@ const ContactForm = () => {
     email: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
   };
 
-  // 🔹 Form data
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -62,10 +61,11 @@ const ContactForm = () => {
     message: "",
   });
 
-  // 🔹 Error messages
   const [errors, setErrors] = useState({});
 
-  // 🔹 Handle input change and validate live
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState(null);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -73,7 +73,6 @@ const ContactForm = () => {
       [name]: value,
     }));
 
-    // Validate fields using regex patterns
     if (patterns[name]) {
       if (!patterns[name].test(value)) {
         let message = "";
@@ -99,11 +98,10 @@ const ContactForm = () => {
     }
   };
 
-  // 🔹 Handle form submission
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitStatus(null);
 
-    // Final validation before submission
     const newErrors = {};
     Object.keys(patterns).forEach((key) => {
       if (!patterns[key].test(formData[key])) {
@@ -116,17 +114,47 @@ const ContactForm = () => {
       return;
     }
 
-    console.log("✅ Form submitted successfully:", formData);
+    setIsSubmitting(true);
 
-    // Reset form
-    setFormData({
-      firstName: "",
-      lastName: "",
-      phone: "",
-      email: "",
-      message: "",
-    });
-    setErrors({});
+    try {
+      console.log("Submitting form...");
+      
+      // Send email
+      const response = await sendEmail({
+        name: `${formData.firstName} ${formData.lastName}`,
+        email: formData.email,
+        phone: formData.phone,
+        message: formData.message,
+        subject: `New Contact Form - ${formData.firstName} ${formData.lastName}`
+      });
+
+      console.log("Email sent, response:", response);
+
+      if (response === "OK") {
+        setSubmitStatus({ type: "success", message: "Message sent successfully! We'll get back to you soon." });
+        
+        // Reset form
+        setFormData({
+          firstName: "",
+          lastName: "",
+          phone: "",
+          email: "",
+          message: "",
+        });
+        setErrors({});
+      } else {
+        setSubmitStatus({ type: "error", message: "Failed to send message. Please try again." });
+      }
+    } catch (error) {
+      console.error("Form submission error:", error);
+      console.error("Error details:", error.message);
+      setSubmitStatus({ 
+        type: "error", 
+        message: `Error: ${error.message || "Please check console for details"}` 
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -207,6 +235,17 @@ const ContactForm = () => {
 
           {/* Right Column - Form */}
           <div className="flex-1">
+            {/* Status Message */}
+            {submitStatus && (
+              <div className={`mb-6 p-4 rounded-lg ${
+                submitStatus.type === 'success' 
+                  ? 'bg-green-50 text-green-700 border border-green-200' 
+                  : 'bg-red-50 text-red-700 border border-red-200'
+              }`}>
+                {submitStatus.message}
+              </div>
+            )}
+
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* First & Last Name */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -218,6 +257,7 @@ const ContactForm = () => {
                   onChange={handleChange}
                   required
                   error={errors.firstName}
+                  disabled={isSubmitting}
                 />
                 <InputField
                   name="lastName"
@@ -227,6 +267,7 @@ const ContactForm = () => {
                   onChange={handleChange}
                   required
                   error={errors.lastName}
+                  disabled={isSubmitting}
                 />
               </div>
 
@@ -240,6 +281,7 @@ const ContactForm = () => {
                   onChange={handleChange}
                   required
                   error={errors.phone}
+                  disabled={isSubmitting}
                 />
                 <InputField
                   name="email"
@@ -249,6 +291,7 @@ const ContactForm = () => {
                   onChange={handleChange}
                   required
                   error={errors.email}
+                  disabled={isSubmitting}
                 />
               </div>
 
@@ -260,15 +303,23 @@ const ContactForm = () => {
                 onChange={handleChange}
                 rows={5}
                 required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-600 resize-none"
+                disabled={isSubmitting}
+                className={`w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-600 resize-none ${
+                  isSubmitting ? "bg-gray-100 cursor-not-allowed" : ""
+                }`}
               ></textarea>
 
               {/* Submit Button */}
               <button
                 type="submit"
-                className="w-full bg-teal-600 hover:bg-teal-700 text-white font-medium py-3 px-6 rounded-full transition"
+                disabled={isSubmitting}
+                className={`w-full font-medium py-3 px-6 rounded-full transition ${
+                  isSubmitting 
+                    ? "bg-gray-400 cursor-not-allowed text-white" 
+                    : "bg-teal-600 hover:bg-teal-700 text-white"
+                }`}
               >
-                Send Message
+                {isSubmitting ? "Sending..." : "Send Message"}
               </button>
             </form>
           </div>

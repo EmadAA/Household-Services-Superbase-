@@ -1,5 +1,6 @@
 import { useState } from "react";
 import HeroImage from "../assets/images/image.png";
+import { sendEmail } from "../utils/emailService";
 
 export default function PriceContact() {
   // Regex patterns
@@ -23,6 +24,10 @@ export default function PriceContact() {
     email: "",
     mobile: "",
   });
+
+  // Submission state
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState(null);
 
   // Handle input changes and live validation
   const handleChange = (e) => {
@@ -48,8 +53,9 @@ export default function PriceContact() {
   };
 
   // Handle form submission
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitStatus(null);
 
     // Final validation check
     const newErrors = {};
@@ -64,16 +70,46 @@ export default function PriceContact() {
       return;
     }
 
-    console.log("Form submitted successfully:", formData);
+    setIsSubmitting(true);
 
-    // Reset form
-    setFormData({
-      name: "",
-      email: "",
-      mobile: "",
-      message: "",
-    });
-    setErrors({});
+    try {
+      console.log("Submitting form...");
+      
+      // Send email
+      const response = await sendEmail({
+        name: formData.name,
+        email: formData.email,
+        mobile: formData.mobile,
+        message: formData.message,
+        subject: "New Household Service Quote Request"
+      });
+
+      console.log("Email sent, response:", response);
+
+      if (response === "OK") {
+        setSubmitStatus({ type: "success", message: "Message sent successfully!" });
+        
+        // Reset form
+        setFormData({
+          name: "",
+          email: "",
+          mobile: "",
+          message: "",
+        });
+        setErrors({});
+      } else {
+        setSubmitStatus({ type: "error", message: "Failed to send message. Please try again." });
+      }
+    } catch (error) {
+      console.error("Form submission error:", error);
+      console.error("Error details:", error.message);
+      setSubmitStatus({ 
+        type: "error", 
+        message: `Error: ${error.message || "Please check console for details"}` 
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -94,6 +130,17 @@ export default function PriceContact() {
             </a>
           </p>
 
+          {/* Status Message */}
+          {submitStatus && (
+            <div className={`mb-4 p-3 rounded-lg text-sm ${
+              submitStatus.type === 'success' 
+                ? 'bg-green-50 text-green-700 border border-green-200' 
+                : 'bg-red-50 text-red-700 border border-red-200'
+            }`}>
+              {submitStatus.message}
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="grid gap-4">
             {/* Name Field */}
             <div>
@@ -104,9 +151,10 @@ export default function PriceContact() {
                 required
                 value={formData.name}
                 onChange={handleChange}
+                disabled={isSubmitting}
                 className={`border rounded-lg px-3 sm:px-4 py-2.5 sm:py-3 w-full text-sm sm:text-base ${
                   errors.name ? "border-red-500" : "border-gray-300"
-                }`}
+                } ${isSubmitting ? "bg-gray-100 cursor-not-allowed" : ""}`}
               />
               {errors.name && (
                 <p className="text-red-500 text-sm mt-1">{errors.name}</p>
@@ -122,9 +170,10 @@ export default function PriceContact() {
                 required
                 value={formData.email}
                 onChange={handleChange}
+                disabled={isSubmitting}
                 className={`border rounded-lg px-3 sm:px-4 py-2.5 sm:py-3 w-full text-sm sm:text-base ${
                   errors.email ? "border-red-500" : "border-gray-300"
-                }`}
+                } ${isSubmitting ? "bg-gray-100 cursor-not-allowed" : ""}`}
               />
               {errors.email && (
                 <p className="text-red-500 text-sm mt-1">{errors.email}</p>
@@ -140,9 +189,10 @@ export default function PriceContact() {
                 required
                 value={formData.mobile}
                 onChange={handleChange}
+                disabled={isSubmitting}
                 className={`border rounded-lg px-3 sm:px-4 py-2.5 sm:py-3 w-full text-sm sm:text-base ${
                   errors.mobile ? "border-red-500" : "border-gray-300"
-                }`}
+                } ${isSubmitting ? "bg-gray-100 cursor-not-allowed" : ""}`}
               />
               {errors.mobile && (
                 <p className="text-red-500 text-sm mt-1">{errors.mobile}</p>
@@ -155,15 +205,23 @@ export default function PriceContact() {
               placeholder="Your Message"
               value={formData.message}
               onChange={handleChange}
-              className="border rounded-lg px-3 sm:px-4 py-2.5 sm:py-3 w-full text-sm sm:text-base min-h-[80px]"
+              disabled={isSubmitting}
+              className={`border rounded-lg px-3 sm:px-4 py-2.5 sm:py-3 w-full text-sm sm:text-base min-h-[80px] ${
+                isSubmitting ? "bg-gray-100 cursor-not-allowed" : ""
+              }`}
             ></textarea>
 
             {/* Submit Button */}
             <button
               type="submit"
-              className="bg-teal-500 text-white px-5 sm:px-6 py-2.5 sm:py-3 rounded-lg hover:bg-teal-600 transition w-full sm:w-auto font-medium text-sm sm:text-base"
+              disabled={isSubmitting}
+              className={`px-5 sm:px-6 py-2.5 sm:py-3 rounded-lg transition w-full sm:w-auto font-medium text-sm sm:text-base ${
+                isSubmitting 
+                  ? "bg-gray-400 cursor-not-allowed text-white" 
+                  : "bg-teal-500 text-white hover:bg-teal-600"
+              }`}
             >
-              SEND MESSAGE
+              {isSubmitting ? "SENDING..." : "SEND MESSAGE"}
             </button>
           </form>
         </div>
