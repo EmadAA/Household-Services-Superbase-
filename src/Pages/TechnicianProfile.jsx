@@ -5,7 +5,8 @@ import Navbar from "../Components/Navbar";
 import PersonalInformation from "../Components/PersonalInformation";
 import ProfileTopSection from "../Components/ProfileTopSection";
 import DoneBookings from "../Components/TechnicianProfileComponents/DoneBookings";
-import MyBookings from "../Components/TechnicianProfileComponents/MyBookings";
+import MyPendingBookings from "../Components/TechnicianProfileComponents/MyPendingBookings";
+import RunningBookings from "../Components/TechnicianProfileComponents/RunningBookings";
 
 export default function TechnicianProfile() {
   const [userData, setUserData] = useState(null);
@@ -49,7 +50,8 @@ export default function TechnicianProfile() {
       <Navbar />
       <ProfileTopSection userData={userData} />
       <PersonalInformation userData={userData} onProfileUpdated={fetchUserData} />
-      <MyBookings />
+      <MyPendingBookings />
+      <RunningBookings />
       <DoneBookings />
       <Footer />
     </div>
