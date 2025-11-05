@@ -7,6 +7,7 @@ import ProfileTopSection from "../Components/ProfileTopSection";
 import DoneBookings from "../Components/TechnicianProfileComponents/DoneBookings";
 import MyPendingBookings from "../Components/TechnicianProfileComponents/MyPendingBookings";
 import RunningBookings from "../Components/TechnicianProfileComponents/RunningBookings";
+import TechnicianStatistics from "../Components/TechnicianProfileComponents/TechnicianStatistics";
 
 export default function TechnicianProfile() {
   const [userData, setUserData] = useState(null);
@@ -53,6 +54,7 @@ export default function TechnicianProfile() {
       <MyPendingBookings />
       <RunningBookings />
       <DoneBookings />
+      <TechnicianStatistics />
       <Footer />
     </div>
   );
