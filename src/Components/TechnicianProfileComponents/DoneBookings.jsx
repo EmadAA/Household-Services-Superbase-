@@ -1,5 +1,4 @@
 import { useState } from "react";
-
 const completedOrders = [
   {
     id: 1,
@@ -11,6 +10,7 @@ const completedOrders = [
     completedDate: "2025-10-26 03:45 PM",
     tranxID: "TXN123456",
     cost: "500 TK",
+    problemDetails: "AC not cooling properly, needed gas refill and filter cleaning",
   },
   {
     id: 2,
@@ -22,6 +22,7 @@ const completedOrders = [
     completedDate: "2025-10-20 05:10 PM",
     tranxID: "TXN987654",
     cost: "700 TK",
+    problemDetails: "Installed 4 CCTV cameras with DVR system for home security",
   },
   {
     id: 3,
@@ -33,6 +34,7 @@ const completedOrders = [
     completedDate: "2025-10-22 06:00 PM",
     tranxID: "TXN555888",
     cost: "250 TK",
+    problemDetails: "Fixed short circuit in living room and replaced faulty switchboard",
   },
   {
     id: 4,
@@ -44,6 +46,7 @@ const completedOrders = [
     completedDate: "2025-10-18 02:40 PM",
     tranxID: "TXN220144",
     cost: "300 TK",
+    problemDetails: "Fan was making noise and wobbling, fixed motor and balanced blades",
   },
 ];
 
@@ -115,6 +118,14 @@ export default function CompletedOrders() {
             <p className="text-sm text-gray-600 mb-3">
               <strong>Total Cost:</strong> {selectedOrder.cost}
             </p>
+            <div className="mb-3">
+              <p className="text-sm text-gray-600 mb-1">
+                <strong>Problem Details:</strong>
+              </p>
+              <p className="text-sm text-gray-600 leading-relaxed">
+                {selectedOrder.problemDetails}
+              </p>
+            </div>
 
             <button
               onClick={() => setSelectedOrder(null)}

@@ -6,6 +6,8 @@ const services = [
     date: "2025-11-03",
     cost: "500 TK",
     status: "Pending",
+    address: "House 12, Road 5, Dhanmondi, Dhaka",
+    problemDetails: "AC not cooling properly, needs gas refill and filter cleaning",
   },
   {
     id: 2,
@@ -14,6 +16,8 @@ const services = [
     date: "2025-11-04",
     cost: "300 TK",
     status: "In Queue",
+    address: "Flat 3B, Gulshan Avenue, Gulshan-1, Dhaka",
+    problemDetails: "Kitchen sink pipe leaking, needs replacement",
   },
   {
     id: 3,
@@ -22,6 +26,8 @@ const services = [
     date: "2025-11-02",
     cost: "400 TK",
     status: "Pending",
+    address: "Apartment 204, Banani DOHS, Dhaka",
+    problemDetails: "Deep cleaning required for 3 bedrooms and living area",
   },
   {
     id: 4,
@@ -30,6 +36,8 @@ const services = [
     date: "2025-11-01",
     cost: "200 TK",
     status: "In Queue",
+    address: "House 45, Mohammadpur, Dhaka",
+    problemDetails: "Two large carpets need professional washing and stain removal",
   },
   {
     id: 5,
@@ -38,6 +46,8 @@ const services = [
     date: "2025-11-06",
     cost: "350 TK",
     status: "Pending",
+    address: "Villa 7, Bashundhara R/A, Dhaka",
+    problemDetails: "Cockroach infestation in kitchen and bathroom areas",
   },
   {
     id: 6,
@@ -46,6 +56,8 @@ const services = [
     date: "2025-11-07",
     cost: "1000 TK",
     status: "In Queue",
+    address: "House 23, Uttara Sector 10, Dhaka",
+    problemDetails: "Interior painting for master bedroom and hallway",
   },
   {
     id: 7,
@@ -54,6 +66,8 @@ const services = [
     date: "2025-11-05",
     cost: "250 TK",
     status: "Pending",
+    address: "Flat 5C, Mirpur DOHS, Dhaka",
+    problemDetails: "Install new water purifier and connect to main line",
   },
   {
     id: 8,
@@ -62,6 +76,8 @@ const services = [
     date: "2025-11-08",
     cost: "700 TK",
     status: "In Queue",
+    address: "Shop 12, Elephant Road, Dhaka",
+    problemDetails: "Install 4 CCTV cameras with DVR system for security",
   },
   {
     id: 9,
@@ -70,6 +86,8 @@ const services = [
     date: "2025-11-09",
     cost: "150 TK",
     status: "Pending",
+    address: "House 8, Old Dhaka, Dhaka",
+    problemDetails: "Fix wooden roof beams and replace damaged tiles",
   },
   {
     id: 10,
@@ -78,6 +96,8 @@ const services = [
     date: "2025-11-10",
     cost: "250 TK",
     status: "In Queue",
+    address: "Bungalow 15, Baridhara, Dhaka",
+    problemDetails: "Regular lawn maintenance and garden cleanup required",
   },
 ];
 
@@ -99,10 +119,25 @@ export default function RunningServices() {
                 {service.name}
               </h3>
               <p className="text-sm text-gray-500 mb-1">
-                Technician Category: {service.category}
+                Category: {service.category}
               </p>
               <p className="text-sm text-gray-500 mb-1">Date: {service.date}</p>
               <p className="text-sm text-gray-500 mb-1">Cost: {service.cost}</p>
+              
+              <div className="mt-2 mb-2">
+                <p className="text-xs font-semibold text-gray-700 mb-1">Address:</p>
+                <p className="text-xs text-gray-600 leading-relaxed">
+                  {service.address}
+                </p>
+              </div>
+
+              <div className="mt-2 mb-2">
+                <p className="text-xs font-semibold text-gray-700 mb-1">Problem Details:</p>
+                <p className="text-xs text-gray-600 leading-relaxed line-clamp-3">
+                  {service.problemDetails}
+                </p>
+              </div>
+
               <p
                 className={`mt-2 text-sm font-medium ${
                   service.status === "In Queue"

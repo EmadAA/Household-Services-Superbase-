@@ -11,6 +11,7 @@ const technicianBookings = [
     time: "10:30 AM",
     cost: "500 TK",
     status: "In Queue",
+    problemDetails: "AC not cooling properly, needs gas refill and filter cleaning",
   },
   {
     id: 2,
@@ -22,6 +23,7 @@ const technicianBookings = [
     time: "02:00 PM",
     cost: "300 TK",
     status: "In Queue",
+    problemDetails: "Kitchen sink pipe leaking continuously",
   },
   {
     id: 3,
@@ -33,6 +35,7 @@ const technicianBookings = [
     time: "11:00 AM",
     cost: "250 TK",
     status: "In Queue",
+    problemDetails: "Short circuit in living room, sparking from switchboard",
   },
   {
     id: 4,
@@ -44,11 +47,11 @@ const technicianBookings = [
     time: "04:00 PM",
     cost: "700 TK",
     status: "In Queue",
+    problemDetails: "Need to install 4 CCTV cameras with DVR system for home security",
   },
 ];
 
-export default function MyPendingBookings() {
-  // Filter bookings for this technician’s category only
+export default function RunningOrders() {
   const filteredBookings = technicianBookings.filter(
     (booking) => booking.category === technicianCategory
   );
@@ -56,9 +59,7 @@ export default function MyPendingBookings() {
   return (
     <div className="mt-10 mb-10 shadow-xl gap-6 ml-auto mr-auto box-border border-2 p-4 sm:p-5 rounded-[15px] border-[#E7E7E7] h-auto w-[90%] sm:w-[85%] md:w-[90%] lg:w-[1300px] max-w-[1400px]">
       <div className="flex flex-col sm:flex-row justify-between w-full border-b-2 pb-4 gap-4 sm:gap-0">
-        <h2 className="text-xl font-bold text-gray-500">
-          Runnig Order 
-        </h2>
+        <h2 className="text-xl font-bold text-gray-500">Running Order</h2>
       </div>
 
       <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 max-h-[600px] overflow-y-auto">
@@ -82,6 +83,15 @@ export default function MyPendingBookings() {
               </p>
               <p className="text-sm text-gray-500 mb-1">Cost: {booking.cost}</p>
 
+              <div className="mt-2 mb-2">
+                <p className="text-xs font-semibold text-gray-700 mb-1">
+                  Problem Details:
+                </p>
+                <p className="text-xs text-gray-600 leading-relaxed line-clamp-3">
+                  {booking.problemDetails}
+                </p>
+              </div>
+
               <p
                 className={`mt-2 text-sm font-medium ${
                   booking.status === "In Queue"
@@ -97,9 +107,6 @@ export default function MyPendingBookings() {
               <button className="flex items-center justify-center gap-2 px-3 lg:px-4 py-2 text-green-600 hover:text-green-500 font-medium transition border border-green-300 rounded-lg hover:bg-green-50 text-sm">
                 Mark as Done
               </button>
-              {/* <button className="flex items-center justify-center gap-2 px-3 lg:px-4 py-2 text-red-600 hover:text-red-500 font-medium transition border border-red-300 rounded-lg hover:bg-red-50 text-sm">
-                Reject
-              </button> */}
             </div>
           </div>
         ))}

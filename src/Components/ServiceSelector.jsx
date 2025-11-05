@@ -1,10 +1,84 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { supabase } from "../../supabaseClient";
 
 const ServiceSelector = () => {
   const [openService, setOpenService] = useState(null);
   const [selectedSub, setSelectedSub] = useState(null);
+  const [showForm, setShowForm] = useState(false);
+  const [customerInfo, setCustomerInfo] = useState({ name: "", number: "" });
+  const [formData, setFormData] = useState({
+    address: "",
+    date: "",
+    problemDetails: "",
+  });
 
-  // ✅ Added prices for each sub-service
+  useEffect(() => {
+    const fetchCustomerInfo = async () => {
+      try {
+        // get session
+        const { data: sessionData, error: sessionError } =
+          await supabase.auth.getSession();
+        if (sessionError) {
+          console.error("Error getting session:", sessionError);
+          return;
+        }
+
+        const session = sessionData?.session;
+        if (!session?.user) {
+          alert("You're not logged in.");
+          return;
+        }
+
+        const storedUserId = localStorage.getItem("userId");
+        console.log("Looking up user with ID:", storedUserId);
+
+        // Query by ID
+        const { data, error } = await supabase
+          .from("users")
+          .select("*")
+          .eq("id", storedUserId)
+          .maybeSingle(); // Use maybeSingle() instead of single() to avoid errors if no row exists
+
+        console.log("User data:", data, "Error:", error);
+
+        if (error) {
+          console.error("Error fetching customer:", error);
+          // Fallback to session data
+          setCustomerInfo({
+            name:
+              session.user.user_metadata?.full_name || session.user.email || "",
+            number: session.user.phone || "",
+          });
+          return;
+        }
+
+        if (data) {
+          // Map table columns to your form fields
+          setCustomerInfo({
+            name: data.fullname || session.user.user_metadata?.full_name || "",
+            number: data.mobile || session.user.phone || "",
+          });
+          console.log("Successfully loaded user info:", {
+            name: data.fullname,
+            number: data.mobile,
+          });
+        } else {
+          // fallback: use session user data when table row missing
+          console.log("No user record found, using session data");
+          setCustomerInfo({
+            name:
+              session.user.user_metadata?.full_name || session.user.email || "",
+            number: session.user.phone || "",
+          });
+        }
+      } catch (err) {
+        console.error("Unexpected fetch error:", err);
+      }
+    };
+
+    fetchCustomerInfo();
+  }, []);
+
   const services = {
     "AC & Refrigerator Expert": [
       { name: "AC Installation", price: 1200 },
@@ -72,17 +146,39 @@ const ServiceSelector = () => {
     setSelectedSub({ service, sub });
   };
 
+  const handleOrderClick = () => {
+    if (!selectedSub) {
+      alert("Please select a service option first!");
+      return;
+    }
+    setShowForm(true);
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    // Later you can send this to Supabase:
+    const orderDetails = {
+      ...selectedSub,
+      ...formData,
+      customer: customerInfo,
+      orderedAt: new Date().toISOString(),
+    };
+
+    console.log("✅ Order Submitted:", orderDetails);
+    alert("Order placed successfully!");
+    setShowForm(false);
+    setFormData({ address: "", date: "", problemDetails: "" });
+  };
+
   return (
-    <div className="w-full max-w-[1300px] mx-auto p-6 border-2 shadow-md rounded-lg border-gray-200 my-12">
+    <div className="w-full max-w-[1300px] mx-auto p-6 border-2 shadow-md rounded-lg border-gray-200 my-12 relative">
       <h2 className="text-2xl font-semibold text-center text-gray-800 mb-6">
         Choose Your Service
       </h2>
 
       {/* Responsive Grid */}
-      <div
-        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6"
-        style={{ paddingBottom: openService ? "320px" : "0" }}
-      >
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
         {Object.keys(services).map((service) => (
           <div
             key={service}
@@ -128,13 +224,7 @@ const ServiceSelector = () => {
                 <div className="flex justify-between mt-4">
                   <button
                     className="px-4 py-2 bg-cyan-500 text-white text-sm rounded-lg hover:bg-cyan-600 transition"
-                    onClick={() =>
-                      alert(
-                        selectedSub?.service === service
-                          ? `Ordered: ${selectedSub.sub.name} (${service}) - ${selectedSub.sub.price} Tk`
-                          : "Please select a service option first!"
-                      )
-                    }
+                    onClick={handleOrderClick}
                   >
                     Order
                   </button>
@@ -153,6 +243,120 @@ const ServiceSelector = () => {
           </div>
         ))}
       </div>
+
+      {/* 🟢 Floating Order Form */}
+      {showForm && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50"
+          onClick={() => setShowForm(false)}
+        >
+          <div
+            className="bg-white rounded-xl shadow-2xl p-6 w-[90%] sm:w-[500px] relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-xl font-semibold text-gray-700 mb-4">
+              Confirm Your Booking
+            </h3>
+            <form onSubmit={handleSubmit} className="space-y-3">
+              <div>
+                <label className="text-sm text-gray-600">Service</label>
+                <input
+                  type="text"
+                  value={`${selectedSub.service} - ${selectedSub.sub.name}`}
+                  disabled
+                  className="w-full p-2 border rounded-lg text-gray-700 bg-gray-100"
+                />
+              </div>
+
+              <div>
+                <label className="text-sm text-gray-600">Cost (Tk)</label>
+                <input
+                  type="text"
+                  value={selectedSub.sub.price}
+                  disabled
+                  className="w-full p-2 border rounded-lg text-gray-700 bg-gray-100"
+                />
+              </div>
+
+              <div>
+                <label className="text-sm text-gray-600">Customer Name</label>
+                <input
+                  type="text"
+                  value={customerInfo.name || ""}
+                  disabled
+                  className="w-full p-2 border rounded-lg text-gray-700 bg-gray-100"
+                />
+              </div>
+
+              <div>
+                <label className="text-sm text-gray-600">Phone Number</label>
+                <input
+                  type="text"
+                  value={customerInfo.number || ""}
+                  disabled
+                  className="w-full p-2 border rounded-lg text-gray-700 bg-gray-100"
+                />
+              </div>
+
+              <div>
+                <label className="text-sm text-gray-600">Address</label>
+                <input
+                  type="text"
+                  required
+                  value={formData.address}
+                  onChange={(e) =>
+                    setFormData({ ...formData, address: e.target.value })
+                  }
+                  className="w-full p-2 border rounded-lg"
+                />
+              </div>
+
+              <div>
+                <label className="text-sm text-gray-600">Preferred Date</label>
+                <input
+                  type="date"
+                  required
+                  value={formData.date}
+                  onChange={(e) =>
+                    setFormData({ ...formData, date: e.target.value })
+                  }
+                  className="w-full p-2 border rounded-lg"
+                />
+              </div>
+
+              <div>
+                <label className="text-sm text-gray-600">
+                  Problem Details (optional)
+                </label>
+                <textarea
+                  value={formData.problemDetails}
+                  onChange={(e) =>
+                    setFormData({ ...formData, problemDetails: e.target.value })
+                  }
+                  className="w-full p-2 border rounded-lg"
+                  placeholder="Describe the issue (optional)"
+                />
+              </div>
+
+              <div className="flex justify-end gap-3 mt-4">
+                <button
+                  type="button"
+                  className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 text-sm"
+                  onClick={() => setShowForm(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600 text-sm"
+                >
+                  Confirm Order
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

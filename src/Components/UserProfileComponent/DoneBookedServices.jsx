@@ -3,59 +3,104 @@ import { useState } from "react";
 const pastServices = [
   {
     id: 1,
-    name: "AC Repair",
+    name: "AC Maintenance",
     category: "Electrician",
-    orderedDate: "2025-10-01 10:30 AM",
-    completedDate: "2025-10-02 04:45 PM",
+    date: "2025-11-03",
     cost: "500 TK",
-    tranxID: "TXN-784512",
+    status: "Pending",
+    address: "House 12, Road 5, Dhanmondi, Dhaka",
+    problemDetails: "AC not cooling properly, needs gas refill and filter cleaning",
   },
   {
     id: 2,
-    name: "Pipe Fixing",
+    name: "Plumbing Repair",
     category: "Plumber",
-    orderedDate: "2025-10-03 02:00 PM",
-    completedDate: "2025-10-03 06:30 PM",
+    date: "2025-11-04",
     cost: "300 TK",
-    tranxID: "TXN-784513",
+    status: "In Queue",
+    address: "Flat 3B, Gulshan Avenue, Gulshan-1, Dhaka",
+    problemDetails: "Kitchen sink pipe leaking, needs replacement",
   },
   {
     id: 3,
-    name: "Full House Cleaning",
+    name: "House Cleaning",
     category: "Cleaner",
-    orderedDate: "2025-10-05 09:00 AM",
-    completedDate: "2025-10-05 02:15 PM",
-    cost: "800 TK",
-    tranxID: "TXN-784514",
+    date: "2025-11-02",
+    cost: "400 TK",
+    status: "Pending",
+    address: "Apartment 204, Banani DOHS, Dhaka",
+    problemDetails: "Deep cleaning required for 3 bedrooms and living area",
   },
   {
     id: 4,
-    name: "Furniture Polishing",
-    category: "Carpenter",
-    orderedDate: "2025-10-07 11:15 AM",
-    completedDate: "2025-10-08 03:40 PM",
-    cost: "600 TK",
-    tranxID: "TXN-784515",
+    name: "Carpet Wash",
+    category: "Cleaner",
+    date: "2025-11-01",
+    cost: "200 TK",
+    status: "In Queue",
+    address: "House 45, Mohammadpur, Dhaka",
+    problemDetails: "Two large carpets need professional washing and stain removal",
   },
   {
     id: 5,
     name: "Pest Control",
     category: "Pest Control Expert",
-    orderedDate: "2025-10-10 09:30 AM",
-    completedDate: "2025-10-10 01:00 PM",
-    cost: "400 TK",
-    tranxID: "TXN-784516",
+    date: "2025-11-06",
+    cost: "350 TK",
+    status: "Pending",
+    address: "Villa 7, Bashundhara R/A, Dhaka",
+    problemDetails: "Cockroach infestation in kitchen and bathroom areas",
   },
   {
     id: 6,
-    name: "Painting",
+    name: "Painter",
     category: "Home Decor",
-    orderedDate: "2025-10-11 08:00 AM",
-    completedDate: "2025-10-13 06:00 PM",
+    date: "2025-11-07",
     cost: "1000 TK",
-    tranxID: "TXN-784517",
+    status: "In Queue",
+    address: "House 23, Uttara Sector 10, Dhaka",
+    problemDetails: "Interior painting for master bedroom and hallway",
   },
-  
+  {
+    id: 7,
+    name: "Water Filter Setup",
+    category: "Plumber",
+    date: "2025-11-05",
+    cost: "250 TK",
+    status: "Pending",
+    address: "Flat 5C, Mirpur DOHS, Dhaka",
+    problemDetails: "Install new water purifier and connect to main line",
+  },
+  {
+    id: 8,
+    name: "CCTV Installation",
+    category: "Electrician",
+    date: "2025-11-08",
+    cost: "700 TK",
+    status: "In Queue",
+    address: "Shop 12, Elephant Road, Dhaka",
+    problemDetails: "Install 4 CCTV cameras with DVR system for security",
+  },
+  {
+    id: 9,
+    name: "Roof Repair",
+    category: "Carpenter",
+    date: "2025-11-09",
+    cost: "150 TK",
+    status: "Pending",
+    address: "House 8, Old Dhaka, Dhaka",
+    problemDetails: "Fix wooden roof beams and replace damaged tiles",
+  },
+  {
+    id: 10,
+    name: "Lawn Mowing",
+    category: "Mover",
+    date: "2025-11-10",
+    cost: "250 TK",
+    status: "In Queue",
+    address: "Bungalow 15, Baridhara, Dhaka",
+    problemDetails: "Regular lawn maintenance and garden cleanup required",
+  },
 ];
 
 export default function DoneBookedServices() {
@@ -123,6 +168,14 @@ export default function DoneBookedServices() {
               <p>
                 <span className="font-semibold text-gray-700">Cost:</span>{" "}
                 {selectedService.cost}
+              </p>
+              <p>
+                <span className="font-semibold text-gray-700">Address:</span>{" "}
+                {selectedService.address}
+              </p>
+              <p>
+                <span className="font-semibold text-gray-700">Problem Details:</span>{" "}
+                {selectedService.problemDetails}
               </p>
               {selectedService.tranxID && (
                 <p>

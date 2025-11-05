@@ -11,8 +11,8 @@ const technicianBookings = [
     time: "10:30 AM",
     cost: "500 TK",
     status: "Pending",
+    problemDetails: "AC not cooling properly, needs gas refill and filter cleaning",
   },
-
   {
     id: 3,
     serviceName: "Electric Wiring Fix",
@@ -23,6 +23,7 @@ const technicianBookings = [
     time: "11:00 AM",
     cost: "250 TK",
     status: "In Queue",
+    problemDetails: "Short circuit in living room, sparking from switchboard",
   },
   {
     id: 4,
@@ -34,12 +35,12 @@ const technicianBookings = [
     time: "04:00 PM",
     cost: "700 TK",
     status: "Pending",
+    problemDetails: "Need to install 4 CCTV cameras with DVR system for home security",
   },
-
 ];
 
 export default function MyPendingBookings() {
-  // Filter bookings for this technician’s category only
+  // Filter bookings for this technician's category only
   const filteredBookings = technicianBookings.filter(
     (booking) => booking.category === technicianCategory
   );
@@ -72,6 +73,13 @@ export default function MyPendingBookings() {
                 Date: {booking.date}, Time: {booking.time}
               </p>
               <p className="text-sm text-gray-500 mb-1">Cost: {booking.cost}</p>
+
+              <div className="mt-2 mb-2">
+                <p className="text-xs font-semibold text-gray-700 mb-1">Problem Details:</p>
+                <p className="text-xs text-gray-600 leading-relaxed line-clamp-3">
+                  {booking.problemDetails}
+                </p>
+              </div>
 
               <p
                 className={`mt-2 text-sm font-medium ${
