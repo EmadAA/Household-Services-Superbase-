@@ -51,7 +51,7 @@ export default function RunningServices() {
 
   const handleSubmitReview = () => {
     console.log("Review submitted:", reviewData);
-    alert("Review submitted successfully!");
+    alert("Thanks for the review, we appreciate your feedback! Stay with us.");
     setOpenModal(null);
   };
 
@@ -130,7 +130,7 @@ export default function RunningServices() {
             </h3>
 
             {/* Ratings */}
-            {["How was technician's behavior", "How was timing", "How was quality"].map((field) => (
+            {["How was technician's behavior", "How was timing", "How was the service quality"].map((field) => (
               <div key={field} className="mb-3">
                 <label className="capitalize font-medium text-gray-700">
                   {field}:
