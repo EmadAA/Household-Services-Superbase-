@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 const services = [
   {
     id: 1,
@@ -7,7 +9,8 @@ const services = [
     cost: "500 TK",
     status: "Pending",
     address: "House 12, Road 5, Dhanmondi, Dhaka",
-    problemDetails: "AC not cooling properly, needs gas refill and filter cleaning",
+    problemDetails:
+      "AC not cooling properly, needs gas refill and filter cleaning",
   },
   {
     id: 2,
@@ -29,79 +32,29 @@ const services = [
     address: "Apartment 204, Banani DOHS, Dhaka",
     problemDetails: "Deep cleaning required for 3 bedrooms and living area",
   },
-  {
-    id: 4,
-    name: "Carpet Wash",
-    category: "Cleaner",
-    date: "2025-11-01",
-    cost: "200 TK",
-    status: "In Queue",
-    address: "House 45, Mohammadpur, Dhaka",
-    problemDetails: "Two large carpets need professional washing and stain removal",
-  },
-  {
-    id: 5,
-    name: "Pest Control",
-    category: "Pest Control Expert",
-    date: "2025-11-06",
-    cost: "350 TK",
-    status: "Pending",
-    address: "Villa 7, Bashundhara R/A, Dhaka",
-    problemDetails: "Cockroach infestation in kitchen and bathroom areas",
-  },
-  {
-    id: 6,
-    name: "Painter",
-    category: "Home Decor",
-    date: "2025-11-07",
-    cost: "1000 TK",
-    status: "In Queue",
-    address: "House 23, Uttara Sector 10, Dhaka",
-    problemDetails: "Interior painting for master bedroom and hallway",
-  },
-  {
-    id: 7,
-    name: "Water Filter Setup",
-    category: "Plumber",
-    date: "2025-11-05",
-    cost: "250 TK",
-    status: "Pending",
-    address: "Flat 5C, Mirpur DOHS, Dhaka",
-    problemDetails: "Install new water purifier and connect to main line",
-  },
-  {
-    id: 8,
-    name: "CCTV Installation",
-    category: "Electrician",
-    date: "2025-11-08",
-    cost: "700 TK",
-    status: "In Queue",
-    address: "Shop 12, Elephant Road, Dhaka",
-    problemDetails: "Install 4 CCTV cameras with DVR system for security",
-  },
-  {
-    id: 9,
-    name: "Roof Repair",
-    category: "Carpenter",
-    date: "2025-11-09",
-    cost: "150 TK",
-    status: "Pending",
-    address: "House 8, Old Dhaka, Dhaka",
-    problemDetails: "Fix wooden roof beams and replace damaged tiles",
-  },
-  {
-    id: 10,
-    name: "Lawn Mowing",
-    category: "Mover",
-    date: "2025-11-10",
-    cost: "250 TK",
-    status: "In Queue",
-    address: "Bungalow 15, Baridhara, Dhaka",
-    problemDetails: "Regular lawn maintenance and garden cleanup required",
-  },
+  // ... (you can keep your other services)
 ];
 
 export default function RunningServices() {
+  const [openModal, setOpenModal] = useState(null); // holds id of service
+  const [reviewData, setReviewData] = useState({
+    behavior: 0,
+    timing: 0,
+    quality: 0,
+    review: "",
+  });
+
+  const handleOpenModal = (id) => {
+    setOpenModal(id);
+    setReviewData({ behavior: 0, timing: 0, quality: 0, review: "" });
+  };
+
+  const handleSubmitReview = () => {
+    console.log("Review submitted:", reviewData);
+    alert("✅ Review submitted successfully!");
+    setOpenModal(null);
+  };
+
   return (
     <div className="mt-10 mb-10 shadow-xl gap-6 ml-auto mr-auto box-border border-2 p-4 sm:p-5 rounded-[15px] border-[#E7E7E7] h-auto w-[90%] sm:w-[85%] md:w-[90%] lg:w-[1300px] max-w-[1400px]">
       <div className="flex flex-col sm:flex-row justify-between w-full border-b-2 pb-4 gap-4 sm:gap-0">
@@ -123,16 +76,20 @@ export default function RunningServices() {
               </p>
               <p className="text-sm text-gray-500 mb-1">Date: {service.date}</p>
               <p className="text-sm text-gray-500 mb-1">Cost: {service.cost}</p>
-              
+
               <div className="mt-2 mb-2">
-                <p className="text-xs font-semibold text-gray-700 mb-1">Address:</p>
+                <p className="text-xs font-semibold text-gray-700 mb-1">
+                  Address:
+                </p>
                 <p className="text-xs text-gray-600 leading-relaxed">
                   {service.address}
                 </p>
               </div>
 
               <div className="mt-2 mb-2">
-                <p className="text-xs font-semibold text-gray-700 mb-1">Problem Details:</p>
+                <p className="text-xs font-semibold text-gray-700 mb-1">
+                  Problem Details:
+                </p>
                 <p className="text-xs text-gray-600 leading-relaxed line-clamp-3">
                   {service.problemDetails}
                 </p>
@@ -150,7 +107,10 @@ export default function RunningServices() {
             </div>
 
             <div className="mt-4 flex flex-col gap-2">
-              <button className="flex items-center justify-center gap-2 px-3 lg:px-4 py-2 text-teal-600 hover:text-teal-500 font-medium transition border border-teal-300 rounded-lg hover:bg-teal-50 text-sm">
+              <button
+                onClick={() => handleOpenModal(service.id)}
+                className="flex items-center justify-center gap-2 px-3 lg:px-4 py-2 text-teal-600 hover:text-teal-500 font-medium transition border border-teal-300 rounded-lg hover:bg-teal-50 text-sm"
+              >
                 Mark as Done
               </button>
               <button className="flex items-center justify-center gap-2 px-3 lg:px-4 py-2 text-red-600 hover:text-red-500 font-medium transition border border-red-300 rounded-lg hover:bg-red-50 text-sm">
@@ -160,6 +120,70 @@ export default function RunningServices() {
           </div>
         ))}
       </div>
+
+      {/* Review Modal */}
+      {openModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
+          <div className="bg-white rounded-2xl shadow-xl w-[90%] sm:w-[400px] p-6 relative">
+            <h3 className="text-lg font-bold text-gray-700 mb-4 text-center">
+              Leave a Review
+            </h3>
+
+            {/* Ratings */}
+            {["behavior", "timing", "quality"].map((field) => (
+              <div key={field} className="mb-3">
+                <label className="capitalize font-medium text-gray-700">
+                  {field}:
+                </label>
+                <div className="flex gap-2 mt-1">
+                  {[1, 2, 3, 4, 5].map((num) => (
+                    <button
+                      key={num}
+                      onClick={() =>
+                        setReviewData((prev) => ({ ...prev, [field]: num }))
+                      }
+                      className={`w-8 h-8 flex items-center justify-center rounded-full border ${
+                        reviewData[field] >= num
+                          ? "bg-yellow-400 border-yellow-400 text-white"
+                          : "border-gray-300 text-gray-500"
+                      }`}
+                    >
+                      {num}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
+
+            {/* Review Text */}
+            <textarea
+              placeholder="Write your review..."
+              className="w-full border border-gray-300 rounded-lg p-2 text-sm mt-2 focus:ring-2 focus:ring-teal-400 focus:outline-none"
+              rows="3"
+              value={reviewData.review}
+              onChange={(e) =>
+                setReviewData((prev) => ({ ...prev, review: e.target.value }))
+              }
+            />
+
+            {/* Buttons */}
+            <div className="flex justify-between mt-4">
+              <button
+                onClick={() => setOpenModal(null)}
+                className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 text-sm"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSubmitReview}
+                className="px-4 py-2 rounded-lg bg-teal-600 text-white hover:bg-teal-500 text-sm"
+              >
+                Submit
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
