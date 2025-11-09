@@ -51,7 +51,7 @@ export default function RunningServices() {
 
   const handleSubmitReview = () => {
     console.log("Review submitted:", reviewData);
-    alert("✅ Review submitted successfully!");
+    alert("Review submitted successfully!");
     setOpenModal(null);
   };
 
@@ -126,11 +126,11 @@ export default function RunningServices() {
         <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
           <div className="bg-white rounded-2xl shadow-xl w-[90%] sm:w-[400px] p-6 relative">
             <h3 className="text-lg font-bold text-gray-700 mb-4 text-center">
-              Leave a Review
+              Please Leave a Review, It will be helpful for others to trust
             </h3>
 
             {/* Ratings */}
-            {["behavior", "timing", "quality"].map((field) => (
+            {["How was technician's behavior", "How was timing", "How was quality"].map((field) => (
               <div key={field} className="mb-3">
                 <label className="capitalize font-medium text-gray-700">
                   {field}:
