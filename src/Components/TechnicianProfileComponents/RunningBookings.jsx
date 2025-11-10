@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Swal from "sweetalert2"; // Make sure to install: npm install sweetalert2
 
 const technicianCategory = "Electrical";
 
@@ -60,7 +61,6 @@ export default function RunningOrders() {
     (booking) => booking.category === technicianCategory
   );
 
-  // Modal state
   const [openModal, setOpenModal] = useState(null);
   const [reviewData, setReviewData] = useState({
     helpfulness: 0,
@@ -75,9 +75,57 @@ export default function RunningOrders() {
   };
 
   const handleSubmitReview = () => {
-    console.log("Technician Review Submitted:", reviewData);
-    alert("Thanks for the Review, we appreciate your feedback!");
-    setOpenModal(null);
+    // ✅ Validation before submit
+    if (
+      reviewData.helpfulness === 0 ||
+      reviewData.behavior === 0 ||
+      reviewData.punctuality === 0
+    ) {
+      Swal.fire({
+        icon: "warning",
+        title: "Please complete all ratings",
+        text: "Rate all 3 categories before submitting your review.",
+        confirmButtonColor: "#3085d6",
+      });
+      return;
+    }
+
+    Swal.fire({
+      title: "Submit Review?",
+      text: "Are you sure you want to submit this feedback?",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: "#16a34a",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, Submit",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        console.log("Technician Review Submitted:", reviewData);
+        Swal.fire({
+          icon: "success",
+          title: "Thank you!",
+          text: "We appreciate your feedback.",
+          confirmButtonColor: "#16a34a",
+        });
+        setOpenModal(null);
+      }
+    });
+  };
+
+  const handleMarkAsDone = (bookingId) => {
+    Swal.fire({
+      title: "Mark as Done?",
+      text: "Are you sure you want to complete this order?",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: "#16a34a",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, Mark Done",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        handleOpenModal(bookingId);
+      }
+    });
   };
 
   return (
@@ -129,7 +177,7 @@ export default function RunningOrders() {
 
             <div className="mt-4 flex flex-col gap-2">
               <button
-                onClick={() => handleOpenModal(booking.id)}
+                onClick={() => handleMarkAsDone(booking.id)}
                 className="flex items-center justify-center gap-2 px-3 lg:px-4 py-2 text-green-600 hover:text-green-500 font-medium transition border border-green-300 rounded-lg hover:bg-green-50 text-sm"
               >
                 Mark as Done
@@ -153,8 +201,7 @@ export default function RunningOrders() {
               Rate the Customer
             </h3>
 
-            {/* Ratings */}
-            {[
+            {[ 
               { key: "helpfulness", label: "Helpfulness" },
               { key: "behavior", label: "Behavior & Communication" },
               { key: "punctuality", label: "Punctuality" },
@@ -181,9 +228,8 @@ export default function RunningOrders() {
               </div>
             ))}
 
-            {/* Review Text */}
             <textarea
-              placeholder="Write your feedback about the technician..."
+              placeholder="Write your feedback..."
               className="w-full border border-gray-300 rounded-lg p-2 text-sm mt-2 focus:ring-2 focus:ring-green-400 focus:outline-none"
               rows="3"
               value={reviewData.review}
@@ -192,7 +238,6 @@ export default function RunningOrders() {
               }
             />
 
-            {/* Buttons */}
             <div className="flex justify-between mt-4">
               <button
                 onClick={() => setOpenModal(null)}

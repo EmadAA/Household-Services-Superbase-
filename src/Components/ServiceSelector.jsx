@@ -258,16 +258,29 @@ const ServiceSelector = () => {
               Confirm Your Booking
             </h3>
             <form onSubmit={handleSubmit} className="space-y-3">
+              {/* 🟢 Category Field */}
               <div>
-                <label className="text-sm text-gray-600">Service</label>
+                <label className="text-sm text-gray-600">Category</label>
                 <input
                   type="text"
-                  value={`${selectedSub.service} - ${selectedSub.sub.name}`}
+                  value={selectedSub.service} // main category name
                   disabled
                   className="w-full p-2 border rounded-lg text-gray-700 bg-gray-100"
                 />
               </div>
 
+              {/* 🟢 Service Field */}
+              <div>
+                <label className="text-sm text-gray-600">Service</label>
+                <input
+                  type="text"
+                  value={selectedSub.sub.name} // sub service name
+                  disabled
+                  className="w-full p-2 border rounded-lg text-gray-700 bg-gray-100"
+                />
+              </div>
+
+              {/* 🟢 Cost Field */}
               <div>
                 <label className="text-sm text-gray-600">Cost (Tk)</label>
                 <input
@@ -278,6 +291,7 @@ const ServiceSelector = () => {
                 />
               </div>
 
+              {/* 🟢 Customer Info */}
               <div>
                 <label className="text-sm text-gray-600">Customer Name</label>
                 <input
@@ -298,6 +312,7 @@ const ServiceSelector = () => {
                 />
               </div>
 
+              {/* 🟢 Address */}
               <div>
                 <label className="text-sm text-gray-600">Address</label>
                 <input
@@ -311,11 +326,15 @@ const ServiceSelector = () => {
                 />
               </div>
 
+              {/* 🟢 Date */}
               <div>
                 <label className="text-sm text-gray-600">Preferred Date</label>
                 <input
                   type="date"
                   required
+                  min={
+                    new Date(Date.now() + 86400000).toISOString().split("T")[0]
+                  }
                   value={formData.date}
                   onChange={(e) =>
                     setFormData({ ...formData, date: e.target.value })
@@ -324,6 +343,7 @@ const ServiceSelector = () => {
                 />
               </div>
 
+              {/* 🟢 Problem Details */}
               <div>
                 <label className="text-sm text-gray-600">
                   Problem Details (optional)
@@ -338,6 +358,7 @@ const ServiceSelector = () => {
                 />
               </div>
 
+              {/* 🟢 Buttons */}
               <div className="flex justify-end gap-3 mt-4">
                 <button
                   type="button"

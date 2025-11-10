@@ -18,6 +18,7 @@ const Page404 = lazy(() => import('./Pages/Page404'));
 const UserProfile = lazy(() => import('./Pages/UserProfile'));
 const TechnicianProfile = lazy(() => import('./Pages/TechnicianProfile'));
 const AdminDashBoard = lazy(() => import('./Pages/AdminDashBoard'));
+const TermsAndConditions = lazy(() => import('./Pages/TOC'));
 
 // Preloader
 const Preloader = () => (
@@ -38,6 +39,7 @@ const App = () => {
           <Route path="/services" element={<Services />} /> 
           <Route path="/contact" element={<Contact />} />
           <Route path="/registration-complete" element={<RegistrationComplete />} />
+          <Route path="/toc" element={<TermsAndConditions />} />
            <Route
           path="/userprofile"
           element={

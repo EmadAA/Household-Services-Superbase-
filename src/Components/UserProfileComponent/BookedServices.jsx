@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Swal from "sweetalert2";
 
 const services = [
   {
@@ -22,21 +23,11 @@ const services = [
     address: "Flat 3B, Gulshan Avenue, Gulshan-1, Dhaka",
     problemDetails: "Kitchen sink pipe leaking, needs replacement",
   },
-  {
-    id: 3,
-    name: "House Cleaning",
-    category: "Cleaner",
-    date: "2025-11-02",
-    cost: "400 TK",
-    status: "Pending",
-    address: "Apartment 204, Banani DOHS, Dhaka",
-    problemDetails: "Deep cleaning required for 3 bedrooms and living area",
-  },
-  // ... (you can keep your other services)
 ];
 
 export default function RunningServices() {
-  const [openModal, setOpenModal] = useState(null); // holds id of service
+  const [openModal, setOpenModal] = useState(null); // review modal
+  const [confirmModal, setConfirmModal] = useState(null); // confirmation modal
   const [reviewData, setReviewData] = useState({
     behavior: 0,
     timing: 0,
@@ -45,14 +36,52 @@ export default function RunningServices() {
   });
 
   const handleOpenModal = (id) => {
-    setOpenModal(id);
+    // open confirmation first
+    setConfirmModal(id);
+  };
+
+  const handleConfirmCompletion = () => {
+    setOpenModal(confirmModal);
+    setConfirmModal(null);
     setReviewData({ behavior: 0, timing: 0, quality: 0, review: "" });
   };
 
   const handleSubmitReview = () => {
-    console.log("Review submitted:", reviewData);
-    alert("Thanks for the review, we appreciate your feedback! Stay with us.");
-    setOpenModal(null);
+    const { behavior, timing, quality } = reviewData;
+
+    // Validation before submitting
+    if (behavior === 0 || timing === 0 || quality === 0) {
+      Swal.fire({
+        icon: "warning",
+        title: "Incomplete Ratings",
+        text: "Please rate all categories before submitting your review.",
+        confirmButtonColor: "#0d9488",
+      });
+      return;
+    }
+
+    Swal.fire({
+      title: "Are you sure?",
+      text: "Once submitted, your review cannot be edited later.",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "Yes, Submit",
+      cancelButtonText: "Cancel",
+      confirmButtonColor: "#0d9488",
+      cancelButtonColor: "#d33",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        console.log("Review submitted:", reviewData);
+        setOpenModal(null);
+
+        Swal.fire({
+          icon: "success",
+          title: "Review Submitted!",
+          text: "Thanks for your feedback — it helps improve our service.",
+          confirmButtonColor: "#0d9488",
+        });
+      }
+    });
   };
 
   return (
@@ -121,29 +150,60 @@ export default function RunningServices() {
         ))}
       </div>
 
-      {/* Review Modal */}
+      {/* ✅ Confirmation Modal */}
+      {confirmModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
+          <div className="bg-white rounded-2xl shadow-xl w-[90%] sm:w-[400px] p-6 text-center">
+            <h3 className="text-lg font-semibold text-gray-800 mb-3">
+              Confirm Service Completion
+            </h3>
+            <p className="text-gray-600 mb-6">
+              Are you sure the service is completed? Once confirmed, you can give a review.
+            </p>
+
+            <div className="flex justify-center gap-4">
+              <button
+                onClick={() => setConfirmModal(null)}
+                className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 text-sm"
+              >
+                No, Not Yet
+              </button>
+              <button
+                onClick={handleConfirmCompletion}
+                className="px-4 py-2 rounded-lg bg-teal-600 text-white hover:bg-teal-500 text-sm"
+              >
+                Yes, Completed
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ✅ Review Modal */}
       {openModal && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
           <div className="bg-white rounded-2xl shadow-xl w-[90%] sm:w-[400px] p-6 relative">
             <h3 className="text-lg font-bold text-gray-700 mb-4 text-center">
-              Please Leave a Review, It will be helpful for others to trust
+              Please Leave a Review — It helps others trust your feedback
             </h3>
 
             {/* Ratings */}
-            {["How was technician's behavior", "How was timing", "How was the service quality"].map((field) => (
-              <div key={field} className="mb-3">
-                <label className="capitalize font-medium text-gray-700">
-                  {field}:
-                </label>
+            {[
+              { label: "behavior", text: "Technician’s Behavior" },
+              { label: "timing", text: "Service Timing" },
+              { label: "quality", text: "Service Quality" },
+            ].map(({ label, text }) => (
+              <div key={label} className="mb-3">
+                <label className="font-medium text-gray-700">{text}:</label>
                 <div className="flex gap-2 mt-1">
                   {[1, 2, 3, 4, 5].map((num) => (
                     <button
                       key={num}
                       onClick={() =>
-                        setReviewData((prev) => ({ ...prev, [field]: num }))
+                        setReviewData((prev) => ({ ...prev, [label]: num }))
                       }
                       className={`w-8 h-8 flex items-center justify-center rounded-full border ${
-                        reviewData[field] >= num
+                        reviewData[label] >= num
                           ? "bg-yellow-400 border-yellow-400 text-white"
                           : "border-gray-300 text-gray-500"
                       }`}

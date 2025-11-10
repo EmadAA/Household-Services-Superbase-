@@ -74,8 +74,8 @@ const Footer = () => {
               </a>
             </li>
             <li>
-              <a href="/pricing" className="hover:text-white transition block">
-                Pricing
+              <a href="/toc" className="hover:text-white transition block">
+                Terms & Conditions
               </a>
             </li>
           </ul>
