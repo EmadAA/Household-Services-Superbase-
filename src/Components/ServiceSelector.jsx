@@ -154,22 +154,40 @@ const ServiceSelector = () => {
     setShowForm(true);
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    // Later you can send this to Supabase:
-    const orderDetails = {
-      ...selectedSub,
-      ...formData,
-      customer: customerInfo,
-      orderedAt: new Date().toISOString(),
-    };
+  const storedUserId = localStorage.getItem("userId");
 
-    console.log("✅ Order Submitted:", orderDetails);
-    alert("Order placed successfully!");
+  const orderDetails = {
+    user_id: storedUserId,
+    category: selectedSub.service,
+    service_name: selectedSub.sub.name,
+    price: selectedSub.sub.price,
+    address: formData.address,
+    date: formData.date,
+    problem_details: formData.problemDetails,
+    customer_name: customerInfo.name,
+    customer_number: customerInfo.number,
+    ordered_at: new Date().toISOString(),
+  };
+
+  console.log("🟢 Sending Order:", orderDetails);
+
+  const { error } = await supabase
+    .from("request_services")
+    .insert([orderDetails]);
+
+  if (error) {
+    console.error("❌ Error submitting order:", error);
+    alert("Failed to submit order. Try again!");
+  } else {
+    alert("✅ Order placed successfully!");
     setShowForm(false);
     setFormData({ address: "", date: "", problemDetails: "" });
-  };
+  }
+};
+
 
   return (
     <div className="w-full max-w-[1300px] mx-auto p-6 border-2 shadow-md rounded-lg border-gray-200 my-12 relative">
