@@ -1,54 +1,53 @@
-import { useState } from "react";
-
-// Sample technicians — later you’ll fetch from Supabase (based on category)
-const technicians = [
-  { id: 1, name: "Rahim", category: "Electrician" },
-  { id: 2, name: "Karim", category: "Plumber" },
-  { id: 3, name: "Shuvo", category: "Cleaner" },
-  { id: 4, name: "Rafi", category: "Cleaner" },
-];
-
-const requestedServices = [
-  {
-    id: 1,
-    customerName: "Emad Uddin Adil",
-    customerNumber: "01727199167",
-    serviceName: "AC Maintenance",
-    category: "Electrician",
-    date: "2025-11-03",
-    cost: "500 TK",
-    address: "House 12, Road 5, Dhanmondi, Dhaka",
-    problemDetails:
-      "AC not cooling properly, needs gas refill and filter cleaning.",
-  },
-  {
-    id: 2,
-    customerName: "Farhan Shuvon",
-    customerNumber: "01761303911",
-    serviceName: "Plumbing Repair",
-    category: "Plumber",
-    date: "2025-11-04",
-    cost: "300 TK",
-    address: "Flat 3B, Gulshan Avenue, Gulshan-1, Dhaka",
-    problemDetails: "Kitchen sink pipe leaking, needs replacement.",
-  },
-  {
-    id: 3,
-    customerName: "Mukter",
-    customerNumber: "01761303911",
-    serviceName: "Plumbing Repair",
-    category: "Cleaner",
-    date: "2025-11-04",
-    cost: "300 TK",
-    address: "Flat 3B, Gulshan Avenue, Gulshan-1, Dhaka",
-    problemDetails: "Home cleaning needed for 3-bedroom apartment.",
-  },
-];
+import { useEffect, useState } from "react";
+import { supabase } from "../../../supabaseClient";
 
 export default function RequestedService() {
   const [showModal, setShowModal] = useState(false);
   const [selectedService, setSelectedService] = useState(null);
   const [selectedTechnician, setSelectedTechnician] = useState("");
+  const [technicians, setTechnicians] = useState([]);
+  const [requestedServices, setRequestedServices] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch requested services from Supabase
+  useEffect(() => {
+    fetchRequestedServices();
+    fetchTechnicians();
+  }, []);
+
+  const fetchRequestedServices = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('request_services')
+        .select('*');
+
+      if (error) throw error;
+      
+      console.log('Fetched services:', data); // Debug log
+      setRequestedServices(data || []);
+    } catch (error) {
+      console.error('Error fetching requested services:', error);
+      alert('Failed to load requested services');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchTechnicians = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('technicians')
+        .select('*');
+
+      if (error) throw error;
+      
+      console.log('Fetched technicians:', data); // Debug log
+      setTechnicians(data || []);
+    } catch (error) {
+      console.error('Error fetching technicians:', error);
+      alert('Failed to load technicians');
+    }
+  };
 
   // ✅ Open popup and store which service is being assigned
   const handleAssignClick = (service) => {
@@ -56,23 +55,54 @@ export default function RequestedService() {
     setShowModal(true);
   };
 
-  // ✅ Assign technician (Later this will update Supabase)
-  const handleConfirmAssign = () => {
+  // ✅ Assign technician (Logs data to console)
+  const handleConfirmAssign = async () => {
     if (!selectedTechnician) {
       alert("Please select a technician before assigning.");
       return;
     }
 
-    console.log(
-      `Assigned technician ${selectedTechnician} to service ID ${selectedService.id}`
-    );
+    // Get the full technician object
+    const technicianObj = technicians.find(tech => tech.fullname === selectedTechnician);
+
+    // Log all assignment data
+    const assignmentData = {
+      service_id: selectedService.id,
+      service_name: selectedService.serviceName || selectedService.service_name,
+      category: selectedService.category,
+      date: selectedService.date,
+      cost: selectedService.cost,
+      customer_name: selectedService.customerName || selectedService.customer_name,
+      customer_number: selectedService.customerNumber || selectedService.customer_number,
+      address: selectedService.address,
+      problem_details: selectedService.problemDetails || selectedService.problem_details,
+      assigned_technician_name: selectedTechnician,
+      assigned_technician_id: technicianObj?.id,
+      assigned_technician_category: technicianObj?.category,
+      assignment_timestamp: new Date().toISOString()
+    };
+
+    console.log('=== ASSIGNMENT DATA ===');
+    console.log(assignmentData);
+    console.log('======================');
+
     alert(
-      `✅ ${selectedTechnician} assigned to ${selectedService.serviceName}`
+      `✅ ${selectedTechnician} assigned to ${selectedService.serviceName || selectedService.service_name}`
     );
 
     setShowModal(false);
     setSelectedTechnician("");
   };
+
+  if (loading) {
+    return (
+      <div className="mt-10 mb-10 shadow-xl gap-6 ml-auto mr-auto box-border border-2 p-4 sm:p-5 rounded-[15px] border-[#E7E7E7] h-auto w-[90%] sm:w-[85%] md:w-[90%] lg:w-[1300px] max-w-[1400px]">
+        <div className="flex items-center justify-center h-64">
+          <p className="text-gray-500">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="mt-10 mb-10 shadow-xl gap-6 ml-auto mr-auto box-border border-2 p-4 sm:p-5 rounded-[15px] border-[#E7E7E7] h-auto w-[90%] sm:w-[85%] md:w-[90%] lg:w-[1300px] max-w-[1400px]">
@@ -90,19 +120,19 @@ export default function RequestedService() {
           >
             <div>
               <h3 className="text-lg font-semibold text-gray-800 mb-1">
-                {service.serviceName}
+                {service.serviceName || service.service_name || 'N/A'}
               </h3>
               <p className="text-sm text-gray-500 mb-1">
-                Category: {service.category}
+                Category: {service.category || 'N/A'}
               </p>
-              <p className="text-sm text-gray-500 mb-1">Date: {service.date}</p>
-              <p className="text-sm text-gray-500 mb-1">Cost: {service.cost}</p>
+              <p className="text-sm text-gray-500 mb-1">Date: {service.date || 'N/A'}</p>
+              <p className="text-sm text-gray-500 mb-1">Cost: {service.cost || 'N/A'}</p>
 
               <div className="mt-3 mb-2">
                 <p className="text-xs font-semibold text-gray-700 mb-1">
                   Customer Name:
                 </p>
-                <p className="text-xs text-gray-600">{service.customerName}</p>
+                <p className="text-xs text-gray-600">{service.customerName || service.customer_name || 'N/A'}</p>
               </div>
 
               <div className="mb-2">
@@ -110,7 +140,7 @@ export default function RequestedService() {
                   Customer Number:
                 </p>
                 <p className="text-xs text-gray-600">
-                  {service.customerNumber}
+                  {service.customerNumber || service.customer_number || 'N/A'}
                 </p>
               </div>
 
@@ -119,7 +149,7 @@ export default function RequestedService() {
                   Address:
                 </p>
                 <p className="text-xs text-gray-600 leading-relaxed">
-                  {service.address}
+                  {service.address || 'N/A'}
                 </p>
               </div>
 
@@ -128,7 +158,7 @@ export default function RequestedService() {
                   Problem Details:
                 </p>
                 <p className="text-xs text-gray-600 leading-relaxed line-clamp-3">
-                  {service.problemDetails}
+                  {service.problemDetails || service.problem_details || 'N/A'}
                 </p>
               </div>
             </div>
@@ -158,10 +188,10 @@ export default function RequestedService() {
             </h3>
 
             <p className="text-sm text-gray-500 mb-2">
-              Service: <strong>{selectedService.serviceName}</strong>
+              Service: <strong>{selectedService.serviceName || selectedService.service_name || 'N/A'}</strong>
             </p>
             <p className="text-sm text-gray-500 mb-3">
-              Category: <strong>{selectedService.category}</strong>
+              Category: <strong>{selectedService.category || 'N/A'}</strong>
             </p>
 
             <label className="block text-sm font-medium text-gray-600 mb-1">
@@ -174,14 +204,19 @@ export default function RequestedService() {
             >
               <option value="">-- Choose Technician --</option>
               {technicians
-                .filter(
-                  (tech) => tech.category === selectedService.category
-                )
-                .map((tech) => (
-                  <option key={tech.id} value={tech.name}>
-                    {tech.name}
-                  </option>
-                ))}
+                .filter((tech) => {
+                  const techCategory = (tech.category || tech.Category || '').toLowerCase().trim();
+                  const serviceCategory = (selectedService.category || selectedService.Category || '').toLowerCase().trim();
+                  return techCategory === serviceCategory;
+                })
+                .map((tech) => {
+                  const techName = tech.fullname;
+                  return (
+                    <option key={tech.id} value={techName}>
+                      {techName}
+                    </option>
+                  );
+                })}
             </select>
 
             <div className="mt-5 flex justify-end gap-3">
