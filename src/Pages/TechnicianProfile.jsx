@@ -51,9 +51,10 @@ export default function TechnicianProfile() {
       <Navbar />
       <ProfileTopSection userData={userData} />
       <PersonalInformation userData={userData} onProfileUpdated={fetchUserData} />
-      <MyPendingBookings />
-      <RunningBookings />
-      <DoneBookings />
+      {/* <MyPendingBookings /> */}
+      {/* 👇 pass technicianId from userData.id */}
+      <RunningBookings technicianId={userData.id} />
+      <DoneBookings technicianId={userData.id} />
       <TechnicianStatistics />
       <Footer />
     </div>
