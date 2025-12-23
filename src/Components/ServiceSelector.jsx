@@ -1,7 +1,21 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../../supabaseClient";
 
+const CATEGORY_MAP = {
+  electrician: "Electrician",
+  plumber: "Plumber",
+  ac_refrigerator_expert: "AC & Refrigerator Expert",
+  carpenter: "Carpenter",
+  painter: "Painter",
+  cleaner: "Cleaner",
+  decorator: "Decorator (Home Events)",
+  housemaid: "Housemaid",
+  mover: "Mover",
+  pest_control_expert: "Pest Control Expert",
+};
+
 const ServiceSelector = () => {
+  const [availableServices, setAvailableServices] = useState([]);
   const [openService, setOpenService] = useState(null);
   const [selectedSub, setSelectedSub] = useState(null);
   const [showForm, setShowForm] = useState(false);
@@ -12,68 +26,53 @@ const ServiceSelector = () => {
     problemDetails: "",
   });
 
+  /* Fetch available technicians */
+  useEffect(() => {
+    const fetchAvailableTechnicians = async () => {
+      const { data, error } = await supabase
+        .from("technicians")
+        .select("category");
+
+      if (error) {
+        console.error("Error fetching technicians:", error);
+        return;
+      }
+
+      const uniqueCategories = [...new Set(data.map((t) => t.category))];
+
+      const mappedServices = uniqueCategories
+        .map((cat) => CATEGORY_MAP[cat])
+        .filter(Boolean);
+
+      setAvailableServices(mappedServices);
+    };
+
+    fetchAvailableTechnicians();
+  }, []);
+
+  /* Fetch customer info */
   useEffect(() => {
     const fetchCustomerInfo = async () => {
-      try {
-        // get session
-        const { data: sessionData, error: sessionError } =
-          await supabase.auth.getSession();
-        if (sessionError) {
-          console.error("Error getting session:", sessionError);
-          return;
-        }
+      const { data } = await supabase.auth.getSession();
+      const session = data?.session;
 
-        const session = sessionData?.session;
-        if (!session?.user) {
-          alert("You're not logged in.");
-          return;
-        }
+      if (!session?.user) return;
 
-        const storedUserId = localStorage.getItem("userId");
-        console.log("Looking up user with ID:", storedUserId);
+      const storedUserId = localStorage.getItem("userId");
 
-        // Query by ID
-        const { data, error } = await supabase
-          .from("users")
-          .select("*")
-          .eq("id", storedUserId)
-          .maybeSingle(); // Use maybeSingle() instead of single() to avoid errors if no row exists
+      const { data: userData } = await supabase
+        .from("users")
+        .select("*")
+        .eq("id", storedUserId)
+        .maybeSingle();
 
-        console.log("User data:", data, "Error:", error);
-
-        if (error) {
-          console.error("Error fetching customer:", error);
-          // Fallback to session data
-          setCustomerInfo({
-            name:
-              session.user.user_metadata?.full_name || session.user.email || "",
-            number: session.user.phone || "",
-          });
-          return;
-        }
-
-        if (data) {
-          // Map table columns to your form fields
-          setCustomerInfo({
-            name: data.fullname || session.user.user_metadata?.full_name || "",
-            number: data.mobile || session.user.phone || "",
-          });
-          console.log("Successfully loaded user info:", {
-            name: data.fullname,
-            number: data.mobile,
-          });
-        } else {
-          // fallback: use session user data when table row missing
-          console.log("No user record found, using session data");
-          setCustomerInfo({
-            name:
-              session.user.user_metadata?.full_name || session.user.email || "",
-            number: session.user.phone || "",
-          });
-        }
-      } catch (err) {
-        console.error("Unexpected fetch error:", err);
-      }
+      setCustomerInfo({
+        name:
+          userData?.fullname ||
+          session.user.user_metadata?.full_name ||
+          session.user.email,
+        number: userData?.mobile || session.user.phone || "",
+      });
     };
 
     fetchCustomerInfo();
@@ -155,39 +154,35 @@ const ServiceSelector = () => {
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  const storedUserId = localStorage.getItem("userId");
+    const storedUserId = localStorage.getItem("userId");
 
-  const orderDetails = {
-    user_id: storedUserId,
-    category: selectedSub.service,
-    service_name: selectedSub.sub.name,
-    price: selectedSub.sub.price,
-    address: formData.address,
-    date: formData.date,
-    problem_details: formData.problemDetails,
-    customer_name: customerInfo.name,
-    customer_number: customerInfo.number,
-    ordered_at: new Date().toISOString(),
+    const orderDetails = {
+      user_id: storedUserId,
+      category: selectedSub.service,
+      service_name: selectedSub.sub.name,
+      price: selectedSub.sub.price,
+      address: formData.address,
+      date: formData.date,
+      problem_details: formData.problemDetails,
+      customer_name: customerInfo.name,
+      customer_number: customerInfo.number,
+      ordered_at: new Date().toISOString(),
+    };
+
+    const { error } = await supabase
+      .from("request_services")
+      .insert([orderDetails]);
+
+    if (error) {
+      alert("Failed to submit order!");
+    } else {
+      alert("Order placed successfully!");
+      setShowForm(false);
+      setFormData({ address: "", date: "", problemDetails: "" });
+    }
   };
-
-  console.log("🟢 Sending Order:", orderDetails);
-
-  const { error } = await supabase
-    .from("request_services")
-    .insert([orderDetails]);
-
-  if (error) {
-    console.error("❌ Error submitting order:", error);
-    alert("Failed to submit order. Try again!");
-  } else {
-    alert("✅ Order placed successfully!");
-    setShowForm(false);
-    setFormData({ address: "", date: "", problemDetails: "" });
-  }
-};
-
 
   return (
     <div className="w-full max-w-[1300px] mx-auto p-6 border-2 shadow-md rounded-lg border-gray-200 my-12 relative">
@@ -195,203 +190,105 @@ const ServiceSelector = () => {
         Choose Your Service
       </h2>
 
-      {/* Responsive Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
-        {Object.keys(services).map((service) => (
-          <div
-            key={service}
-            className="relative bg-white border border-gray-200 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300"
-          >
-            {/* Header Button */}
-            <button
-              onClick={() =>
-                setOpenService(openService === service ? null : service)
-              }
-              className={`w-full px-5 py-3 text-left rounded-2xl flex justify-between items-center font-medium ${
-                openService === service
-                  ? "bg-gradient-to-r from-teal-400 to-cyan-500 text-white"
-                  : "bg-gray-50 text-gray-800 hover:bg-gray-100"
-              }`}
+        {Object.keys(services).map((service) => {
+          const isAvailable = availableServices.includes(service);
+
+          return (
+            <div
+              key={service}
+              className="relative bg-white border border-gray-200 rounded-2xl shadow-md"
             >
-              {service}
-              <span>{openService === service ? "▲" : "▼"}</span>
-            </button>
-
-            {/* Dropdown */}
-            {openService === service && (
-              <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-2xl shadow-xl p-4 space-y-2 animate-fadeIn z-10">
-                {services[service].map((sub, index) => (
-                  <div
-                    key={index}
-                    onClick={() => handleSelect(service, sub)}
-                    className={`px-4 py-2 rounded-lg cursor-pointer text-sm font-medium border flex justify-between items-center transition-all ${
-                      selectedSub?.service === service &&
-                      selectedSub?.sub?.name === sub.name
-                        ? "bg-cyan-100 border-cyan-400 text-cyan-700"
-                        : "border-gray-200 hover:bg-gray-50"
-                    }`}
-                  >
-                    <span>{sub.name}</span>
-                    <span className="text-gray-500 font-semibold text-xs">
-                      {sub.price} Tk
+              <button
+                disabled={!isAvailable}
+                onClick={() =>
+                  isAvailable &&
+                  setOpenService(openService === service ? null : service)
+                }
+                className={`w-full px-5 py-3 text-left rounded-2xl flex justify-between items-center font-medium ${
+                  openService === service
+                    ? "bg-gradient-to-r from-teal-400 to-cyan-500 text-white"
+                    : isAvailable
+                    ? "bg-gray-50 text-gray-800 hover:bg-gray-100"
+                    : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                }`}
+              >
+                <span className="flex flex-col">
+                  <span>{service}</span>
+                  {!isAvailable && (
+                    <span className="text-xs text-red-500 font-medium">
+                      Not available right now
                     </span>
-                  </div>
-                ))}
+                  )}
+                </span>
+                <span>{openService === service ? "▲" : "▼"}</span>
+              </button>
 
-                {/* Buttons */}
-                <div className="flex justify-between mt-4">
-                  <button
-                    className="px-4 py-2 bg-cyan-500 text-white text-sm rounded-lg hover:bg-cyan-600 transition"
-                    onClick={handleOrderClick}
-                  >
-                    Order
-                  </button>
-                  <button
-                    className="px-4 py-2 bg-gray-200 text-gray-700 text-sm rounded-lg hover:bg-gray-300 transition"
-                    onClick={() => {
-                      setOpenService(null);
-                      setSelectedSub(null);
-                    }}
-                  >
-                    Cancel
-                  </button>
+              {openService === service && isAvailable && (
+                <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-2xl shadow-xl p-4 space-y-2 z-10">
+                  {services[service].map((sub, index) => (
+                    <div
+                      key={index}
+                      onClick={() => handleSelect(service, sub)}
+                      className={`px-4 py-2 rounded-lg cursor-pointer text-sm font-medium border flex justify-between ${
+                        selectedSub?.service === service &&
+                        selectedSub?.sub?.name === sub.name
+                          ? "bg-cyan-100 border-cyan-400"
+                          : "border-gray-200 hover:bg-gray-50"
+                      }`}
+                    >
+                      <span>{sub.name}</span>
+                      <span className="text-xs font-semibold">
+                        {sub.price} Tk
+                      </span>
+                    </div>
+                  ))}
+
+                  <div className="flex justify-between mt-4">
+                    <button
+                      className="px-4 py-2 bg-cyan-500 text-white text-sm rounded-lg"
+                      onClick={handleOrderClick}
+                    >
+                      Order
+                    </button>
+                    <button
+                      className="px-4 py-2 bg-gray-200 text-sm rounded-lg"
+                      onClick={() => {
+                        setOpenService(null);
+                        setSelectedSub(null);
+                      }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
                 </div>
-              </div>
-            )}
-          </div>
-        ))}
+              )}
+            </div>
+          );
+        })}
       </div>
 
-      {/* 🟢 Floating Order Form */}
       {showForm && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50"
-          onClick={() => setShowForm(false)}
-        >
-          <div
-            className="bg-white rounded-xl shadow-2xl p-6 w-[90%] sm:w-[500px] relative"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h3 className="text-xl font-semibold text-gray-700 mb-4">
-              Confirm Your Booking
-            </h3>
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
+          <div className="bg-white rounded-xl p-6 w-[500px]">
             <form onSubmit={handleSubmit} className="space-y-3">
-              {/* 🟢 Category Field */}
-              <div>
-                <label className="text-sm text-gray-600">Category</label>
-                <input
-                  type="text"
-                  value={selectedSub.service} // main category name
-                  disabled
-                  className="w-full p-2 border rounded-lg text-gray-700 bg-gray-100"
-                />
-              </div>
-
-              {/* 🟢 Service Field */}
-              <div>
-                <label className="text-sm text-gray-600">Service</label>
-                <input
-                  type="text"
-                  value={selectedSub.sub.name} // sub service name
-                  disabled
-                  className="w-full p-2 border rounded-lg text-gray-700 bg-gray-100"
-                />
-              </div>
-
-              {/* 🟢 Cost Field */}
-              <div>
-                <label className="text-sm text-gray-600">Cost (Tk)</label>
-                <input
-                  type="text"
-                  value={selectedSub.sub.price}
-                  disabled
-                  className="w-full p-2 border rounded-lg text-gray-700 bg-gray-100"
-                />
-              </div>
-
-              {/* 🟢 Customer Info */}
-              <div>
-                <label className="text-sm text-gray-600">Customer Name</label>
-                <input
-                  type="text"
-                  value={customerInfo.name || ""}
-                  disabled
-                  className="w-full p-2 border rounded-lg text-gray-700 bg-gray-100"
-                />
-              </div>
-
-              <div>
-                <label className="text-sm text-gray-600">Phone Number</label>
-                <input
-                  type="text"
-                  value={customerInfo.number || ""}
-                  disabled
-                  className="w-full p-2 border rounded-lg text-gray-700 bg-gray-100"
-                />
-              </div>
-
-              {/* 🟢 Address */}
-              <div>
-                <label className="text-sm text-gray-600">Address</label>
-                <input
-                  type="text"
-                  required
-                  value={formData.address}
-                  onChange={(e) =>
-                    setFormData({ ...formData, address: e.target.value })
-                  }
-                  className="w-full p-2 border rounded-lg"
-                />
-              </div>
-
-              {/* 🟢 Date */}
-              <div>
-                <label className="text-sm text-gray-600">Preferred Date</label>
-                <input
-                  type="date"
-                  required
-                  min={
-                    new Date(Date.now() + 86400000).toISOString().split("T")[0]
-                  }
-                  value={formData.date}
-                  onChange={(e) =>
-                    setFormData({ ...formData, date: e.target.value })
-                  }
-                  className="w-full p-2 border rounded-lg"
-                />
-              </div>
-
-              {/* 🟢 Problem Details */}
-              <div>
-                <label className="text-sm text-gray-600">
-                  Problem Details (optional)
-                </label>
-                <textarea
-                  value={formData.problemDetails}
-                  onChange={(e) =>
-                    setFormData({ ...formData, problemDetails: e.target.value })
-                  }
-                  className="w-full p-2 border rounded-lg"
-                  placeholder="Describe the issue (optional)"
-                />
-              </div>
-
-              {/* 🟢 Buttons */}
-              <div className="flex justify-end gap-3 mt-4">
-                <button
-                  type="button"
-                  className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 text-sm"
-                  onClick={() => setShowForm(false)}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600 text-sm"
-                >
-                  Confirm Order
-                </button>
-              </div>
+              <input disabled value={selectedSub.service} className="w-full p-2 border rounded" />
+              <input disabled value={selectedSub.sub.name} className="w-full p-2 border rounded" />
+              <input disabled value={selectedSub.sub.price} className="w-full p-2 border rounded" />
+              <input required placeholder="Address" className="w-full p-2 border rounded"
+                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+              />
+              <input type="date" required className="w-full p-2 border rounded"
+                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+              />
+              <textarea placeholder="Problem details" className="w-full p-2 border rounded"
+                onChange={(e) =>
+                  setFormData({ ...formData, problemDetails: e.target.value })
+                }
+              />
+              <button className="w-full bg-cyan-500 text-white p-2 rounded">
+                Confirm Order
+              </button>
             </form>
           </div>
         </div>
