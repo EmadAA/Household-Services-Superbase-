@@ -6,6 +6,7 @@ import { supabase } from "../../../supabaseClient";
 export default function RunningServices() {
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [userData, setUserData] = useState(null);
 
   const [reviewService, setReviewService] = useState(null);
   const [reviewData, setReviewData] = useState({
@@ -14,6 +15,38 @@ export default function RunningServices() {
     quality: 0,
     review: "",
   });
+
+  // FETCH LOGGED IN USER NAME
+
+  const fetchUserData = async () => {
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session?.user) return;
+
+      const userId = session.user.id;
+
+      const { data, error } = await supabase
+        .from("users")
+        .select("fullname")
+        .eq("id", userId)
+        .single();
+
+      if (error) throw error;
+
+      setUserData(data);
+    } catch (error) {
+      Swal.fire("Failed to load user: " + error.message);
+    }
+  };
+
+  useEffect(() => {
+    fetchUserData();
+  }, []);
+
+  // FETCH RUNNING SERVICES
 
   useEffect(() => {
     let mounted = true;
@@ -36,14 +69,13 @@ export default function RunningServices() {
           .from("request_services")
           .select("*")
           .eq("user_id", userId)
-          .in("status", ["Pending", "Assigned"]) // running = Pending or Assigned
+          .in("status", ["Pending", "Assigned"])
           .order("ordered_at", { ascending: false });
 
         if (error) throw error;
 
         if (mounted) setServices(data || []);
       } catch (err) {
-        console.error("Error fetching requests:", err.message || err);
         Swal.fire({
           icon: "error",
           title: "Failed to load requests",
@@ -65,22 +97,25 @@ export default function RunningServices() {
     const {
       data: { session },
     } = await supabase.auth.getSession();
+
     if (!session?.user) {
       setServices([]);
       setLoading(false);
       return;
     }
-    const userId = session.user.id;
+
     const { data } = await supabase
       .from("request_services")
       .select("*")
-      .eq("user_id", userId)
+      .eq("user_id", session.user.id)
       .in("status", ["Pending", "Assigned"])
       .order("ordered_at", { ascending: false });
+
     setServices(data || []);
     setLoading(false);
   };
 
+  // MARK SERVICE AS DONE
   const handleMarkAsDoneClick = (serviceId) => {
     Swal.fire({
       title: "Mark this service as completed?",
@@ -97,7 +132,6 @@ export default function RunningServices() {
     });
   };
 
-  // user_done + maybe Completed
   const markServiceCompleted = async (serviceId) => {
     try {
       const { data, error } = await supabase
@@ -108,28 +142,20 @@ export default function RunningServices() {
 
       if (error) throw error;
 
-      const newUserDone = true;
-      const newTechDone = data.tech_done;
+      const newStatus = data.tech_done ? "Completed" : "Assigned";
 
-      const newStatus =
-        newUserDone && newTechDone ? "Completed" : "Assigned";
-
-      const { error: updErr } = await supabase
+      await supabase
         .from("request_services")
-        .update({ user_done: newUserDone, status: newStatus })
+        .update({ user_done: true, status: newStatus })
         .eq("id", serviceId);
-
-      if (updErr) throw updErr;
 
       await refresh();
 
-      const updatedRes = await supabase
+      const { data: updated } = await supabase
         .from("request_services")
         .select("*")
         .eq("id", serviceId)
         .single();
-
-      const updated = updatedRes.data;
 
       setReviewService(updated);
       setReviewData({ behavior: 0, timing: 0, quality: 0, review: "" });
@@ -141,63 +167,79 @@ export default function RunningServices() {
         confirmButtonColor: "#0d9488",
       });
     } catch (err) {
-      console.error("Error marking completed:", err);
-      Swal.fire({
-        icon: "error",
-        title: "Failed",
-        text: err.message || "Could not mark completed",
-      });
+      Swal.fire("Failed: " + err.message);
     }
   };
 
+  // SUBMIT REVIEW
+
   const handleSubmitReview = async () => {
     const { behavior, timing, quality, review } = reviewData;
+
+    if (!userData?.fullname) {
+      Swal.fire("User profile not loaded");
+      return;
+    }
+
     if (behavior === 0 || timing === 0 || quality === 0) {
-      Swal.fire({
-        icon: "warning",
-        title: "Incomplete Ratings",
-        text: "Please rate all categories before submitting your review.",
-        confirmButtonColor: "#0d9488",
-      });
+      Swal.fire("Please rate all categories");
       return;
     }
 
     try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      const userId = session?.user?.id || null;
+      const avg = (behavior + timing + quality) / 3;
 
-      const fullReview = {
-        service_id: reviewService.id,
-        user_id: userId,
-        behavior,
-        timing,
-        quality,
-        comment: review || null,
-        created_at: new Date().toISOString(),
-        service_name: reviewService.service_name,
-        category: reviewService.category,
-      };
+      let technicianName = null;
+      if (reviewService?.technician_id) {
+        console.log(
+          "Fetching technician with ID:",
+          reviewService.technician_id
+        );
 
-      console.log("📝 User Review Submitted:", fullReview);
+        const { data: tech, error: techError } = await supabase
+          .from("technicians")
+          .select("*")
+          .eq("id", reviewService.technician_id)
+          .single();
 
-      Swal.fire({
-        icon: "success",
-        title: "Review Logged (Test Mode)",
-        text: "Check the console to see your review data.",
-        confirmButtonColor: "#0d9488",
-      });
+        console.log("Technician data:", tech);
+        console.log("Technician error:", techError);
+
+        technicianName = tech?.name || null;
+      } else {
+        console.log("No technician_id found in reviewService");
+      }
+
+      console.log("Final technician name:", technicianName);
+
+      const { error } = await supabase.from("service_reviews").insert([
+        {
+          service_request_id: reviewService.id,
+          user_id: reviewService.user_id,
+          technician_id: reviewService.technician_id,
+
+          reviewer_name: userData.fullname,
+          technician_name: technicianName,
+
+          service_name: reviewService.service_name,
+          category: reviewService.category,
+
+          behavior,
+          timing,
+          quality,
+          average_rating: Number(avg.toFixed(2)),
+          review: review || null,
+        },
+      ]);
+
+      if (error) throw error;
+
+      Swal.fire("Review submitted successfully");
 
       setReviewService(null);
       setReviewData({ behavior: 0, timing: 0, quality: 0, review: "" });
     } catch (err) {
-      console.error("Error saving review:", err);
-      Swal.fire({
-        icon: "error",
-        title: "Failed to save review",
-        text: err.message || "Please try again later",
-      });
+      Swal.fire("Failed to submit review: " + err.message);
     }
   };
 
@@ -275,29 +317,40 @@ export default function RunningServices() {
               </div>
 
               <div className="mt-4 flex flex-col gap-2">
+                {/* Mark as Done button - only enabled if technician is assigned */}
                 <button
                   onClick={() => handleMarkAsDoneClick(service.id)}
-                  disabled={service.user_done}
+                  disabled={service.user_done || service.status === "Pending"}
                   className={`flex items-center justify-center gap-2 px-3 lg:px-4 py-2 font-medium transition border rounded-lg text-sm
                     ${
-                      service.user_done
+                      service.user_done || service.status === "Pending"
                         ? "text-gray-500 border-gray-300 bg-gray-100 cursor-not-allowed"
                         : "text-teal-600 border-teal-300 hover:text-teal-500 hover:bg-teal-50"
                     }`}
                 >
-                  {service.user_done && !service.tech_done && service.status !== "Completed"
+                  {service.user_done &&
+                  !service.tech_done &&
+                  service.status !== "Completed"
                     ? "Marked done • waiting for technician"
                     : service.user_done && service.tech_done
                     ? "Order completed"
+                    : service.status === "Pending"
+                    ? "Waiting for technician assignment"
                     : "Mark as Done"}
                 </button>
 
-                {/* optional: only allow cancel while not completed */}
-                {!service.user_done || !service.tech_done ? (
-                  <button className="flex items-center justify-center gap-2 px-3 lg:px-4 py-2 text-red-600 hover:text-red-500 font-medium transition border border-red-300 rounded-lg hover:bg-red-50 text-sm">
-                    Cancel
-                  </button>
-                ) : null}
+                {/* Cancel button - disabled if technician is assigned */}
+                <button
+                  disabled={service.status === "Assigned"}
+                  className={`flex items-center justify-center gap-2 px-3 lg:px-4 py-2 font-medium transition border rounded-lg text-sm
+                    ${
+                      service.status === "Assigned"
+                        ? "text-gray-500 border-gray-300 bg-gray-100 cursor-not-allowed"
+                        : "text-red-600 border-red-300 hover:text-red-500 hover:bg-red-50"
+                    }`}
+                >
+                  Cancel
+                </button>
               </div>
             </div>
           ))}
@@ -321,14 +374,12 @@ export default function RunningServices() {
             </div>
 
             {[
-              { key: "behavior", label: "Technician’s Behavior" },
+              { key: "behavior", label: "Technician's Behavior" },
               { key: "timing", label: "Service Timing" },
               { key: "quality", label: "Service Quality" },
             ].map(({ key, label }) => (
               <div key={key} className="mb-3">
-                <label className="font-medium text-gray-700">
-                  {label}:
-                </label>
+                <label className="font-medium text-gray-700">{label}:</label>
                 <div className="flex gap-2 mt-1">
                   {[1, 2, 3, 4, 5].map((num) => (
                     <button
