@@ -8,13 +8,21 @@ const normalizeCategory = (value = "") => {
   return v;
 };
 
+const getTechnicianLabel = (tech) => {
+  if (tech.is_busy) {
+    return `${tech.fullname} (Currently assigned)`;
+  }
+  return tech.fullname;
+};
+
 export default function RequestedService() {
   const [showModal, setShowModal] = useState(false);
   const [selectedService, setSelectedService] = useState(null);
-  const [selectedTechnician, setSelectedTechnician] = useState("");
+  const [selectedTechnicianId, setSelectedTechnicianId] = useState("");
   const [technicians, setTechnicians] = useState([]);
   const [requestedServices, setRequestedServices] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [assigning, setAssigning] = useState(false);
 
   useEffect(() => {
     fetchRequestedServices();
@@ -30,7 +38,6 @@ export default function RequestedService() {
 
       if (error) throw error;
 
-      console.log("Fetched services:", data);
       setRequestedServices(data || []);
     } catch (error) {
       console.error("Error fetching requested services:", error);
@@ -46,7 +53,6 @@ export default function RequestedService() {
 
       if (error) throw error;
 
-      console.log("Fetched technicians:", data);
       setTechnicians(data || []);
     } catch (error) {
       console.error("Error fetching technicians:", error);
@@ -56,18 +62,35 @@ export default function RequestedService() {
 
   const handleAssignClick = (service) => {
     setSelectedService(service);
-    setSelectedTechnician("");
+    setSelectedTechnicianId("");
     setShowModal(true);
   };
 
+  // Real protection: check in request_services before assigning
+  const isTechnicianAvailable = async (technicianId) => {
+    const { data, error } = await supabase
+      .from("request_services")
+      .select("id, status")
+      .eq("technician_id", technicianId)
+      .neq("status", "Completed")
+      .limit(1);
+
+    if (error) {
+      console.error("Error checking technician availability:", error);
+      throw error;
+    }
+
+    return !data || data.length === 0;
+  };
+
   const handleConfirmAssign = async () => {
-    if (!selectedTechnician) {
+    if (!selectedTechnicianId) {
       alert("Please select a technician before assigning.");
       return;
     }
 
     const technicianObj = technicians.find(
-      (tech) => tech.fullname === selectedTechnician
+      (tech) => tech.id === selectedTechnicianId
     );
 
     if (!technicianObj) {
@@ -76,10 +99,21 @@ export default function RequestedService() {
     }
 
     try {
+      setAssigning(true);
+
+      const available = await isTechnicianAvailable(technicianObj.id);
+
+      if (!available) {
+        alert(
+          `${technicianObj.fullname} is already working on another job. Please choose a different technician.`
+        );
+        return;
+      }
+
       const { data, error } = await supabase
         .from("request_services")
         .update({
-          technician_id: technicianObj.id, // requires technician_id column
+          technician_id: technicianObj.id,
           status: "Assigned",
         })
         .eq("id", selectedService.id)
@@ -87,24 +121,32 @@ export default function RequestedService() {
 
       if (error) throw error;
 
-      console.log("Updated request_services row:", data);
+      // Optionally, set this tech to busy locally so label updates immediately
+      setTechnicians((prev) =>
+        prev.map((t) =>
+          t.id === technicianObj.id ? { ...t, is_busy: true } : t
+        )
+      );
 
+      // Remove from pending list in UI
       setRequestedServices((prev) =>
         prev.filter((req) => req.id !== selectedService.id)
       );
 
       alert(
-        `✅ ${selectedTechnician} assigned to ${
+        `✅ ${technicianObj.fullname} assigned to ${
           selectedService.serviceName || selectedService.service_name
         }`
       );
 
       setShowModal(false);
-      setSelectedTechnician("");
+      setSelectedTechnicianId("");
       setSelectedService(null);
     } catch (err) {
       console.error("Error assigning technician:", err);
       alert("Failed to assign technician. Check console for details.");
+    } finally {
+      setAssigning(false);
     }
   };
 
@@ -225,8 +267,9 @@ export default function RequestedService() {
             </label>
             <select
               className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:outline-none focus:ring-1 focus:ring-teal-500"
-              value={selectedTechnician}
-              onChange={(e) => setSelectedTechnician(e.target.value)}
+              value={selectedTechnicianId}
+              onChange={(e) => setSelectedTechnicianId(e.target.value)}
+              disabled={assigning}
             >
               <option value="">-- Choose Technician --</option>
               {technicians
@@ -240,8 +283,8 @@ export default function RequestedService() {
                   return techCategory === serviceCategory;
                 })
                 .map((tech) => (
-                  <option key={tech.id} value={tech.fullname}>
-                    {tech.fullname}
+                  <option key={tech.id} value={tech.id}>
+                    {getTechnicianLabel(tech)}
                   </option>
                 ))}
             </select>
@@ -250,14 +293,16 @@ export default function RequestedService() {
               <button
                 onClick={() => setShowModal(false)}
                 className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-100 text-sm"
+                disabled={assigning}
               >
                 Cancel
               </button>
               <button
                 onClick={handleConfirmAssign}
-                className="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-500 text-sm"
+                className="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-500 text-sm disabled:opacity-60"
+                disabled={assigning}
               >
-                Assign
+                {assigning ? "Assigning..." : "Assign"}
               </button>
             </div>
           </div>

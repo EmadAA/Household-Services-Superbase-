@@ -17,7 +17,6 @@ export default function RunningServices() {
   });
 
   // FETCH LOGGED IN USER NAME
-
   const fetchUserData = async () => {
     try {
       const {
@@ -47,7 +46,6 @@ export default function RunningServices() {
   }, []);
 
   // FETCH RUNNING SERVICES
-
   useEffect(() => {
     let mounted = true;
 
@@ -171,8 +169,53 @@ export default function RunningServices() {
     }
   };
 
-  // SUBMIT REVIEW
+  // CANCEL SERVICE (only when Pending)
+  const handleCancelClick = (service) => {
+    if (service.status === "Assigned") {
+      // safety: should already be disabled
+      return;
+    }
 
+    Swal.fire({
+      title: "Cancel this request?",
+      text: "You can cancel only before a technician is assigned.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, cancel it",
+      cancelButtonText: "Keep it",
+      confirmButtonColor: "#dc2626",
+    }).then(async (res) => {
+      if (res.isConfirmed) {
+        await cancelServiceRequest(service.id);
+      }
+    });
+  };
+
+  const cancelServiceRequest = async (serviceId) => {
+    try {
+      // you can change this to .delete() if you prefer deleting the row
+      const { error } = await supabase
+        .from("request_services")
+        .update({ status: "Cancelled" })
+        .eq("id", serviceId)
+        .eq("status", "Pending"); // extra protection: cancel only if still pending
+
+      if (error) throw error;
+
+      await refresh();
+
+      Swal.fire({
+        icon: "success",
+        title: "Request cancelled",
+        text: "Your service request has been cancelled.",
+        confirmButtonColor: "#0d9488",
+      });
+    } catch (err) {
+      Swal.fire("Failed to cancel: " + err.message);
+    }
+  };
+
+  // SUBMIT REVIEW
   const handleSubmitReview = async () => {
     const { behavior, timing, quality, review } = reviewData;
 
@@ -191,26 +234,14 @@ export default function RunningServices() {
 
       let technicianName = null;
       if (reviewService?.technician_id) {
-        console.log(
-          "Fetching technician with ID:",
-          reviewService.technician_id
-        );
-
-        const { data: tech, error: techError } = await supabase
+        const { data: tech } = await supabase
           .from("technicians")
           .select("*")
           .eq("id", reviewService.technician_id)
           .single();
 
-        console.log("Technician data:", tech);
-        console.log("Technician error:", techError);
-
         technicianName = tech?.name || null;
-      } else {
-        console.log("No technician_id found in reviewService");
       }
-
-      console.log("Final technician name:", technicianName);
 
       const { error } = await supabase.from("service_reviews").insert([
         {
@@ -339,8 +370,9 @@ export default function RunningServices() {
                     : "Mark as Done"}
                 </button>
 
-                {/* Cancel button - disabled if technician is assigned */}
+                {/* Cancel button - only active when Pending */}
                 <button
+                  onClick={() => handleCancelClick(service)}
                   disabled={service.status === "Assigned"}
                   className={`flex items-center justify-center gap-2 px-3 lg:px-4 py-2 font-medium transition border rounded-lg text-sm
                     ${
@@ -349,7 +381,9 @@ export default function RunningServices() {
                         : "text-red-600 border-red-300 hover:text-red-500 hover:bg-red-50"
                     }`}
                 >
-                  Cancel
+                  {service.status === "Assigned"
+                    ? "Cannot cancel after assignment"
+                    : "Cancel"}
                 </button>
               </div>
             </div>
