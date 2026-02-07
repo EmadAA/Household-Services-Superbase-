@@ -2,6 +2,8 @@ import { HiArrowNarrowRight, HiSparkles } from "react-icons/hi";
 import { Link } from "react-router-dom";
 import AdilImg from "../assets/images/Adil.png";
 import MTS from "../assets/images/mosttrustedservice.png";
+import MukterImg from "../assets/images/mukter.jpg";
+import ShuvonImg from "../assets/images/shuvon.png";
 
 export default function MostTrustedService() {
   return (
@@ -51,21 +53,27 @@ export default function MostTrustedService() {
                   className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 border-white"
                 />
                 <img
-                  src={AdilImg}
+                  src={ShuvonImg}
                   alt="Member 2"
                   className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 border-white"
                 />
+                <img
+                  src={MukterImg}
+                  alt="Member 2"
+                  className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 border-white"
+                />
+                
                 <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-teal-600 flex items-center justify-center text-white text-lg sm:text-xl font-bold">
                   +
                 </div>
               </div>
               <div className="text-center sm:text-left">
-                <p className="text-teal-600 font-medium text-lg sm:text-xl">57+</p>
+                <p className="text-teal-600 font-medium text-lg sm:text-xl">59+</p>
                 <p className="text-sm sm:text-base">Members</p>
               </div>
             </div>
 
-            {/* ✨ Icon */}
+            {/* Icon */}
             <div className="flex justify-center lg:justify-start mb-8">
               <HiSparkles className="w-10 h-10 sm:w-12 sm:h-12 text-white" />
             </div>
