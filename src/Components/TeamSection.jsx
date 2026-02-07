@@ -16,7 +16,7 @@ export default function TeamSection({
       name: "Kaji Jahid Hasan",
       role: "Supervisor",
       image: KJH,
-      socialLinks: { facebook: "#", linkedin: "#", instagram: "#", github: "#" },
+      socialLinks: { facebook: "https://www.facebook.com/kazi.j.hasan.9", linkedin: "https://www.linkedin.com/", instagram: "https://www.instagram.com/", github: "https://www.github.com/" },
     },
     {
       name: "Emad Uddin Adil",
@@ -56,10 +56,10 @@ export default function TeamSection({
       role: "Test Role",
       image: JW,
       socialLinks: {
-        facebook: "#",
-        linkedin: "#",
-        instagram: "#",
-        github: "#",
+        facebook: "https://www.facebook.com/",
+        linkedin: "https://www.linkedin.com/",
+        instagram: "https://www.instagram.com/",
+        github: "https://www.github.com/",
       },
     },
   ];
