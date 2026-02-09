@@ -209,8 +209,8 @@ const ServiceSelector = () => {
                   openService === service
                     ? "bg-gradient-to-r from-teal-400 to-cyan-500 text-white"
                     : isAvailable
-                    ? "bg-gray-50 text-gray-800 hover:bg-gray-100"
-                    : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                      ? "bg-gray-50 text-gray-800 hover:bg-gray-100"
+                      : "bg-gray-100 text-gray-400 cursor-not-allowed"
                 }`}
               >
                 <span className="flex flex-col">
@@ -269,19 +269,50 @@ const ServiceSelector = () => {
       </div>
 
       {showForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
-          <div className="bg-white rounded-xl p-6 w-[500px]">
+        <div
+          className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50"
+          onClick={() => setShowForm(false)}
+        >
+          <div
+            className="bg-white rounded-xl p-6 w-[500px]"
+            onClick={(e) => e.stopPropagation()}
+          >
             <form onSubmit={handleSubmit} className="space-y-3">
-              <input disabled value={selectedSub.service} className="w-full p-2 border rounded" />
-              <input disabled value={selectedSub.sub.name} className="w-full p-2 border rounded" />
-              <input disabled value={selectedSub.sub.price} className="w-full p-2 border rounded" />
-              <input required placeholder="Address" className="w-full p-2 border rounded"
-                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+              <input
+                disabled
+                value={selectedSub.service}
+                className="w-full p-2 border rounded"
               />
-              <input type="date" required className="w-full p-2 border rounded"
-                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+              <input
+                disabled
+                value={selectedSub.sub.name}
+                className="w-full p-2 border rounded"
               />
-              <textarea placeholder="Problem details" className="w-full p-2 border rounded"
+              <input
+                disabled
+                value={selectedSub.sub.price}
+                className="w-full p-2 border rounded"
+              />
+              <input
+                required
+                placeholder="Address"
+                className="w-full p-2 border rounded"
+                onChange={(e) =>
+                  setFormData({ ...formData, address: e.target.value })
+                }
+              />
+              <input
+                type="date"
+                required
+                className="w-full p-2 border rounded"
+                min={new Date().toISOString().split("T")[0]}
+                onChange={(e) =>
+                  setFormData({ ...formData, date: e.target.value })
+                }
+              />
+              <textarea
+                placeholder="Problem details"
+                className="w-full p-2 border rounded"
                 onChange={(e) =>
                   setFormData({ ...formData, problemDetails: e.target.value })
                 }
