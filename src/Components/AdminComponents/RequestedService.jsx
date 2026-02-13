@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../../../supabaseClient";
+import { sendAssignmentNotifications } from "../../utils/emailNotifications";
 
 const normalizeCategory = (value = "") => {
   const v = value.toLowerCase().trim();
@@ -96,6 +97,7 @@ export default function RequestedService() {
         return;
       }
 
+      // Update database - assign technician
       const { data, error } = await supabase
         .from("request_services")
         .update({
@@ -107,6 +109,66 @@ export default function RequestedService() {
 
       if (error) throw error;
 
+      // ✅ SEND EMAIL NOTIFICATIONS
+      console.log("Sending email notifications...");
+      
+      // Fetch customer data from users table using user_id
+      const { data: customerUser, error: customerError } = await supabase
+        .from('users')
+        .select('email, fullname, mobile')
+        .eq('id', selectedService.user_id)
+        .single();
+
+      if (customerError) {
+        console.error("Error fetching customer data:", customerError);
+      }
+
+      // Prepare customer data (prioritize users table data)
+      const customerData = {
+        email: customerUser?.email || selectedService.customer_email,
+        name: customerUser?.fullname || selectedService.customer_name,
+        phone: customerUser?.mobile || selectedService.customer_number
+      };
+
+      console.log("Customer data:", customerData);
+
+      // Prepare technician data
+      const technicianData = {
+        email: technicianObj.email,
+        name: technicianObj.fullname,
+        phone: technicianObj.mobile,
+        category: technicianObj.category
+      };
+
+      console.log("Technician data:", technicianData);
+
+      // Prepare service data
+      const serviceData = {
+        serviceName: selectedService.service_name || selectedService.serviceName,
+        category: selectedService.category,
+        date: selectedService.date,
+        cost: selectedService.cost || selectedService.price,
+        address: selectedService.address,
+        problemDetails: selectedService.problem_details || selectedService.problemDetails || "No details provided"
+      };
+
+      console.log("Service data:", serviceData);
+
+      // Send notifications
+      const notificationResult = await sendAssignmentNotifications(
+        customerData,
+        technicianData,
+        serviceData
+      );
+
+      if (notificationResult.success) {
+        console.log("✅ Email notifications sent successfully!");
+      } else {
+        console.warn("⚠️ Some email notifications failed, but assignment was successful");
+        console.log("Notification errors:", notificationResult);
+      }
+
+      // Update UI state
       setTechnicians((prev) =>
         prev.map((t) =>
           t.id === technicianObj.id ? { ...t, is_busy: true } : t
@@ -117,13 +179,20 @@ export default function RequestedService() {
         prev.filter((req) => req.id !== selectedService.id)
       );
 
-      alert(`${getTechnicianLabel(technicianObj)} assigned successfully!`);
+      alert(
+        `${getTechnicianLabel(technicianObj)} assigned successfully!\n${
+          notificationResult.success 
+            ? "Email notifications sent to customer and technician." 
+            : "Assignment successful, but some email notifications may have failed. Check console for details."
+        }`
+      );
+      
       setShowModal(false);
       setSelectedTechnicianId("");
       setSelectedService(null);
     } catch (err) {
       console.error("Error assigning technician:", err);
-      alert("Failed to assign technician.");
+      alert("Failed to assign technician. Please try again.");
     } finally {
       setAssigning(false);
     }
