@@ -8,6 +8,7 @@ import DoneBookings from "../Components/TechnicianProfileComponents/DoneBookings
 import MyPendingBookings from "../Components/TechnicianProfileComponents/MyPendingBookings";
 import RunningBookings from "../Components/TechnicianProfileComponents/RunningBookings";
 import TechnicianStatistics from "../Components/TechnicianProfileComponents/TechnicianStatistics";
+import TechLocationForm from "../Components/TechnicianProfileComponents/TechLocationForm";
 
 export default function TechnicianProfile() {
   const [userData, setUserData] = useState(null);
@@ -51,8 +52,10 @@ export default function TechnicianProfile() {
       <Navbar />
       <ProfileTopSection userData={userData} />
       <PersonalInformation userData={userData} onProfileUpdated={fetchUserData} />
-      {/* <MyPendingBookings /> */}
-      {/* 👇 pass technicianId from userData.id */}
+      
+      {/* ✅ FIXED: Use userData.id instead of undefined technicianId */}
+      <TechLocationForm technicianId={userData.id} />
+      
       <RunningBookings technicianId={userData.id} />
       <DoneBookings technicianId={userData.id} />
       <TechnicianStatistics />
