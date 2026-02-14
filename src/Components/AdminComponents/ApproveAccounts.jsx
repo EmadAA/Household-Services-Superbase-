@@ -241,7 +241,7 @@ export default function ApproveGigs() {
                           rel="noopener noreferrer"
                           className="text-md text-teal-600 hover:text-teal-800 "
                         >
-                          📄 View NID Document
+                           View NID Document
                         </a>
                       </div>
                     )}

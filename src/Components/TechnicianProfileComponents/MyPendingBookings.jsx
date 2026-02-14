@@ -40,7 +40,7 @@ export default function MyPendingBookings() {
       return;
     }
 
-    // 🔁 update local state: mark this booking as Accepted, don't remove it
+    //Update local state: mark this booking as Accepted, don't remove it
     setBookings((prev) =>
       prev.map((b) =>
         b.id === id ? { ...b, status: "Accepted" } : b
@@ -127,7 +127,7 @@ export default function MyPendingBookings() {
 
             <div className="mt-4 flex flex-col gap-2">
               {booking.status === "Accepted" ? (
-                // 🔒 show disabled Accepted button
+                //show disabled Accepted button
                 <button
                   disabled
                   className="flex items-center justify-center gap-2 px-3 lg:px-4 py-2 text-green-500 font-medium border border-green-300 rounded-lg bg-green-50 text-sm cursor-default"

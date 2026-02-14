@@ -33,7 +33,7 @@ export default function AllUsers() {
 
   const fetchUsers = async () => {
     try {
-      console.log("🔍 Fetching users from database...");
+      console.log("Fetching users from database.");
       setError(null);
 
       // Fetch users data
@@ -42,10 +42,10 @@ export default function AllUsers() {
         .select("*", { count: "exact" })
         .order("created_at", { ascending: false });
 
-      console.log("📊 Supabase response:", { data, error, count });
+      console.log("Supabase response: ", { data, error, count });
 
       if (error) {
-        console.error(" Supabase error:", error);
+        console.error("Supabase error:", error);
         setError(`Database Error: ${error.message}`);
 
         // If RLS is blocking, show specific message
@@ -111,7 +111,7 @@ export default function AllUsers() {
     setDeleting(userId);
 
     try {
-      // console.log("🗑️ Starting user deletion process for ID:", userId);
+      // console.log("Starting user deletion process for ID:", userId);
 
       const { data: userData, error: fetchError } = await supabase
         .from("users")

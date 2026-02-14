@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { useEffect, useState } from "react";
 import { supabase } from "../../../supabaseClient";
 import { sendAssignmentNotifications } from "../../utils/emailNotifications";
@@ -109,7 +110,7 @@ export default function RequestedService() {
 
       if (error) throw error;
 
-      // ✅ SEND EMAIL NOTIFICATIONS
+      //SEND EMAIL NOTIFICATIONS
       console.log("Sending email notifications...");
       
       // Fetch customer data from users table using user_id
@@ -162,9 +163,9 @@ export default function RequestedService() {
       );
 
       if (notificationResult.success) {
-        console.log("✅ Email notifications sent successfully!");
+        console.log("Email notifications sent successfully!");
       } else {
-        console.warn("⚠️ Some email notifications failed, but assignment was successful");
+        console.warn("Some email notifications failed, but assignment was successful");
         console.log("Notification errors:", notificationResult);
       }
 
@@ -286,7 +287,7 @@ export default function RequestedService() {
         ))}
       </div>
 
-      {/* ✅ BOLD BORDER SELECTION */}
+      {/*BOLD BORDER SELECTION */}
       {showModal && selectedService && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50 p-4">
           <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md max-h-[85vh] overflow-y-auto border border-gray-200">
