@@ -103,7 +103,7 @@ export default function DoneBookedServices() {
                   View Details
                 </button>
                 <button className="flex items-center justify-center gap-2 px-3 lg:px-4 py-2 text-gray-600 hover:text-gray-500 font-medium transition border border-gray-300 rounded-lg hover:bg-gray-50 text-sm">
-                  Rebook Service
+                  Rebook Service (Coming Soon.....)
                 </button>
               </div>
             </div>
