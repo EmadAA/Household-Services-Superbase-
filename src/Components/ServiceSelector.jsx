@@ -17,7 +17,7 @@ const CATEGORY_MAP = {
 const ServiceSelector = () => {
   const [availableServices, setAvailableServices] = useState([]);
   const [openService, setOpenService] = useState(null);
-  const [selectedSub, setSelectedSub] = useState(null);
+  const [selectedSubs, setSelectedSubs] = useState([]); // ✅ changed
   const [showForm, setShowForm] = useState(false);
   const [customerInfo, setCustomerInfo] = useState({ name: "", number: "" });
   const [formData, setFormData] = useState({
@@ -141,13 +141,26 @@ const ServiceSelector = () => {
     ],
   };
 
+  // ✅ Toggle multiple selection
   const handleSelect = (service, sub) => {
-    setSelectedSub({ service, sub });
+    const exists = selectedSubs.find(
+      (item) => item.service === service && item.sub.name === sub.name,
+    );
+
+    if (exists) {
+      setSelectedSubs(
+        selectedSubs.filter(
+          (item) => !(item.service === service && item.sub.name === sub.name),
+        ),
+      );
+    } else {
+      setSelectedSubs([...selectedSubs, { service, sub }]);
+    }
   };
 
   const handleOrderClick = () => {
-    if (!selectedSub) {
-      alert("Please select a service option first!");
+    if (selectedSubs.length === 0) {
+      alert("Please select at least one service option!");
       return;
     }
     setShowForm(true);
@@ -160,9 +173,9 @@ const ServiceSelector = () => {
 
     const orderDetails = {
       user_id: storedUserId,
-      category: selectedSub.service,
-      service_name: selectedSub.sub.name,
-      price: selectedSub.sub.price,
+      category: [...new Set(selectedSubs.map((i) => i.service))].join(" + "),
+      service_name: selectedSubs.map((i) => i.sub.name).join(" + "),
+      price: selectedSubs.reduce((t, i) => t + i.sub.price, 0),
       address: formData.address,
       date: formData.date,
       problem_details: formData.problemDetails,
@@ -180,6 +193,7 @@ const ServiceSelector = () => {
     } else {
       alert("Order placed successfully!");
       setShowForm(false);
+      setSelectedSubs([]);
       setFormData({ address: "", date: "", problemDetails: "" });
     }
   };
@@ -226,23 +240,29 @@ const ServiceSelector = () => {
 
               {openService === service && isAvailable && (
                 <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-2xl shadow-xl p-4 space-y-2 z-10">
-                  {services[service].map((sub, index) => (
-                    <div
-                      key={index}
-                      onClick={() => handleSelect(service, sub)}
-                      className={`px-4 py-2 rounded-lg cursor-pointer text-sm font-medium border flex justify-between ${
-                        selectedSub?.service === service &&
-                        selectedSub?.sub?.name === sub.name
-                          ? "bg-cyan-100 border-cyan-400"
-                          : "border-gray-200 hover:bg-gray-50"
-                      }`}
-                    >
-                      <span>{sub.name}</span>
-                      <span className="text-xs font-semibold">
-                        {sub.price} Tk
-                      </span>
-                    </div>
-                  ))}
+                  {services[service].map((sub, index) => {
+                    const isSelected = selectedSubs.some(
+                      (item) =>
+                        item.service === service && item.sub.name === sub.name,
+                    );
+
+                    return (
+                      <div
+                        key={index}
+                        onClick={() => handleSelect(service, sub)}
+                        className={`px-4 py-2 rounded-lg cursor-pointer text-sm font-medium border flex justify-between ${
+                          isSelected
+                            ? "bg-cyan-100 border-cyan-400"
+                            : "border-gray-200 hover:bg-gray-50"
+                        }`}
+                      >
+                        <span>{sub.name}</span>
+                        <span className="text-xs font-semibold">
+                          {sub.price} Tk
+                        </span>
+                      </div>
+                    );
+                  })}
 
                   <div className="flex justify-between mt-4">
                     <button
@@ -255,7 +275,7 @@ const ServiceSelector = () => {
                       className="px-4 py-2 bg-gray-200 text-sm rounded-lg"
                       onClick={() => {
                         setOpenService(null);
-                        setSelectedSub(null);
+                        setSelectedSubs([]);
                       }}
                     >
                       Cancel
@@ -280,17 +300,20 @@ const ServiceSelector = () => {
             <form onSubmit={handleSubmit} className="space-y-3">
               <input
                 disabled
-                value={selectedSub.service}
+                value={[...new Set(selectedSubs.map((i) => i.service))].join(
+                  " + ",
+                )}
+                className="w-full p-2 border rounded"
+              />
+
+              <input
+                disabled
+                value={selectedSubs.map((i) => i.sub.name).join(" + ")}
                 className="w-full p-2 border rounded"
               />
               <input
                 disabled
-                value={selectedSub.sub.name}
-                className="w-full p-2 border rounded"
-              />
-              <input
-                disabled
-                value={selectedSub.sub.price}
+                value={selectedSubs.reduce((t, i) => t + i.sub.price, 0)}
                 className="w-full p-2 border rounded"
               />
               <input
@@ -304,8 +327,8 @@ const ServiceSelector = () => {
               <input
                 type="date"
                 required
-                className="w-full p-2 border rounded"
                 min={new Date().toISOString().split("T")[0]}
+                className="w-full p-2 border rounded"
                 onChange={(e) =>
                   setFormData({ ...formData, date: e.target.value })
                 }
@@ -314,7 +337,10 @@ const ServiceSelector = () => {
                 placeholder="Problem details"
                 className="w-full p-2 border rounded"
                 onChange={(e) =>
-                  setFormData({ ...formData, problemDetails: e.target.value })
+                  setFormData({
+                    ...formData,
+                    problemDetails: e.target.value,
+                  })
                 }
               />
               <button className="w-full bg-cyan-500 text-white p-2 rounded">

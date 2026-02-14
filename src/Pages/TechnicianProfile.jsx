@@ -5,9 +5,7 @@ import Navbar from "../Components/Navbar";
 import PersonalInformation from "../Components/PersonalInformation";
 import ProfileTopSection from "../Components/ProfileTopSection";
 import DoneBookings from "../Components/TechnicianProfileComponents/DoneBookings";
-import MyPendingBookings from "../Components/TechnicianProfileComponents/MyPendingBookings";
 import RunningBookings from "../Components/TechnicianProfileComponents/RunningBookings";
-import TechnicianStatistics from "../Components/TechnicianProfileComponents/TechnicianStatistics";
 import TechLocationForm from "../Components/TechnicianProfileComponents/TechLocationForm";
 
 export default function TechnicianProfile() {
@@ -58,7 +56,7 @@ export default function TechnicianProfile() {
       
       <RunningBookings technicianId={userData.id} />
       <DoneBookings technicianId={userData.id} />
-      <TechnicianStatistics />
+      {/* <TechnicianStatistics /> */}
       <Footer />
     </div>
   );
