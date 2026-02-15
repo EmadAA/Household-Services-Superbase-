@@ -51,7 +51,7 @@ export default function TechnicianProfile() {
       <ProfileTopSection userData={userData} />
       <PersonalInformation userData={userData} onProfileUpdated={fetchUserData} />
       
-      {/* ✅ FIXED: Use userData.id instead of undefined technicianId */}
+      {/*Use userData.id instead of undefined technicianId */}
       <TechLocationForm technicianId={userData.id} />
       
       <RunningBookings technicianId={userData.id} />

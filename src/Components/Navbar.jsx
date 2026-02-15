@@ -15,11 +15,26 @@ export default function Navbar() {
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
+  const [availableServices, setAvailableServices] = useState([]);
   const [userRole, setUserRole] = useState(null);
   const menuRef = useRef(null);
   const searchRef = useRef(null);
 
-  // All services data
+  //all technician category listed
+  const CATEGORY_MAP = {
+    electrician: "Electrician",
+    plumber: "Plumber",
+    ac_refrigerator_expert: "AC & Refrigerator Expert",
+    carpenter: "Carpenter",
+    painter: "Painter",
+    cleaner: "Cleaner",
+    decorator: "Decorator (Home Events)",
+    housemaid: "Housemaid",
+    mover: "Mover",
+    pest_control_expert: "Pest Control Expert",
+  };
+
+  // All services data list
   const services = {
     "AC & Refrigerator Expert": [
       { name: "AC Installation", price: 1200 },
@@ -181,6 +196,29 @@ export default function Navbar() {
     ],
   };
 
+  // Fetch available technicians
+  useEffect(() => {
+    const fetchAvailableTechnicians = async () => {
+      const { data, error } = await supabase
+        .from("technicians")
+        .select("category");
+
+      if (error) {
+        console.error("Error fetching technicians:", error);
+        return;
+      }
+
+      const uniqueCategories = [...new Set(data.map((t) => t.category))];
+      const mappedServices = uniqueCategories
+        .map((cat) => CATEGORY_MAP[cat])
+        .filter(Boolean);
+
+      setAvailableServices(mappedServices);
+    };
+
+    fetchAvailableTechnicians();
+  }, []);
+
   // Check user role
   useEffect(() => {
     const checkUserRole = () => {
@@ -218,7 +256,7 @@ export default function Navbar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Search functionality
+  // Search functionality with availability check
   const handleSearch = (query) => {
     setSearchQuery(query);
 
@@ -233,6 +271,7 @@ export default function Navbar() {
         serviceList.map((service) => ({
           ...service,
           category,
+          isAvailable: availableServices.includes(category),
         })),
     );
 
@@ -247,6 +286,11 @@ export default function Navbar() {
 
   // Handle selecting a service from search
   const handleSelectService = (service) => {
+    // Only navigate if service is available in  our list
+    if (!service.isAvailable) {
+      return; //if not available,  then  return
+    }
+
     // Navigate to services page with pre-selected category and service
     navigate("/services", {
       state: {
@@ -260,6 +304,7 @@ export default function Navbar() {
     setSearchResults([]);
   };
 
+  //if not logged in, then login first
   const handleLogin = () => {
     setIsMenuOpen(false);
     navigate("/login");
@@ -290,11 +335,12 @@ export default function Navbar() {
     navigate("/login");
   };
 
+  //just navigate to the homepage
   const handleLogoClick = () => {
     navigate("/home");
   };
 
-  // Navigation Links
+  // Navigation Links for navbar
   const getNavLinks = () => {
     const baseLinks = [
       { name: "HOME", path: "/home", end: true },
@@ -373,18 +419,41 @@ export default function Navbar() {
                     <div
                       key={index}
                       onClick={() => handleSelectService(service)}
-                      className="px-4 py-3 hover:bg-gray-50 cursor-pointer border-b last:border-b-0 transition-colors"
+                      className={`px-4 py-3 border-b last:border-b-0 transition-colors ${
+                        service.isAvailable
+                          ? "hover:bg-gray-50 cursor-pointer"
+                          : "bg-gray-100 cursor-not-allowed opacity-60"
+                      }`}
                     >
                       <div className="flex justify-between items-center">
-                        <div>
-                          <p className="font-medium text-gray-800 text-sm">
+                        <div className="flex-1">
+                          <p
+                            className={`font-medium text-sm ${
+                              service.isAvailable
+                                ? "text-gray-800"
+                                : "text-gray-500"
+                            }`}
+                          >
                             {service.name}
                           </p>
-                          <p className="text-xs text-gray-500">
-                            {service.category}
-                          </p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <p className="text-xs text-gray-500">
+                              {service.category}
+                            </p>
+                            {!service.isAvailable && (
+                              <span className="text-xs text-red-500 font-semibold">
+                                • Not Available
+                              </span>
+                            )}
+                          </div>
                         </div>
-                        <p className="text-teal-600 font-semibold text-sm">
+                        <p
+                          className={`font-semibold text-sm ${
+                            service.isAvailable
+                              ? "text-teal-600"
+                              : "text-gray-400"
+                          }`}
+                        >
                           ৳{service.price}
                         </p>
                       </div>

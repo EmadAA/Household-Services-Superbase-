@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "../../supabaseClient";
 
 const CATEGORY_MAP = {
@@ -26,6 +26,7 @@ const ServiceSelector = ({ searchPreSelection }) => {
     problemDetails: "",
   });
   const [highlightedService, setHighlightedService] = useState(null);
+  const containerRef = useRef(null); 
 
   /* Fetch available technicians */
   useEffect(() => {
@@ -104,6 +105,24 @@ const ServiceSelector = ({ searchPreSelection }) => {
       }, 3000);
     }
   }, [searchPreSelection]);
+
+  // this useeffect is for the outside clicking in serviceSelector dropdownlist
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target)
+      ) {
+        setOpenService(null);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const services = {
     "AC & Refrigerator Expert": [
@@ -323,7 +342,10 @@ const ServiceSelector = ({ searchPreSelection }) => {
   };
 
   return (
-    <div className="w-full max-w-[1300px] mx-auto p-6 border-2 shadow-md rounded-lg border-gray-200 my-12 relative">
+    <div
+      ref={containerRef}
+      className="w-full max-w-[1300px] mx-auto p-6 border-2 shadow-md rounded-lg border-gray-200 my-12 relative"
+    >
       <h2 className="text-2xl font-semibold text-center text-gray-800 mb-6">
         Choose Your Service
       </h2>
@@ -380,14 +402,14 @@ const ServiceSelector = ({ searchPreSelection }) => {
                           isSelected
                             ? "bg-cyan-100 border-cyan-400"
                             : isHighlighted
-                              ? "bg-yellow-100 border-yellow-400 animate-pulse"
+                              ? "bg-teal-100 border-teal-400 animate-pulse"
                               : "border-gray-200 hover:bg-gray-50"
                         }`}
                       >
                         <span className="flex items-center gap-2">
                           {sub.name}
                           {isHighlighted && (
-                            <span className="text-xs text-yellow-600 font-bold">
+                            <span className="text-xs text-teal-600 font-bold">
                               ← From Search
                             </span>
                           )}
