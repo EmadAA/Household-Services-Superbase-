@@ -1,7 +1,7 @@
 // utils/emailNotifications.js - CONFIGURED VERSION
 import emailjs from '@emailjs/browser';
 
-// ✅ EMAILJS CREDENTIALS - CONFIGURED
+//credential of EmailJS 
 const EMAILJS_PUBLIC_KEY = 'Qk9ajvN6MqcOPuiNn';
 const EMAILJS_SERVICE_ID = 'service_ltrmrlq';
 
@@ -22,12 +22,12 @@ const isConfigured = () => {
          TEMPLATE_IDS.TECHNICIAN_ASSIGNMENT !== 'YOUR_TECHNICIAN_TEMPLATE_ID';
   
   if (DEBUG_MODE) {
-    console.log('📧 EmailJS Configuration Check:');
-    console.log('  - Public Key:', EMAILJS_PUBLIC_KEY !== 'YOUR_PUBLIC_KEY_HERE' ? '✅ Set' : '❌ Not set');
-    console.log('  - Service ID:', EMAILJS_SERVICE_ID !== 'YOUR_SERVICE_ID_HERE' ? '✅ Set' : '❌ Not set');
-    console.log('  - Customer Template:', TEMPLATE_IDS.CUSTOMER_ASSIGNMENT !== 'YOUR_CUSTOMER_TEMPLATE_ID' ? '✅ Set' : '❌ Not set');
-    console.log('  - Technician Template:', TEMPLATE_IDS.TECHNICIAN_ASSIGNMENT !== 'YOUR_TECHNICIAN_TEMPLATE_ID' ? '✅ Set' : '❌ Not set');
-    console.log('  - Overall Status:', configured ? '✅ CONFIGURED' : '❌ NOT CONFIGURED');
+    console.log('EmailJS Configuration Check:');
+    console.log('  - Public Key:', EMAILJS_PUBLIC_KEY !== 'YOUR_PUBLIC_KEY_HERE' ? 'Set' : 'Not set');
+    console.log('  - Service ID:', EMAILJS_SERVICE_ID !== 'YOUR_SERVICE_ID_HERE' ? 'Set' : 'Not set');
+    console.log('  - Customer Template:', TEMPLATE_IDS.CUSTOMER_ASSIGNMENT !== 'YOUR_CUSTOMER_TEMPLATE_ID' ? ' Set' : ' Not set');
+    console.log('  - Technician Template:', TEMPLATE_IDS.TECHNICIAN_ASSIGNMENT !== 'YOUR_TECHNICIAN_TEMPLATE_ID' ? ' Set' : ' Not set');
+    console.log('  - Overall Status:', configured ? 'CONFIGURED' : ' NOT CONFIGURED');
   }
   
   return configured;
@@ -37,12 +37,12 @@ const isConfigured = () => {
 if (isConfigured()) {
   try {
     emailjs.init(EMAILJS_PUBLIC_KEY);
-    if (DEBUG_MODE) console.log('✅ EmailJS initialized successfully');
+    if (DEBUG_MODE) console.log(' EmailJS initialized successfully');
   } catch (error) {
-    console.error('❌ EmailJS initialization failed:', error);
+    console.error(' EmailJS initialization failed:', error);
   }
 } else {
-  console.warn('⚠️ EmailJS NOT configured yet. Please update credentials in emailNotifications.js');
+  console.warn(' EmailJS NOT configured yet. Please update credentials in emailNotifications.js');
 }
 
 /**
@@ -60,7 +60,7 @@ const isValidEmail = (email) => {
 export const sendCustomerAssignmentEmail = async (customerData, technicianData, serviceData) => {
   try {
     if (DEBUG_MODE) {
-      console.log('📧 === CUSTOMER EMAIL DEBUG ===');
+      console.log(' === CUSTOMER EMAIL DEBUG ===');
       console.log('Customer Data:', customerData);
       console.log('Technician Data:', technicianData);
       console.log('Service Data:', serviceData);
@@ -69,7 +69,7 @@ export const sendCustomerAssignmentEmail = async (customerData, technicianData, 
     // Check if EmailJS is configured
     if (!isConfigured()) {
       const error = 'EmailJS not configured. Please set up your API keys in emailNotifications.js';
-      console.error('❌', error);
+      console.error('Error : ', error);
       return { 
         success: false, 
         error: error
@@ -79,7 +79,7 @@ export const sendCustomerAssignmentEmail = async (customerData, technicianData, 
     // Validate customer email
     if (!isValidEmail(customerData.email)) {
       const error = `Invalid customer email: ${customerData.email || 'missing'}`;
-      console.error('❌', error);
+      console.error('Error : ', error);
       return { 
         success: false, 
         error: error
@@ -101,7 +101,7 @@ export const sendCustomerAssignmentEmail = async (customerData, technicianData, 
     };
 
     if (DEBUG_MODE) {
-      console.log('📤 Sending customer email with params:', templateParams);
+      console.log('Sending customer email with params:', templateParams);
     }
 
     const response = await emailjs.send(
@@ -110,10 +110,10 @@ export const sendCustomerAssignmentEmail = async (customerData, technicianData, 
       templateParams
     );
 
-    console.log('✅ Customer email sent successfully:', response);
+    console.log('Customer email sent successfully:', response);
     return { success: true, response };
   } catch (error) {
-    console.error('❌ Failed to send customer email:', error);
+    console.error('Failed to send customer email:', error);
     console.error('Error details:', {
       message: error.message,
       text: error.text,
@@ -132,7 +132,7 @@ export const sendCustomerAssignmentEmail = async (customerData, technicianData, 
 export const sendTechnicianAssignmentEmail = async (technicianData, customerData, serviceData) => {
   try {
     if (DEBUG_MODE) {
-      console.log('📧 === TECHNICIAN EMAIL DEBUG ===');
+      console.log(' TECHNICIAN EMAIL DEBUG');
       console.log('Technician Data:', technicianData);
       console.log('Customer Data:', customerData);
       console.log('Service Data:', serviceData);
@@ -141,7 +141,7 @@ export const sendTechnicianAssignmentEmail = async (technicianData, customerData
     // Check if EmailJS is configured
     if (!isConfigured()) {
       const error = 'EmailJS not configured. Please set up your API keys in emailNotifications.js';
-      console.error('❌', error);
+      console.error('Error : ', error);
       return { 
         success: false, 
         error: error
@@ -151,7 +151,7 @@ export const sendTechnicianAssignmentEmail = async (technicianData, customerData
     // Validate technician email
     if (!isValidEmail(technicianData.email)) {
       const error = `Invalid technician email: ${technicianData.email || 'missing'}`;
-      console.error('❌', error);
+      console.error('Error : ', error);
       return { 
         success: false, 
         error: error
@@ -173,7 +173,7 @@ export const sendTechnicianAssignmentEmail = async (technicianData, customerData
     };
 
     if (DEBUG_MODE) {
-      console.log('📤 Sending technician email with params:', templateParams);
+      console.log('Sending technician email with params:', templateParams);
     }
 
     const response = await emailjs.send(
@@ -182,10 +182,10 @@ export const sendTechnicianAssignmentEmail = async (technicianData, customerData
       templateParams
     );
 
-    console.log('✅ Technician email sent successfully:', response);
+    console.log('Technician email sent successfully:', response);
     return { success: true, response };
   } catch (error) {
-    console.error('❌ Failed to send technician email:', error);
+    console.error('Failed to send technician email:', error);
     console.error('Error details:', {
       message: error.message,
       text: error.text,
@@ -203,11 +203,11 @@ export const sendTechnicianAssignmentEmail = async (technicianData, customerData
  */
 export const sendAssignmentNotifications = async (customerData, technicianData, serviceData) => {
   try {
-    console.log('📧 ===== STARTING EMAIL NOTIFICATIONS =====');
+    console.log('STARTING EMAIL NOTIFICATIONS');
     
     // Check configuration first
     if (!isConfigured()) {
-      console.error('❌ EmailJS is not configured!');
+      console.error('Error : EmailJS is not configured!');
       return {
         success: false,
         error: 'EmailJS not configured',
@@ -225,11 +225,11 @@ export const sendAssignmentNotifications = async (customerData, technicianData, 
     const allSuccess = customerResult.success && technicianResult.success;
     
     if (allSuccess) {
-      console.log('✅ ===== ALL NOTIFICATIONS SENT SUCCESSFULLY! =====');
+      console.log('ALL NOTIFICATIONS SENT SUCCESSFULLY!');
     } else {
-      console.warn('⚠️ ===== SOME NOTIFICATIONS FAILED =====');
-      console.log('Customer email:', customerResult.success ? '✅ Success' : '❌ Failed');
-      console.log('Technician email:', technicianResult.success ? '✅ Success' : '❌ Failed');
+      console.warn('SOME NOTIFICATIONS FAILED ');
+      console.log('Customer email:', customerResult.success ? ' Success' : ' Failed');
+      console.log('Technician email:', technicianResult.success ? ' Success' : ' Failed');
       
       if (!customerResult.success) {
         console.error('Customer email error:', customerResult.error);
@@ -245,7 +245,7 @@ export const sendAssignmentNotifications = async (customerData, technicianData, 
       technicianEmail: technicianResult
     };
   } catch (error) {
-    console.error('❌ Error sending notifications:', error);
+    console.error(' Error sending notifications:', error);
     return { 
       success: false, 
       error: error.message,
