@@ -1,24 +1,26 @@
-import { Suspense, lazy } from 'react';
+import { Suspense, lazy } from "react";
 import {
   Navigate,
   Route,
   BrowserRouter as Router,
-  Routes
+  Routes,
 } from "react-router-dom";
-import ProtectedRoute from './Components/AdminComponents/ProtectedRoute';
-import RegistrationComplete from './Components/RegistrationComplete ';
+import ProtectedRoute from "./Components/AdminComponents/ProtectedRoute";
+import RegistrationComplete from "./Components/RegistrationComplete ";
+import ForgetPassword from "./Pages/ForgetPassword";
+import ResetPassword from "./Pages/ResetPassword";
 
-const Home = lazy(() => import('./Pages/Home'));
-const About = lazy(() => import('./Pages/About'));
-const Contact = lazy(() => import('./Pages/Contact'));
-const Login = lazy(() => import('./Pages/Login'));
-const Signup = lazy(() => import('./Pages/Signup'));
-const Services = lazy(() => import('./Pages/Services'));
-const Page404 = lazy(() => import('./Pages/Page404'));
-const UserProfile = lazy(() => import('./Pages/UserProfile'));
-const TechnicianProfile = lazy(() => import('./Pages/TechnicianProfile'));
-const AdminDashBoard = lazy(() => import('./Pages/AdminDashBoard'));
-const TermsAndConditions = lazy(() => import('./Pages/TOC'));
+const Home = lazy(() => import("./Pages/Home"));
+const About = lazy(() => import("./Pages/About"));
+const Contact = lazy(() => import("./Pages/Contact"));
+const Login = lazy(() => import("./Pages/Login"));
+const Signup = lazy(() => import("./Pages/Signup"));
+const Services = lazy(() => import("./Pages/Services"));
+const Page404 = lazy(() => import("./Pages/Page404"));
+const UserProfile = lazy(() => import("./Pages/UserProfile"));
+const TechnicianProfile = lazy(() => import("./Pages/TechnicianProfile"));
+const AdminDashBoard = lazy(() => import("./Pages/AdminDashBoard"));
+const TermsAndConditions = lazy(() => import("./Pages/TOC"));
 
 // Preloader
 const Preloader = () => (
@@ -36,31 +38,40 @@ const App = () => {
           <Route path="/signup" element={<Signup />} />
           <Route path="/home" element={<Home />} />
           <Route path="/about" element={<About />} />
-          <Route path="/services" element={<Services />} /> 
+          <Route path="/services" element={<Services />} />
           <Route path="/contact" element={<Contact />} />
-          <Route path="/registration-complete" element={<RegistrationComplete />} />
-          <Route path="/toc" element={<TermsAndConditions />} />
-           <Route
-          path="/userprofile"
-          element={
-            <ProtectedRoute>
-              <UserProfile />
-            </ProtectedRoute>
-          }
-        />
- 
           <Route
-          path="/technicianprofile"
-          element={
-            <ProtectedRoute>
-              <TechnicianProfile />
-            </ProtectedRoute>}
-          /> 
-          <Route path="/admindashboard"  element={
-            // <ProtectedRoute>
+            path="/registration-complete"
+            element={<RegistrationComplete />}
+          />
+          <Route path="/toc" element={<TermsAndConditions />} />
+          <Route path="/forget-password" element={<ForgetPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route
+            path="/userprofile"
+            element={
+              <ProtectedRoute>
+                <UserProfile />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/technicianprofile"
+            element={
+              <ProtectedRoute>
+                <TechnicianProfile />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admindashboard"
+            element={
+              // <ProtectedRoute>
               <AdminDashBoard />
-            // </ProtectedRoute>
-          }/>
+              // </ProtectedRoute>
+            }
+          />
           <Route path="*" element={<Page404 />} />
         </Routes>
       </Suspense>

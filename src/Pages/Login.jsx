@@ -21,41 +21,43 @@ const Login = () => {
   const verifyAdminLogin = async (email, password) => {
     try {
       // console.log(' Checking admin login for:', email);
-      
+
       // fetch admin data
       const { data, error } = await supabase
-        .from('admin')
-        .select('*')
-        .eq('email', email.toLowerCase().trim())
+        .from("admin")
+        .select("*")
+        .eq("email", email.toLowerCase().trim())
         .single();
 
       // console.log('Admin query result:', { data, error });
 
       // for RLS error(in supabase)
-       if (error) {
-        console.log(' Admin query error (expected for non-admins):', error.message);
+      if (error) {
+        console.log(
+          " Admin query error (expected for non-admins):",
+          error.message,
+        );
         return { isAdmin: false, adminData: null };
       }
 
       if (!data) {
-        console.log(' No admin found with this email');
+        console.log(" No admin found with this email");
         return { isAdmin: false, adminData: null };
       }
 
       // console.log(' Admin found:', data.fullname);
-      
+
       // password match check
       const isValidPassword = data.password_hash === password;
-      
+
       // console.log(' Password comparison result:', isValidPassword);
-      
-      return { 
-        isAdmin: isValidPassword, 
-        adminData: isValidPassword ? data : null 
+
+      return {
+        isAdmin: isValidPassword,
+        adminData: isValidPassword ? data : null,
       };
-      
     } catch (error) {
-      console.log(' Admin verification error', error);
+      console.log(" Admin verification error", error);
       return { isAdmin: false, adminData: null };
     }
   };
@@ -66,20 +68,23 @@ const Login = () => {
 
     try {
       // console.log(' Starting login process...');
-      
+
       // First check if this is an admin login
-      const { isAdmin, adminData } = await verifyAdminLogin(formData.email, formData.password);
-      
+      const { isAdmin, adminData } = await verifyAdminLogin(
+        formData.email,
+        formData.password,
+      );
+
       if (isAdmin && adminData) {
         // console.log(' Admin login successful for:', adminData.fullname);
-        
+
         // Store admin session data
-        localStorage.setItem('userRole', 'admin');
-        localStorage.setItem('adminId', adminData.id);
-        localStorage.setItem('adminEmail', adminData.email);
-        localStorage.setItem('adminName', adminData.fullname);
-        localStorage.setItem('isLoggedIn', 'true');
-        
+        localStorage.setItem("userRole", "admin");
+        localStorage.setItem("adminId", adminData.id);
+        localStorage.setItem("adminEmail", adminData.email);
+        localStorage.setItem("adminName", adminData.fullname);
+        localStorage.setItem("isLoggedIn", "true");
+
         alert(` Welcome back, ${adminData.fullname}! Admin login successful.`);
         navigate("/admindashboard");
         setLoading(false);
@@ -88,52 +93,92 @@ const Login = () => {
 
       //login for users/technicians
       // console.log('regular user login :', formData.email);
-      
+
       const { data, error } = await supabase.auth.signInWithPassword({
         email: formData.email,
         password: formData.password,
       });
 
       if (error) {
-        console.error(' Supabase authenticate error:', error);
-        
-        if (error.message.includes('Email not confirmed')) {
-          alert(' Please check your email and confirm your account first!');
-        } else if (error.message.includes('Invalid login credentials')) {
-          alert(' Invalid email or password. Please check your credentials and try again.');
+        console.error(" Supabase authenticate error:", error);
+
+        if (error.message.includes("Email not confirmed")) {
+          alert(" Please check your email and confirm your account first!");
+        } else if (error.message.includes("Invalid login credentials")) {
+          alert(
+            " Invalid email or password. Please check your credentials and try again.",
+          );
         } else {
-          alert(' Login failed: ' + error.message);
+          alert(" Login failed: " + error.message);
         }
         setLoading(false);
         return;
       }
 
       if (data.user) {
-        console.log('user login successfully:', data.user.email);
-        
+        console.log("user login successfully:", data.user.email);
+
         // Store user session data
-        localStorage.setItem('userRole', data.user.user_metadata?.role || 'user');
-        localStorage.setItem('userId', data.user.id);
-        localStorage.setItem('userEmail', data.user.email);
-        localStorage.setItem('isLoggedIn', 'true');
-        
-        alert(' Login successful!');
-        
+        localStorage.setItem(
+          "userRole",
+          data.user.user_metadata?.role || "user",
+        );
+        localStorage.setItem("userId", data.user.id);
+        localStorage.setItem("userEmail", data.user.email);
+        localStorage.setItem("isLoggedIn", "true");
+
+        alert(" Login successful!");
+
         navigate("/home");
       }
-
     } catch (error) {
-      console.error(' Login error:', error);
-      alert(' Login error: ' + error.message);
+      console.error(" Login error:", error);
+      alert(" Login error: " + error.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleForgetPasswordClick = async () => {
+    if (!formData.email.trim()) {
+      alert("Please enter your email first.");
+      return;
+    }
+
+    const email = formData.email.toLowerCase().trim();
+
+    try {
+      // check in users table
+      const { data: userData } = await supabase
+        .from("users")
+        .select("email")
+        .eq("email", email)
+        .maybeSingle();
+
+      // check in technicians table
+      const { data: technicianData } = await supabase
+        .from("technicians")
+        .select("email")
+        .eq("email", email)
+        .maybeSingle();
+
+      if (!userData && !technicianData) {
+        alert("This email does not exist in our system.");
+        return;
+      }
+
+      // If exists → go to Forget password page with email
+      navigate("/forget-password", {
+        state: { email },
+      });
+    } catch (error) {
+      alert("Something went wrong: " + error.message);
     }
   };
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100">
       <div className="bg-white rounded-xl shadow-lg w-[800px] h-[600px] flex flex-col overflow-hidden">
-        
         {/* Header */}
         <div className="bg-gradient-to-r from-teal-500 to-teal-600 h-[200px] flex justify-center items-center">
           <h1 className="text-white text-3xl font-bold uppercase bg-black/40 px-6 py-2 rounded-md">
@@ -183,15 +228,19 @@ const Login = () => {
               </button>
             </div>
 
-            {/* Remember me / forgot password */}
+            {/* Remember me / Forget password */}
             <div className="flex justify-between items-center text-sm text-gray-600">
               <label className="flex items-center gap-2">
                 <input type="checkbox" name="remember" />
                 Remember me
               </label>
-              <a href="#" className="hover:underline">
-                Forgot Password?
-              </a>
+              <button
+                type="button"
+                onClick={handleForgetPasswordClick}
+                className="hover:underline"
+              >
+                Forget Password?
+              </button>
             </div>
 
             {/* Buttons */}
