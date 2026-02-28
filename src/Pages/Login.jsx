@@ -155,7 +155,7 @@ const Login = () => {
         .eq("email", email)
         .maybeSingle();
 
-      // check in technicians table
+      // check in technician table
       const { data: technicianData } = await supabase
         .from("technicians")
         .select("email")
@@ -163,11 +163,11 @@ const Login = () => {
         .maybeSingle();
 
       if (!userData && !technicianData) {
-        alert("This email does not exist in our system.");
+        alert("This email does not exist in our Database.");
         return;
       }
 
-      // If exists → go to Forget password page with email
+      // If exists ,then go to Forget password page with this email
       navigate("/forget-password", {
         state: { email },
       });
@@ -231,7 +231,7 @@ const Login = () => {
             {/* Remember me / Forget password */}
             <div className="flex justify-between items-center text-sm text-gray-600">
               <label className="flex items-center gap-2">
-                <input type="checkbox" name="remember" />
+                <input type="checkbox" checked name="remember" title="It remember you until you logout  !" />
                 Remember me
               </label>
               <button
