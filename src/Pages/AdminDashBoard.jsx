@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "../../supabaseClient";
 import AllTechnicians from "../Components/AdminComponents/AllTechnicians";
 import AllUsers from "../Components/AdminComponents/AllUsers";
@@ -9,11 +9,14 @@ import Footer from "../Components/Footer";
 import Navbar from "../Components/Navbar";
 import PersonalInformation from "../Components/PersonalInformation";
 import ProfileTopSection from "../Components/ProfileTopSection";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function AdminDashboard() {
   const [adminData, setAdminData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("accounts");
+  const toastShown = useRef(false); // 🔒 prevent double toast
 
   const fetchAdminData = async () => {
     try {
@@ -42,6 +45,39 @@ export default function AdminDashboard() {
       };
 
       setAdminData(formattedAdminData);
+
+      // 🔔 Only show toast once
+      if (!toastShown.current) {
+        toastShown.current = true;
+
+        const { data: pendingServices } = await supabase
+          .from("request_services")
+          .select("id")
+          .eq("status", "Pending");
+
+        if (pendingServices?.length > 0) {
+          setTimeout(() => {
+            toast.info(
+              `🔔 You have ${pendingServices.length} new service request${pendingServices.length > 1 ? "s" : ""}! Check the Services tab.`,
+              {
+                position: "top-right",
+                autoClose: 7000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                theme: "colored",
+                style: {
+                  background: "linear-gradient(135deg, #0e7490, #06b6d4)",
+                  color: "white",
+                  fontWeight: "500",
+                  fontSize: "14px",
+                },
+              }
+            );
+          }, 1000);
+        }
+      }
+
     } catch (error) {
       alert("Failed to load admin profile: " + error.message);
     } finally {
@@ -92,7 +128,7 @@ export default function AdminDashboard() {
           onProfileUpdated={fetchAdminData}
         />
 
-        {/* 🟢 Full-width Tab Buttons */}
+        {/* Tab Buttons */}
         <div className="flex mt-8 shadow-md rounded-lg overflow-hidden border border-gray-200">
           <button
             onClick={() => setActiveTab("accounts")}
@@ -117,26 +153,24 @@ export default function AdminDashboard() {
           </button>
         </div>
 
-        {/*  Tab Content Section */}
+        {/* Tab Content Section */}
         <div className="mt-8 space-y-8">
           {activeTab === "accounts" ? (
             <>
-            {/* Here  the all  component related to accounts */}
               <TotalMember />
               <ApproveAccounts />
               <AllTechnicians />
               <AllUsers />
             </>
           ) : (
-            
             <>
-            {/* Here  the all  component related to services */}
               <RequestedService />
             </>
           )}
         </div>
       </div>
 
+      <ToastContainer />
       <Footer />
     </div>
   );

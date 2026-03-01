@@ -6,7 +6,6 @@ export default function RunningOrders({ technicianId }) {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // fetch running orders for this technician
   useEffect(() => {
     const fetchOrders = async () => {
       console.log("RunningOrders techId:", technicianId);
@@ -24,7 +23,7 @@ export default function RunningOrders({ technicianId }) {
         .from("request_services")
         .select("*")
         .eq("technician_id", technicianId)
-        .eq("status", "Assigned"); // running = Assigned
+        .eq("status", "Assigned");
 
       console.log("Supabase data:", data, "error:", error);
 
@@ -41,35 +40,6 @@ export default function RunningOrders({ technicianId }) {
     fetchOrders();
   }, [technicianId]);
 
-  const refresh = async () => {
-    if (!technicianId) return;
-    const { data } = await supabase
-      .from("request_services")
-      .select("*")
-      .eq("technician_id", technicianId)
-      .eq("status", "Assigned");
-    setOrders(data || []);
-  };
-
-  // tech clicks Cancel -> back to Pending, free technician
-  const handleCancel = async (id) => {
-    const { error } = await supabase
-      .from("request_services")
-      .update({
-        status: "Pending",
-        tech_done: false,
-        technician_id: null,
-      })
-      .eq("id", id);
-
-    if (error) {
-      console.error("Cancel error:", error.message);
-      return;
-    }
-    await refresh();
-  };
-
-  // tech clicks Mark as Done
   const handleMarkAsDone = async (id) => {
     const { data, error } = await supabase
       .from("request_services")
@@ -84,8 +54,7 @@ export default function RunningOrders({ technicianId }) {
 
     const newTechDone = true;
     const newUserDone = data.user_done;
-    const newStatus =
-      newTechDone && newUserDone ? "Completed" : "Assigned";
+    const newStatus = newTechDone && newUserDone ? "Completed" : "Assigned";
 
     const { error: updErr } = await supabase
       .from("request_services")
@@ -155,11 +124,11 @@ export default function RunningOrders({ technicianId }) {
               </p>
             </div>
 
-            <div className="mt-4 flex flex-col gap-2">
+            <div className="mt-4">
               <button
                 onClick={() => handleMarkAsDone(booking.id)}
                 disabled={booking.tech_done}
-                className={`flex items-center justify-center gap-2 px-3 lg:px-4 py-2 font-medium transition border rounded-lg text-sm
+                className={`w-full flex items-center justify-center gap-2 px-3 lg:px-4 py-2 font-medium transition border rounded-lg text-sm
                   ${
                     booking.tech_done
                       ? "text-gray-500 border-gray-300 bg-gray-100 cursor-not-allowed"
@@ -172,25 +141,13 @@ export default function RunningOrders({ technicianId }) {
                   ? "Order completed"
                   : "Mark as Done"}
               </button>
-
-              {/* Cancel only if not completed by both */}
-              {!booking.tech_done || !booking.user_done ? (
-                <button
-                  onClick={() => handleCancel(booking.id)}
-                  className="flex items-center justify-center gap-2 px-3 lg:px-4 py-2 text-red-600 hover:text-red-500 font-medium transition border border-red-300 rounded-lg hover:bg-red-50 text-sm"
-                >
-                  Cancel Assignment
-                </button>
-              ) : null}
             </div>
           </div>
         ))}
       </div>
 
       {orders.length === 0 && (
-        <p className="text-center text-gray-500 mt-6">
-          No running orders.
-        </p>
+        <p className="text-center text-gray-500 mt-6">No running orders.</p>
       )}
     </div>
   );

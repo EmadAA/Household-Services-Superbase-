@@ -12,15 +12,12 @@ const normalizeCategory = (value = "") => {
 
 const getTechnicianLabel = (tech) => {
   let label = tech.fullname || "Unnamed Technician";
-  
   if (tech.service_division && tech.service_city) {
     label += ` (${tech.service_division} - ${tech.service_city})`;
   }
-  
   if (tech.is_busy) {
     label += " (Busy)";
   }
-  
   return label;
 };
 
@@ -40,10 +37,10 @@ export default function RequestedService() {
   const fetchAllData = async () => {
     try {
       setLoading(true);
-      
+
       const [servicesRes, techsRes] = await Promise.all([
         supabase.from("request_services").select("*").eq("status", "Pending"),
-        supabase.from("technicians").select("*")
+        supabase.from("technicians").select("*"),
       ]);
 
       if (servicesRes.error) throw servicesRes.error;
@@ -89,7 +86,6 @@ export default function RequestedService() {
       return;
     }
 
-    // Check if technician is inactive
     if (technicianObj.is_active === false) {
       alert(`${technicianObj.fullname} is currently INACTIVE and cannot be assigned to jobs.`);
       return;
@@ -104,82 +100,57 @@ export default function RequestedService() {
         return;
       }
 
-      // Update database - assign technician
       const { data, error } = await supabase
         .from("request_services")
-        .update({
-          technician_id: technicianObj.id,
-          status: "Assigned",
-        })
+        .update({ technician_id: technicianObj.id, status: "Assigned" })
         .eq("id", selectedService.id)
         .select();
 
       if (error) throw error;
 
-      //SEND EMAIL NOTIFICATIONS
       console.log("Sending email notifications...");
-      
-      // Fetch customer data from users table using user_id
+
       const { data: customerUser, error: customerError } = await supabase
-        .from('users')
-        .select('email, fullname, mobile')
-        .eq('id', selectedService.user_id)
+        .from("users")
+        .select("email, fullname, mobile")
+        .eq("id", selectedService.user_id)
         .single();
 
-      if (customerError) {
-        console.error("Error fetching customer data:", customerError);
-      }
+      if (customerError) console.error("Error fetching customer data:", customerError);
 
-      // Prepare customer data (prioritize users table data)
       const customerData = {
         email: customerUser?.email || selectedService.customer_email,
         name: customerUser?.fullname || selectedService.customer_name,
-        phone: customerUser?.mobile || selectedService.customer_number
+        phone: customerUser?.mobile || selectedService.customer_number,
       };
 
-      console.log("Customer data:", customerData);
-
-      // Prepare technician data
       const technicianData = {
         email: technicianObj.email,
         name: technicianObj.fullname,
         phone: technicianObj.mobile,
-        category: technicianObj.category
+        category: technicianObj.category,
       };
 
-      console.log("Technician data:", technicianData);
-
-      // Prepare service data
       const serviceData = {
         serviceName: selectedService.service_name || selectedService.serviceName,
         category: selectedService.category,
         date: selectedService.date,
         cost: selectedService.cost || selectedService.price,
         address: selectedService.address,
-        problemDetails: selectedService.problem_details || selectedService.problemDetails || "No details provided"
+        problemDetails:
+          selectedService.problem_details ||
+          selectedService.problemDetails ||
+          "No details provided",
       };
 
-      console.log("Service data:", serviceData);
-
-      // Send notifications
       const notificationResult = await sendAssignmentNotifications(
         customerData,
         technicianData,
         serviceData
       );
 
-      if (notificationResult.success) {
-        console.log("Email notifications sent successfully!");
-      } else {
-        console.warn("Some email notifications failed, but assignment was successful");
-        console.log("Notification errors:", notificationResult);
-      }
-
-      // Update UI state
       setTechnicians((prev) =>
-        prev.map((t) =>
-          t.id === technicianObj.id ? { ...t, is_busy: true } : t
-        )
+        prev.map((t) => (t.id === technicianObj.id ? { ...t, is_busy: true } : t))
       );
 
       setRequestedServices((prev) =>
@@ -188,12 +159,12 @@ export default function RequestedService() {
 
       alert(
         `${getTechnicianLabel(technicianObj)} assigned successfully!\n${
-          notificationResult.success 
-            ? "Email notifications sent to customer and technician." 
-            : "Assignment successful, but some email notifications may have failed. Check console for details."
+          notificationResult.success
+            ? "Email notifications sent to customer and technician."
+            : "Assignment successful, but some email notifications may have failed."
         }`
       );
-      
+
       setShowModal(false);
       setSelectedTechnicianId("");
       setSelectedService(null);
@@ -239,12 +210,8 @@ export default function RequestedService() {
               <h3 className="text-lg font-semibold text-gray-800 mb-2">
                 {service.serviceName || service.service_name || "Service"}
               </h3>
-              <p className="text-sm text-gray-500 mb-1">
-                Category: {service.category || "N/A"}
-              </p>
-              <p className="text-sm text-gray-500 mb-1">
-                Date: {service.date || "N/A"}
-              </p>
+              <p className="text-sm text-gray-500 mb-1">Category: {service.category || "N/A"}</p>
+              <p className="text-sm text-gray-500 mb-1">Date: {service.date || "N/A"}</p>
               <p className="text-sm text-gray-500 mb-1">
                 Cost: ৳{service.cost || service.price || "N/A"}
               </p>
@@ -293,7 +260,6 @@ export default function RequestedService() {
         ))}
       </div>
 
-      {/*BOLD BORDER SELECTION */}
       {showModal && selectedService && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50 p-4">
           <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md max-h-[85vh] overflow-y-auto border border-gray-200">
@@ -303,50 +269,55 @@ export default function RequestedService() {
 
             <div className="space-y-2 mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
               <p className="text-sm">
-                <span className="font-medium text-gray-700">Service:</span> 
-                <span className="ml-1">{selectedService.serviceName || selectedService.service_name}</span>
+                <span className="font-medium text-gray-700">Service:</span>
+                <span className="ml-1">
+                  {selectedService.serviceName || selectedService.service_name}
+                </span>
               </p>
               <p className="text-sm">
-                <span className="font-medium text-gray-700">Category:</span> 
+                <span className="font-medium text-gray-700">Category:</span>
                 <span className="ml-1">{selectedService.category}</span>
               </p>
               <p className="text-sm">
-                <span className="font-medium text-gray-700">Customer:</span> 
-                <span className="ml-1">{selectedService.customer_name || selectedService.customerName}</span>
+                <span className="font-medium text-gray-700">Customer:</span>
+                <span className="ml-1">
+                  {selectedService.customer_name || selectedService.customerName}
+                </span>
               </p>
             </div>
 
             <label className="block text-sm font-medium text-gray-700 mb-3">
               Select Technician
             </label>
-            
+
             <div className="border border-gray-300 rounded-lg p-3 bg-white max-h-60 overflow-y-auto mb-6 shadow-sm">
               {technicians
                 .filter((tech) => {
                   const techCategory = normalizeCategory(tech.category || tech.Category);
-                  const serviceCategory = normalizeCategory(selectedService.category || selectedService.Category);
+                  const serviceCategory = normalizeCategory(
+                    selectedService.category || selectedService.Category
+                  );
                   return techCategory === serviceCategory;
                 })
                 .map((tech) => {
                   const label = getTechnicianLabel(tech);
                   const isSelected = selectedTechnicianId === tech.id;
                   const isInactive = tech.is_active === false;
-                  
+
                   return (
                     <div
                       key={tech.id}
                       className={`p-3 cursor-pointer border-b border-gray-100 last:border-b-0 hover:bg-gray-50 rounded-lg transition-all duration-200 ${
-                        isSelected 
-                          ? "border-4 border-teal-400 bg-teal-50 shadow-md" 
+                        isSelected
+                          ? "border-4 border-teal-400 bg-teal-50 shadow-md"
                           : "hover:border-teal-300"
                       }`}
                       onClick={() => setSelectedTechnicianId(tech.id)}
                     >
-                      <div className="font-medium text-sm text-gray-800 mb-1">
-                        {label}
-                      </div>
+                      <div className="font-medium text-sm text-gray-800 mb-1">{label}</div>
                       <div className="text-xs text-gray-600">
-                        Phone: {tech.mobile || "Not provided"} | Category: {tech.category || "N/A"}
+                        Phone: {tech.mobile || "Not provided"} | Category:{" "}
+                        {tech.category || "N/A"}
                         {tech.is_busy && (
                           <span className="ml-2 inline-block px-2 py-1 bg-red-100 text-red-800 text-xs font-medium rounded">
                             Busy
@@ -361,10 +332,12 @@ export default function RequestedService() {
                     </div>
                   );
                 })}
-              
+
               {technicians.filter((tech) => {
                 const techCategory = normalizeCategory(tech.category || tech.Category);
-                const serviceCategory = normalizeCategory(selectedService.category || selectedService.Category);
+                const serviceCategory = normalizeCategory(
+                  selectedService.category || selectedService.Category
+                );
                 return techCategory === serviceCategory;
               }).length === 0 && (
                 <div className="text-center py-8 text-gray-500">
