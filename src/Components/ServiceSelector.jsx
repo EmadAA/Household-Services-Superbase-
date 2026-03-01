@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "../../supabaseClient";
-
+import { sendAdminNewRequestEmail } from "../utils/emailNotifications";
 const CATEGORY_MAP = {
   electrician: "Electrician",
   plumber: "Plumber",
@@ -19,7 +19,7 @@ const ServiceSelector = ({ searchPreSelection }) => {
   const [openService, setOpenService] = useState(null);
   const [selectedSubs, setSelectedSubs] = useState([]);
   const [showForm, setShowForm] = useState(false);
-  const [customerInfo, setCustomerInfo] = useState({ name: "", number: "" });
+  const [customerInfo, setCustomerInfo] = useState({ name: "", number: "", email: "" });
   const [formData, setFormData] = useState({
     address: "",
     date: "",
@@ -74,6 +74,7 @@ const ServiceSelector = ({ searchPreSelection }) => {
           session.user.user_metadata?.full_name ||
           session.user.email,
         number: userData?.mobile || session.user.phone || "",
+        email: userData?.email || session.user.email || ""
       });
     };
 
@@ -85,13 +86,9 @@ const ServiceSelector = ({ searchPreSelection }) => {
     if (searchPreSelection) {
       const { category, service } = searchPreSelection;
 
-      // Open the dropdown for the selected category
       setOpenService(category);
-
-      // Highlight the specific service
       setHighlightedService(service);
 
-      // Scroll to the specific category
       setTimeout(() => {
         const element = document.getElementById(`category-${category}`);
         if (element) {
@@ -99,14 +96,12 @@ const ServiceSelector = ({ searchPreSelection }) => {
         }
       }, 100);
 
-      // Remove highlight after 3 seconds
       setTimeout(() => {
         setHighlightedService(null);
       }, 3000);
     }
   }, [searchPreSelection]);
 
-  // this useeffect is for the outside clicking in serviceSelector dropdownlist
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -334,6 +329,33 @@ const ServiceSelector = ({ searchPreSelection }) => {
     if (error) {
       alert("Failed to submit order!");
     } else {
+      // ✅ SEND EMAIL NOTIFICATION TO ADMIN
+      console.log("📧 Sending admin notification email...");
+      
+      const customerData = {
+        name: customerInfo.name,
+        phone: customerInfo.number,
+        email: customerInfo.email
+      };
+
+      const serviceData = {
+        serviceName: orderDetails.service_name,
+        category: orderDetails.category,
+        date: orderDetails.date,
+        cost: orderDetails.price,
+        address: orderDetails.address,
+        problemDetails: orderDetails.problem_details
+      };
+
+      // Send admin notification
+      const emailResult = await sendAdminNewRequestEmail(customerData, serviceData);
+
+      if (emailResult.success) {
+        console.log("✅ Admin notification sent successfully!");
+      } else {
+        console.warn("⚠️ Admin notification failed, but order was placed successfully");
+      }
+
       alert("Order placed successfully!");
       setShowForm(false);
       setSelectedSubs([]);

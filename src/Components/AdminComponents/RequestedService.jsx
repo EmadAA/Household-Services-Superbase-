@@ -89,6 +89,12 @@ export default function RequestedService() {
       return;
     }
 
+    // Check if technician is inactive
+    if (technicianObj.is_active === false) {
+      alert(`${technicianObj.fullname} is currently INACTIVE and cannot be assigned to jobs.`);
+      return;
+    }
+
     try {
       setAssigning(true);
 
@@ -324,6 +330,8 @@ export default function RequestedService() {
                 .map((tech) => {
                   const label = getTechnicianLabel(tech);
                   const isSelected = selectedTechnicianId === tech.id;
+                  const isInactive = tech.is_active === false;
+                  
                   return (
                     <div
                       key={tech.id}
@@ -342,6 +350,11 @@ export default function RequestedService() {
                         {tech.is_busy && (
                           <span className="ml-2 inline-block px-2 py-1 bg-red-100 text-red-800 text-xs font-medium rounded">
                             Busy
+                          </span>
+                        )}
+                        {isInactive && (
+                          <span className="ml-2 inline-block px-2 py-1 bg-orange-100 text-orange-800 text-xs font-medium rounded">
+                            Inactive
                           </span>
                         )}
                       </div>
