@@ -5,9 +5,9 @@ import { sendAssignmentNotifications } from "../../utils/emailNotifications";
 
 const normalizeCategory = (value = "") => {
   const v = value.toLowerCase().trim();
-  if (v === "ac & refrigerator expert") return "ac_refrigerator_expert";
-  if (v === "ac_refrigerator_expert") return "ac_refrigerator_expert";
-  return v;
+  if (v === "ac & refrigerator expert" || v === "ac_refrigerator_expert")
+    return "ac_refrigerator_expert";
+  return v.replace(/\s+/g, "_");
 };
 
 const getTechnicianLabel = (tech) => {
@@ -45,7 +45,6 @@ export default function RequestedService() {
       if (servicesRes.error) throw servicesRes.error;
       if (techsRes.error) throw techsRes.error;
 
-      // Build rating map: technician_id -> average of all their ratings
       const ratingMap = {};
       (ratingsRes.data || []).forEach(({ technician_id, average_rating }) => {
         if (!ratingMap[technician_id]) ratingMap[technician_id] = [];
