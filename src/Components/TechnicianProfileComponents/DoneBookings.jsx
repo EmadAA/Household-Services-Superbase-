@@ -19,7 +19,7 @@ export default function CompletedOrders({ technicianId }) {
       const { data, error } = await supabase
         .from("request_services")
         .select("*")
-        .eq("technician_id", technicianId)     // remove this line if it's customer side
+        .eq("technician_id", technicianId)     
         .eq("status", "Completed")
         .order("ordered_at", { ascending: false });
 

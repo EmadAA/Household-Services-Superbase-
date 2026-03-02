@@ -40,7 +40,6 @@ export default function MyPendingBookings() {
       return;
     }
 
-    //Update local state: mark this booking as Accepted, don't remove it
     setBookings((prev) =>
       prev.map((b) =>
         b.id === id ? { ...b, status: "Accepted" } : b

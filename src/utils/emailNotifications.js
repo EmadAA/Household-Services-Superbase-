@@ -1,6 +1,6 @@
 import emailjs from '@emailjs/browser';
 
-// ========== OLD ACCOUNT (Customer & Technician emails) ==========
+//  OLD ACCOUNT (Customer & Technician emails) 
 const OLD_PUBLIC_KEY = 'Qk9ajvN6MqcOPuiNn';
 const OLD_SERVICE_ID = 'service_ltrmrlq';
 const OLD_TEMPLATES = {
@@ -8,14 +8,14 @@ const OLD_TEMPLATES = {
   TECHNICIAN_ASSIGNMENT: 'template_s5z5f9h',
 };
 
-// ========== NEW ACCOUNT (Admin notification emails) ==========
+//  NEW ACCOUNT (Admin notification emails) 
 const NEW_PUBLIC_KEY = 'ZJHTiCoV9M2GxN-dw';
 const NEW_SERVICE_ID = 'service_h8y6215';
 const NEW_TEMPLATES = {
-  ADMIN_NEW_REQUEST: 'template_vj9r6uo',  // ← updated
+  ADMIN_NEW_REQUEST: 'template_vj9r6uo',  // updated
 };
 
-const ADMIN_EMAIL = 'farhanshuvon01@gmail.com';  // ← replace with your admin email
+const ADMIN_EMAIL = 'farhanshuvon01@gmail.com';  //admin email
 
 const DEBUG_MODE = true;
 
@@ -29,11 +29,11 @@ const isOldConfigured = () => {
 
   if (DEBUG_MODE) {
     console.log('Old EmailJS Config Check:');
-    console.log('  - Public Key:', OLD_PUBLIC_KEY !== 'YOUR_PUBLIC_KEY_HERE' ? '✅ Set' : '❌ Not set');
-    console.log('  - Service ID:', OLD_SERVICE_ID !== 'YOUR_SERVICE_ID_HERE' ? '✅ Set' : '❌ Not set');
-    console.log('  - Customer Template:', OLD_TEMPLATES.CUSTOMER_ASSIGNMENT !== 'YOUR_CUSTOMER_TEMPLATE_ID' ? '✅ Set' : '❌ Not set');
-    console.log('  - Technician Template:', OLD_TEMPLATES.TECHNICIAN_ASSIGNMENT !== 'YOUR_TECHNICIAN_TEMPLATE_ID' ? '✅ Set' : '❌ Not set');
-    console.log('  - Overall Status:', configured ? '✅ CONFIGURED' : '❌ NOT CONFIGURED');
+    console.log(' Public Key:', OLD_PUBLIC_KEY !== 'YOUR_PUBLIC_KEY_HERE' ? ' Set' : ' Not set');
+    console.log(' Service ID:', OLD_SERVICE_ID !== 'YOUR_SERVICE_ID_HERE' ? ' Set' : ' Not set');
+    console.log(' Customer Template:', OLD_TEMPLATES.CUSTOMER_ASSIGNMENT !== 'YOUR_CUSTOMER_TEMPLATE_ID' ? ' Set' : ' Not set');
+    console.log('  - Technician Template:', OLD_TEMPLATES.TECHNICIAN_ASSIGNMENT !== 'YOUR_TECHNICIAN_TEMPLATE_ID' ? ' Set' : ' Not set');
+    console.log('  - Overall Status:', configured ? ' CONFIGURED' : ' NOT CONFIGURED');
   }
 
   return configured;
@@ -48,8 +48,8 @@ const isNewConfigured = () => {
 
   if (DEBUG_MODE) {
     console.log('New EmailJS Config Check:');
-    console.log('  - Admin Template:', NEW_TEMPLATES.ADMIN_NEW_REQUEST !== 'your_new_admin_template_id' ? '✅ Set' : '❌ Not set');
-    console.log('  - Overall Status:', configured ? '✅ CONFIGURED' : '❌ NOT CONFIGURED');
+    console.log('  - Admin Template:', NEW_TEMPLATES.ADMIN_NEW_REQUEST !== 'your_new_admin_template_id' ? ' Set' : ' Not set');
+    console.log('  - Overall Status:', configured ? ' CONFIGURED' : ' NOT CONFIGURED');
   }
 
   return configured;
@@ -78,13 +78,13 @@ export const sendCustomerAssignmentEmail = async (customerData, technicianData, 
 
     if (!isOldConfigured()) {
       const error = 'Old EmailJS not configured.';
-      console.error('❌', error);
+      console.error('Error : ', error);
       return { success: false, error };
     }
 
     if (!isValidEmail(customerData.email)) {
       const error = `Invalid customer email: ${customerData.email || 'missing'}`;
-      console.error('❌', error);
+      console.error('Error : ', error);
       return { success: false, error };
     }
 
@@ -111,10 +111,10 @@ export const sendCustomerAssignmentEmail = async (customerData, technicianData, 
       OLD_PUBLIC_KEY
     );
 
-    console.log('✅ Customer email sent successfully:', response);
+    console.log(' Customer email sent successfully:', response);
     return { success: true, response };
   } catch (error) {
-    console.error('❌ Failed to send customer email:', error);
+    console.error(' Failed to send customer email:', error);
     return { success: false, error: error.text || error.message || 'Unknown error' };
   }
 };
@@ -133,13 +133,13 @@ export const sendTechnicianAssignmentEmail = async (technicianData, customerData
 
     if (!isOldConfigured()) {
       const error = 'Old EmailJS not configured.';
-      console.error('❌', error);
+      console.error('Error : ', error);
       return { success: false, error };
     }
 
     if (!isValidEmail(technicianData.email)) {
       const error = `Invalid technician email: ${technicianData.email || 'missing'}`;
-      console.error('❌', error);
+      console.error('Error : ', error);
       return { success: false, error };
     }
 
@@ -166,10 +166,10 @@ export const sendTechnicianAssignmentEmail = async (technicianData, customerData
       OLD_PUBLIC_KEY
     );
 
-    console.log('✅ Technician email sent successfully:', response);
+    console.log(' Technician email sent successfully:', response);
     return { success: true, response };
   } catch (error) {
-    console.error('❌ Failed to send technician email:', error);
+    console.error(' Failed to send technician email:', error);
     return { success: false, error: error.text || error.message || 'Unknown error' };
   }
 };
@@ -180,13 +180,13 @@ export const sendTechnicianAssignmentEmail = async (technicianData, customerData
 export const sendAdminNewRequestEmail = async (customerData, serviceData) => {
   try {
     if (DEBUG_MODE) {
-      console.log('📧 === ADMIN NOTIFICATION EMAIL DEBUG ===');
+      console.log('ADMIN NOTIFICATION EMAIL DEBUG ');
       console.log('Customer Data:', customerData);
       console.log('Service Data:', serviceData);
     }
 
     if (!isNewConfigured()) {
-      console.warn('⚠️ New EmailJS (admin) not configured yet');
+      console.warn('New EmailJS (admin) not configured yet');
       return { success: false, error: 'Admin EmailJS not configured' };
     }
 
@@ -204,7 +204,7 @@ export const sendAdminNewRequestEmail = async (customerData, serviceData) => {
       requested_at: new Date().toLocaleString(),
     };
 
-    if (DEBUG_MODE) console.log('📤 Sending admin email with params:', templateParams);
+    if (DEBUG_MODE) console.log(' Sending admin email with params:', templateParams);
 
     const response = await emailjs.send(
       NEW_SERVICE_ID,
@@ -213,10 +213,10 @@ export const sendAdminNewRequestEmail = async (customerData, serviceData) => {
       NEW_PUBLIC_KEY
     );
 
-    console.log('✅ Admin notification email sent successfully:', response);
+    console.log(' Admin notification email sent successfully:', response);
     return { success: true, response };
   } catch (error) {
-    console.error('❌ Failed to send admin notification email:', error);
+    console.error(' Failed to send admin notification email:', error);
     return { success: false, error: error.text || error.message || 'Unknown error' };
   }
 };
@@ -229,7 +229,7 @@ export const sendAssignmentNotifications = async (customerData, technicianData, 
     console.log('STARTING EMAIL NOTIFICATIONS');
 
     if (!isOldConfigured()) {
-      console.error('❌ Old EmailJS is not configured!');
+      console.error(' Old EmailJS is not configured!');
       return {
         success: false,
         error: 'EmailJS not configured',
@@ -246,11 +246,11 @@ export const sendAssignmentNotifications = async (customerData, technicianData, 
     const allSuccess = customerResult.success && technicianResult.success;
 
     if (allSuccess) {
-      console.log('✅ ALL NOTIFICATIONS SENT SUCCESSFULLY!');
+      console.log(' ALL NOTIFICATIONS SENT SUCCESSFULLY!');
     } else {
-      console.warn('⚠️ SOME NOTIFICATIONS FAILED');
-      console.log('Customer email:', customerResult.success ? '✅ Success' : '❌ Failed');
-      console.log('Technician email:', technicianResult.success ? '✅ Success' : '❌ Failed');
+      console.warn(' SOME NOTIFICATIONS FAILED');
+      console.log('Customer email:', customerResult.success ? ' Success' : ' Failed');
+      console.log('Technician email:', technicianResult.success ? 'Success' : ' Failed');
       if (!customerResult.success) console.error('Customer email error:', customerResult.error);
       if (!technicianResult.success) console.error('Technician email error:', technicianResult.error);
     }
@@ -261,7 +261,7 @@ export const sendAssignmentNotifications = async (customerData, technicianData, 
       technicianEmail: technicianResult,
     };
   } catch (error) {
-    console.error('❌ Error sending notifications:', error);
+    console.error(' Error sending notifications:', error);
     return {
       success: false,
       error: error.message,
