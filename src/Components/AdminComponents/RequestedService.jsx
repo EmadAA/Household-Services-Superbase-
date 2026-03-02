@@ -15,9 +15,7 @@ const getTechnicianLabel = (tech) => {
   if (tech.service_division && tech.service_city) {
     label += ` (${tech.service_division} - ${tech.service_city})`;
   }
-  if (tech.is_busy) {
-    label += " (Busy)";
-  }
+  if (tech.is_busy) label += " (Busy)";
   return label;
 };
 
@@ -38,16 +36,32 @@ export default function RequestedService() {
     try {
       setLoading(true);
 
-      const [servicesRes, techsRes] = await Promise.all([
+      const [servicesRes, techsRes, ratingsRes] = await Promise.all([
         supabase.from("request_services").select("*").eq("status", "Pending"),
         supabase.from("technicians").select("*"),
+        supabase.from("service_reviews").select("technician_id, average_rating"),
       ]);
 
       if (servicesRes.error) throw servicesRes.error;
       if (techsRes.error) throw techsRes.error;
 
+      // Build rating map: technician_id -> average of all their ratings
+      const ratingMap = {};
+      (ratingsRes.data || []).forEach(({ technician_id, average_rating }) => {
+        if (!ratingMap[technician_id]) ratingMap[technician_id] = [];
+        ratingMap[technician_id].push(parseFloat(average_rating));
+      });
+
+      const techsWithRatings = (techsRes.data || []).map((tech) => {
+        const ratings = ratingMap[tech.id];
+        const avg = ratings
+          ? (ratings.reduce((a, b) => a + b, 0) / ratings.length).toFixed(1)
+          : null;
+        return { ...tech, avgRating: avg };
+      });
+
       setRequestedServices(servicesRes.data || []);
-      setTechnicians(techsRes.data || []);
+      setTechnicians(techsWithRatings);
     } catch (error) {
       console.error("Error fetching data:", error);
       alert("Failed to load data");
@@ -69,7 +83,6 @@ export default function RequestedService() {
       .eq("technician_id", technicianId)
       .neq("status", "Completed")
       .limit(1);
-
     if (error) throw error;
     return !data || data.length === 0;
   };
@@ -107,8 +120,6 @@ export default function RequestedService() {
         .select();
 
       if (error) throw error;
-
-      console.log("Sending email notifications...");
 
       const { data: customerUser, error: customerError } = await supabase
         .from("users")
@@ -152,7 +163,6 @@ export default function RequestedService() {
       setTechnicians((prev) =>
         prev.map((t) => (t.id === technicianObj.id ? { ...t, is_busy: true } : t))
       );
-
       setRequestedServices((prev) =>
         prev.filter((req) => req.id !== selectedService.id)
       );
@@ -215,28 +225,24 @@ export default function RequestedService() {
               <p className="text-sm text-gray-500 mb-1">
                 Cost: ৳{service.cost || service.price || "N/A"}
               </p>
-
               <div className="mt-3 space-y-1">
                 <p className="text-xs font-semibold text-gray-700">Customer</p>
                 <p className="text-xs text-gray-600">
                   {service.customerName || service.customer_name || "N/A"}
                 </p>
               </div>
-
               <div className="mt-2 space-y-1">
                 <p className="text-xs font-semibold text-gray-700">Phone</p>
                 <p className="text-xs text-gray-600">
                   {service.customerNumber || service.customer_number || "N/A"}
                 </p>
               </div>
-
               <div className="mt-2 space-y-1">
                 <p className="text-xs font-semibold text-gray-700">Address</p>
                 <p className="text-xs text-gray-600 leading-tight line-clamp-2">
                   {service.address || "N/A"}
                 </p>
               </div>
-
               <div className="mt-2 space-y-1">
                 <p className="text-xs font-semibold text-gray-700">Problem</p>
                 <p className="text-xs text-gray-600 leading-tight line-clamp-2">
@@ -244,7 +250,6 @@ export default function RequestedService() {
                 </p>
               </div>
             </div>
-
             <div className="mt-4 flex flex-col gap-2 pt-2 border-t border-gray-100">
               <button
                 onClick={() => handleAssignClick(service)}
@@ -315,16 +320,24 @@ export default function RequestedService() {
                       onClick={() => setSelectedTechnicianId(tech.id)}
                     >
                       <div className="font-medium text-sm text-gray-800 mb-1">{label}</div>
-                      <div className="text-xs text-gray-600">
-                        Phone: {tech.mobile || "Not provided"} | Category:{" "}
-                        {tech.category || "N/A"}
+                      <div className="text-xs text-gray-600 flex flex-wrap items-center gap-1">
+                        <span>
+                          Phone: {tech.mobile || "Not provided"} | Category: {tech.category || "N/A"}
+                        </span>
+                        {tech.avgRating ? (
+                          <span className="inline-flex items-center gap-1 text-yellow-600 font-medium">
+                            ⭐ {tech.avgRating}/5.0
+                          </span>
+                        ) : (
+                          <span className="text-gray-400">⭐ No ratings yet</span>
+                        )}
                         {tech.is_busy && (
-                          <span className="ml-2 inline-block px-2 py-1 bg-red-100 text-red-800 text-xs font-medium rounded">
+                          <span className="inline-block px-2 py-1 bg-red-100 text-red-800 text-xs font-medium rounded">
                             Busy
                           </span>
                         )}
                         {isInactive && (
-                          <span className="ml-2 inline-block px-2 py-1 bg-orange-100 text-orange-800 text-xs font-medium rounded">
+                          <span className="inline-block px-2 py-1 bg-orange-100 text-orange-800 text-xs font-medium rounded">
                             Inactive
                           </span>
                         )}

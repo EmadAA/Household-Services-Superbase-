@@ -16,32 +16,57 @@ const DIVISIONS = [
 
 const CITIES = {
   Dhaka: [
-    "Dhaka",
-    "Faridpur",
-    "Gazipur",
-    "Gopalganj",
-    "Kishoreganj",
-    "Madaripur",
-    "Manikganj",
-    "Munshiganj",
-    "Narayanganj",
-    "Narsingdi",
-    "Rajbari",
-    "Shariatpur",
-    "Tangail",
+    "Banani",
+    "Gulshan",
+    "Baridhara",
+    "Bashundhara",
+    "Uttara",
+    "Mirpur",
+    "Dhanmondi",
+    "Mohammadpur",
+    "Khilgaon",
+    "Badda",
+    "Rampura",
+    "Malibagh",
+    "Shahbag",
+    "Motijheel",
+    "Paltan",
+    "Tejgaon",
+    "Farmgate",
+    "Lalbagh",
+    "Old Dhaka",
+    "Kakrail",
+    "Moghbazar",
+    "Shantinagar",
+    "Agargaon",
+    "Demra",
+    "Jatrabari",
   ],
   Chittagong: [
-    "Bandarban",
-    "Brahmanbaria",
-    "Chandpur",
-    "Chattogram",
-    "Cumilla",
-    "Cox's Bazar",
-    "Feni",
-    "Khagrachhari",
-    "Lakshmipur",
-    "Noakhali",
-    "Rangamati",
+    "Agrabad",
+    "Nasirabad",
+    "GEC Circle",
+    "Panchlaish",
+    "Khulshi",
+    "Halishahar",
+    "Chawkbazar",
+    "Kotwali",
+    "Anderkilla",
+    "Patharghata",
+    "Bakalia",
+    "Muradpur",
+    "2 No. Gate",
+    "Oxygen",
+    "EPZ",
+    "Patenga",
+    "Foy's Lake",
+    "Bahaddarhat",
+    "Sholashahar",
+    "Lalkhan Bazar",
+    "Tigerpass",
+    "Kaptai Rashta Matha",
+    "Mehedibag",
+    "Kazir Dewri",
   ],
   Rajshahi: [
     "Bogura",
@@ -73,7 +98,28 @@ const CITIES = {
     "Patuakhali",
     "Pirojpur",
   ],
-  Sylhet: ["Habiganj", "Moulvibazar", "Sunamganj", "Sylhet"],
+  Sylhet: [
+    "Zindabazar",
+    "Amberkhana",
+    "Chowhatta",
+    "Bondor Bazar",
+    "Uposhohor",
+    "Shahjalal Uposhohor",
+    "Mirabazar",
+    "Subidbazar",
+    "Tilagor",
+    "Shibgonj",
+    "Baghbari",
+    "South Surma",
+    "Kumarpara",
+    "Mejortila",
+    "Akhalia",
+    "Mendibagh",
+    "Nayasarak",
+    "Pathantula",
+    "Dargah Gate",
+    "Lamabazar",
+  ],
   Rangpur: [
     "Dinajpur",
     "Gaibandha",
@@ -212,16 +258,14 @@ export default function TechLocationForm({ technicianId }) {
                 <p className="text-sm text-gray-500 mb-1">Current Status</p>
                 <div className="flex items-center gap-3">
                   <span
-                    className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold ${
-                      isActive
-                        ? "bg-green-100 text-green-800"
-                        : "bg-red-100 text-red-800"
-                    }`}
+                    className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold ${isActive
+                      ? "bg-green-100 text-green-800"
+                      : "bg-red-100 text-red-800"
+                      }`}
                   >
                     <span
-                      className={`w-2 h-2 rounded-full mr-2 ${
-                        isActive ? "bg-green-500" : "bg-red-500"
-                      }`}
+                      className={`w-2 h-2 rounded-full mr-2 ${isActive ? "bg-green-500" : "bg-red-500"
+                        }`}
                     ></span>
                     {isActive ? "ACTIVE" : "INACTIVE"}
                   </span>
@@ -269,20 +313,18 @@ export default function TechLocationForm({ technicianId }) {
               {/* Active Option */}
               <div
                 onClick={() => !loading && saveStatus(true)}
-                className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                  isActive
-                    ? "border-green-500 bg-green-50"
-                    : "border-gray-300 hover:border-green-300 hover:bg-green-50"
-                } ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
+                className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${isActive
+                  ? "border-green-500 bg-green-50"
+                  : "border-gray-300 hover:border-green-300 hover:bg-green-50"
+                  } ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div
-                      className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                        isActive
-                          ? "border-green-500 bg-green-500"
-                          : "border-gray-300"
-                      }`}
+                      className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${isActive
+                        ? "border-green-500 bg-green-500"
+                        : "border-gray-300"
+                        }`}
                     >
                       {isActive && (
                         <svg
@@ -314,20 +356,18 @@ export default function TechLocationForm({ technicianId }) {
               {/* Inactive Option */}
               <div
                 onClick={() => !loading && saveStatus(false)}
-                className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                  !isActive
-                    ? "border-red-500 bg-red-50"
-                    : "border-gray-300 hover:border-red-300 hover:bg-red-50"
-                } ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
+                className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${!isActive
+                  ? "border-red-500 bg-red-50"
+                  : "border-gray-300 hover:border-red-300 hover:bg-red-50"
+                  } ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div
-                      className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                        !isActive
-                          ? "border-red-500 bg-red-500"
-                          : "border-gray-300"
-                      }`}
+                      className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${!isActive
+                        ? "border-red-500 bg-red-500"
+                        : "border-gray-300"
+                        }`}
                     >
                       {!isActive && (
                         <svg

@@ -5,6 +5,7 @@ import AllUsers from "../Components/AdminComponents/AllUsers";
 import ApproveAccounts from "../Components/AdminComponents/ApproveAccounts";
 import RequestedService from "../Components/AdminComponents/RequestedService";
 import TotalMember from "../Components/AdminComponents/TotalMember";
+import CompletedWorks from "../Components/AdminComponents/CompletedWorks"; // ✅ NEW IMPORT
 import Footer from "../Components/Footer";
 import Navbar from "../Components/Navbar";
 import PersonalInformation from "../Components/PersonalInformation";
@@ -16,7 +17,7 @@ export default function AdminDashboard() {
   const [adminData, setAdminData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("accounts");
-  const toastShown = useRef(false); // 🔒 prevent double toast
+  const toastShown = useRef(false);
 
   const fetchAdminData = async () => {
     try {
@@ -46,7 +47,6 @@ export default function AdminDashboard() {
 
       setAdminData(formattedAdminData);
 
-      // 🔔 Only show toast once
       if (!toastShown.current) {
         toastShown.current = true;
 
@@ -128,11 +128,11 @@ export default function AdminDashboard() {
           onProfileUpdated={fetchAdminData}
         />
 
-        {/* Tab Buttons */}
+        {/* Tab Buttons - NOW WITH 3 TABS */}
         <div className="flex mt-8 shadow-md rounded-lg overflow-hidden border border-gray-200">
           <button
             onClick={() => setActiveTab("accounts")}
-            className={`w-1/2 py-3 text-center font-semibold text-lg transition-all duration-300 ${
+            className={`flex-1 py-3 text-center font-semibold text-lg transition-all duration-300 ${
               activeTab === "accounts"
                 ? "bg-gradient-to-r from-teal-400 to-cyan-500 text-white"
                 : "bg-gray-100 text-gray-700 hover:bg-gray-200"
@@ -143,13 +143,24 @@ export default function AdminDashboard() {
 
           <button
             onClick={() => setActiveTab("services")}
-            className={`w-1/2 py-3 text-center font-semibold text-lg transition-all duration-300 ${
+            className={`flex-1 py-3 text-center font-semibold text-lg transition-all duration-300 ${
               activeTab === "services"
                 ? "bg-gradient-to-r from-teal-400 to-cyan-500 text-white"
                 : "bg-gray-100 text-gray-700 hover:bg-gray-200"
             }`}
           >
             Services
+          </button>
+
+          <button
+            onClick={() => setActiveTab("completed")}
+            className={`flex-1 py-3 text-center font-semibold text-lg transition-all duration-300 ${
+              activeTab === "completed"
+                ? "bg-gradient-to-r from-teal-400 to-cyan-500 text-white"
+                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+            }`}
+          >
+            Completed Works
           </button>
         </div>
 
@@ -162,9 +173,13 @@ export default function AdminDashboard() {
               <AllTechnicians />
               <AllUsers />
             </>
-          ) : (
+          ) : activeTab === "services" ? (
             <>
               <RequestedService />
+            </>
+          ) : (
+            <>
+              <CompletedWorks />
             </>
           )}
         </div>
