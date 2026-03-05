@@ -329,7 +329,7 @@ const ServiceSelector = ({ searchPreSelection }) => {
     if (error) {
       alert("Failed to submit order!");
     } else {
-      // ✅ SEND EMAIL NOTIFICATION TO ADMIN
+      //  SEND EMAIL NOTIFICATION TO ADMIN
       console.log("📧 Sending admin notification email...");
       
       const customerData = {
