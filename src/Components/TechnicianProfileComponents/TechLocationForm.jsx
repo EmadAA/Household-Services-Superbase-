@@ -259,12 +259,12 @@ export default function TechLocationForm({ technicianId }) {
                 <div className="flex items-center gap-3">
                   <span
                     className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold ${isActive
-                      ? "bg-green-100 text-green-800"
+                      ? "bg-green-100 text-teal-500"
                       : "bg-red-100 text-red-800"
                       }`}
                   >
                     <span
-                      className={`w-2 h-2 rounded-full mr-2 ${isActive ? "bg-green-500" : "bg-red-500"
+                      className={`w-2 h-2 rounded-full mr-2 ${isActive ? "bg-teal-500" : "bg-red-500"
                         }`}
                     ></span>
                     {isActive ? "ACTIVE" : "INACTIVE"}
@@ -274,8 +274,8 @@ export default function TechLocationForm({ technicianId }) {
               <div className="text-right">
                 <p className="text-xs text-gray-500">
                   {isActive
-                    ? "✅ You can receive new job assignments"
-                    : "⏸️ You won't receive new assignments"}
+                    ? " You can receive new job assignments"
+                    : " You won't receive new assignments"}
                 </p>
               </div>
             </div>
@@ -283,8 +283,8 @@ export default function TechLocationForm({ technicianId }) {
             {!isActive && (
               <div className="mt-4 p-3 bg-yellow-50 border-l-4 border-yellow-400 rounded">
                 <p className="text-sm text-yellow-800">
-                  <strong>⚠️ Note:</strong> You are currently INACTIVE. Admin
-                  cannot assign you to new jobs. Change to ACTIVE when you're
+                  <strong> Note:</strong> You are currently <b>INACTIVE</b>. Admin
+                  cannot assign you to new jobs. Change to <b>ACTIVE</b> when you're
                   ready to work.
                 </p>
               </div>
@@ -314,8 +314,8 @@ export default function TechLocationForm({ technicianId }) {
               <div
                 onClick={() => !loading && saveStatus(true)}
                 className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${isActive
-                  ? "border-green-500 bg-green-50"
-                  : "border-gray-300 hover:border-green-300 hover:bg-green-50"
+                  ? "border-green-500 bg-teal-100"
+                  : "border-gray-300 hover:border-teal-300 hover:bg-teal-100"
                   } ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
               >
                 <div className="flex items-center justify-between">
@@ -349,7 +349,7 @@ export default function TechLocationForm({ technicianId }) {
                       </p>
                     </div>
                   </div>
-                  <span className="text-2xl">✅</span>
+                  {/* <span className="text-2xl">✅</span> */}
                 </div>
               </div>
 
@@ -392,7 +392,7 @@ export default function TechLocationForm({ technicianId }) {
                       </p>
                     </div>
                   </div>
-                  <span className="text-2xl">⏸️</span>
+                  {/* <span className="text-2xl">⏸️</span> */}
                 </div>
               </div>
             </div>
