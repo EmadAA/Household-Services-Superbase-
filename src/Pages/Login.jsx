@@ -221,9 +221,9 @@ const Login = () => {
                 className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700 focus:outline-none"
               >
                 {showPassword ? (
-                  <AiOutlineEyeInvisible size={22} />
+                  <AiOutlineEye  size={22} />
                 ) : (
-                  <AiOutlineEye size={22} />
+                  <AiOutlineEyeInvisible size={22} />
                 )}
               </button>
             </div>
