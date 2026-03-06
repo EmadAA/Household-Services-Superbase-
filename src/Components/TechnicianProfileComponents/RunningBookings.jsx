@@ -67,8 +67,8 @@ export default function RunningOrders({ technicianId }) {
     }
 
     setOrders((prev) =>
-      prev.map((o) =>
-        o.id === id ? { ...o, tech_done: newTechDone, status: newStatus } : o
+      prev.map((ord) =>
+        ord.id === id ? { ...ord, tech_done: newTechDone, status: newStatus } : ord
       )
     );
   };

@@ -35,7 +35,7 @@ export default function AllTechnicians() {
 
   const fetchTechnicians = async () => {
     try {
-      console.log("🔍 Fetching technicians from database...");
+      console.log("Fetching technicians from database...");
       setError(null);
 
       // Try to fetch technicians data
@@ -50,7 +50,7 @@ export default function AllTechnicians() {
         // console.error("Supabase error:", error);
         setError(`Database Error: ${error.message}`);
 
-        // If RLS is blocking, try a different approach
+        // If RLS is blocking, try a different approach.... RLS meaning is Row Level Security
         if (
           error.message.includes("row-level security") ||
           error.code === "PGRST116"

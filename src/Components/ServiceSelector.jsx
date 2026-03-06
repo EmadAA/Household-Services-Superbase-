@@ -330,7 +330,7 @@ const ServiceSelector = ({ searchPreSelection }) => {
       alert("Failed to submit order!");
     } else {
       //  SEND EMAIL NOTIFICATION TO ADMIN
-      console.log("📧 Sending admin notification email...");
+      console.log(" Sending admin notification email...");
       
       const customerData = {
         name: customerInfo.name,
@@ -351,9 +351,9 @@ const ServiceSelector = ({ searchPreSelection }) => {
       const emailResult = await sendAdminNewRequestEmail(customerData, serviceData);
 
       if (emailResult.success) {
-        console.log("✅ Admin notification sent successfully!");
+        console.log(" Admin notification sent successfully!");
       } else {
-        console.warn("⚠️ Admin notification failed, but order was placed successfully");
+        console.warn(" Admin notification failed, but order was placed successfully");
       }
 
       alert("Order placed successfully!");

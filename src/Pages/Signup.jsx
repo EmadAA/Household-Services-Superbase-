@@ -597,72 +597,70 @@ const Signup = () => {
               </>
             )}
 
-{/* Password */}
-<div>
-  <div className="relative">
-    <input
-      type={showPassword ? "text" : "password"}
-      id="password"
-      name="password"
-      value={formData.password}
-      onChange={handleChange}
-      required
-      placeholder="Password"
-      className={`w-full p-4 pr-12 border rounded-lg focus:outline-none focus:ring-2 transition ${
-        errors.password
-          ? "border-red-500 focus:ring-red-500"
-          : "border-gray-300 focus:ring-teal-500 focus:border-transparent"
-      }`}
-    />
+            {/* Password */}
+            <div>
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  id="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
+                  placeholder="Password"
+                  className={`w-full p-4 pr-12 border rounded-lg focus:outline-none focus:ring-2 transition ${
+                    errors.password
+                      ? "border-red-500 focus:ring-red-500"
+                      : "border-gray-300 focus:ring-teal-500 focus:border-transparent"
+                  }`}
+                />
 
-    <button
-      type="button"
-      onClick={() => setShowPassword(!showPassword)}
-      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-    >
-      {showPassword ? <FaEyeSlash /> : <FaEye />}
-    </button>
-  </div>
+                <button
+                  type="button"
+                  title="This is showing the current state of password show/hide"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                >
+                  {showPassword ? <FaEye /> : <FaEyeSlash />}
+                </button>
+              </div>
 
-  {errors.password && (
-    <p className="text-red-500 text-sm mt-1">
-      {errors.password}
-    </p>
-  )}
-</div> 
+              {errors.password && (
+                <p className="text-red-500 text-sm mt-1">{errors.password}</p>
+              )}
+            </div>
 
-<div>
-  <div className="relative">
-    <input
-      type={showConfirmPassword ? "text" : "password"}
-      name="cpassword"
-      value={formData.cpassword}
-      onChange={handleChange}
-      required
-      placeholder="Confirm Password"
-      className={`w-full p-4 pr-12 border rounded-lg focus:outline-none focus:ring-2 transition ${
-        errors.cpassword
-          ? "border-red-500 focus:ring-red-500"
-          : "border-gray-300 focus:ring-teal-500 focus:border-transparent"
-      }`}
-    />
+            <div>
+              <div className="relative">
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  name="cpassword"
+                  value={formData.cpassword}
+                  onChange={handleChange}
+                  required
+                  placeholder="Confirm Password"
+                  className={`w-full p-4 pr-12 border rounded-lg focus:outline-none focus:ring-2 transition ${
+                    errors.cpassword
+                      ? "border-red-500 focus:ring-red-500"
+                      : "border-gray-300 focus:ring-teal-500 focus:border-transparent"
+                  }`}
+                />
 
-    <button
-      type="button"
-      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-    >
-      {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
-    </button>
-  </div>
+                <button
+                  type="button"
+                  title="This is showing the current state of password show/hide"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                >
+                  {showConfirmPassword ? <FaEye /> : <FaEyeSlash />}
+                </button>
+              </div>
 
-  {errors.cpassword && (
-    <p className="text-red-500 text-sm mt-1">
-      {errors.cpassword}
-    </p>
-  )}
-</div>
-            {/* Password Requirements */}
+              {errors.cpassword && (
+                <p className="text-red-500 text-sm mt-1">{errors.cpassword}</p>
+              )}
+            </div>
+            {/* Password Requirements
             <div className="text-xs text-gray-600 bg-blue-50 p-3 rounded-lg">
               <strong>Password Requirements:</strong>
               <ul className="list-disc list-inside mt-1">
@@ -672,7 +670,7 @@ const Signup = () => {
                 <li>One number (0-9)</li>
                 <li>One special character (@$!%*?&)</li>
               </ul>
-            </div>
+            </div> */}
 
             {/* Buttons */}
             <div className="flex justify-center gap-4 pt-4">
